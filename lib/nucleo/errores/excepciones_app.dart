@@ -18,3 +18,7 @@ class ExcepcionPermiso extends ExcepcionApp {
 class ExcepcionDatosNoEncontrados extends ExcepcionApp {
   const ExcepcionDatosNoEncontrados([super.mensaje = 'No se encontraron los datos solicitados.']);
 }
+
+class ExcepcionDesconocida extends ExcepcionApp {
+  const ExcepcionDesconocida([super.mensaje = 'No se pudo completar la acción. Intenta de nuevo.']);
+}
