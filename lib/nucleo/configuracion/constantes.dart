@@ -5,4 +5,5 @@ class Constantes {
 
   static String get urlSupabase => dotenv.get('SUPABASE_URL');
   static String get claveAnonSupabase => dotenv.get('SUPABASE_ANON_KEY');
+  static String get googleWebClientId => dotenv.get('GOOGLE_WEB_CLIENT_ID');
 }
