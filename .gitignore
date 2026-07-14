@@ -47,6 +47,7 @@ app.*.map.json
 # Secretos - NUNCA subir
 .env
 .env.*
+!.env.example
 supabase/.env.admin
 *.jks
 *.keystore
