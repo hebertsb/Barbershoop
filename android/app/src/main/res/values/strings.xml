@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BarberApp</string>
+    <string name="facebook_app_id">27659270717087204</string>
+    <string name="fb_login_protocol_scheme">fb27659270717087204</string>
+    <string name="facebook_client_token">1dea4c61fd0b419291c286aeaf312f20</string>
+</resources>
