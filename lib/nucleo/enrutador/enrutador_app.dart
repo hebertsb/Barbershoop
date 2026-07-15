@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../funcionalidades/administracion/dominio/modelo_barbero.dart';
+import '../../funcionalidades/administracion/presentacion/pantallas/pantalla_administracion_dashboard.dart';
+import '../../funcionalidades/administracion/presentacion/pantallas/pantalla_configurar_horarios.dart';
+import '../../funcionalidades/administracion/presentacion/pantallas/pantalla_gestion_barberos.dart';
+import '../../funcionalidades/administracion/presentacion/pantallas/pantalla_gestion_servicios.dart';
+import '../../funcionalidades/administracion/presentacion/pantallas/pantalla_gestion_sucursales.dart';
 import '../../funcionalidades/autenticacion/dominio/enum_rol_usuario.dart';
 import '../../funcionalidades/autenticacion/dominio/modelo_perfil.dart';
 import '../../funcionalidades/autenticacion/presentacion/controladores/controlador_autenticacion.dart';
@@ -30,6 +36,13 @@ String? calcularRedireccion({
   final perfil = estadoPerfil.valueOrNull;
   if (perfil == null) {
     return enLogin ? null : '/login';
+  }
+
+  // Protección de rutas administrativas
+  if (ubicacionActual.startsWith('/administracion')) {
+    if (perfil.rol != RolUsuario.admin && perfil.rol != RolUsuario.superadmin) {
+      return '/';
+    }
   }
 
   final enSeleccion = ubicacionActual == '/seleccion-barberia';
@@ -86,9 +99,37 @@ final enrutadorAppProvider = Provider<GoRouter>((ref) {
             return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
           final perfil = estadoPerfil.valueOrNull;
+          
+          if (perfil?.rol == RolUsuario.admin || perfil?.rol == RolUsuario.superadmin) {
+            return const PantallaAdministracionDashboard();
+          }
+          
           return PantallaBienvenidaProvisional(
             rol: perfil?.rol ?? RolUsuario.cliente,
             nombre: perfil?.nombre,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/administracion/sucursales',
+        builder: (context, state) => const PantallaGestionSucursales(),
+      ),
+      GoRoute(
+        path: '/administracion/servicios',
+        builder: (context, state) => const PantallaGestionServicios(),
+      ),
+      GoRoute(
+        path: '/administracion/barberos',
+        builder: (context, state) => const PantallaGestionBarberos(),
+      ),
+      GoRoute(
+        path: '/administracion/barberos/:id/horarios',
+        builder: (context, state) {
+          final barberoId = state.pathParameters['id']!;
+          final barbero = state.extra as ModeloBarbero?;
+          return PantallaConfigurarHorarios(
+            barberoId: barberoId,
+            barbero: barbero,
           );
         },
       ),

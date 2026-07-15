@@ -137,5 +137,29 @@ void main() {
         expect(resultado, isNull);
       },
     );
+
+    test(
+      'con sesión, perfil con rol cliente, en ruta de admin → / (bloqueado)',
+      () {
+        final resultado = calcularRedireccion(
+          haySesion: true,
+          estadoPerfil: const AsyncValue.data(perfilSinBarberia), // rol cliente
+          ubicacionActual: '/administracion/sucursales',
+        );
+        expect(resultado, '/');
+      },
+    );
+
+    test(
+      'con sesión, perfil con rol admin, en ruta de admin → null (permitido)',
+      () {
+        final resultado = calcularRedireccion(
+          haySesion: true,
+          estadoPerfil: const AsyncValue.data(perfilConBarberia), // rol admin
+          ubicacionActual: '/administracion/sucursales',
+        );
+        expect(resultado, isNull);
+      },
+    );
   });
 }
