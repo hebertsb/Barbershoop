@@ -9,6 +9,9 @@ class PantallaSeleccionBarberia extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final barberias = ref.watch(barberiasActivasProvider);
+    final asignando = ref.watch(
+      controladorAutenticacionProvider.select((estado) => estado.isLoading),
+    );
 
     ref.listen(controladorAutenticacionProvider, (anterior, siguiente) {
       if (siguiente.hasError && !siguiente.isLoading) {
@@ -33,9 +36,11 @@ class PantallaSeleccionBarberia extends ConsumerWidget {
               final barberia = lista[indice];
               return ListTile(
                 title: Text(barberia.nombre),
-                onTap: () => ref
-                    .read(controladorAutenticacionProvider.notifier)
-                    .asignarBarberia(barberia.id),
+                onTap: asignando
+                    ? null
+                    : () => ref
+                        .read(controladorAutenticacionProvider.notifier)
+                        .asignarBarberia(barberia.id),
               );
             },
           );
