@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -9,6 +10,12 @@ import '../../../nucleo/configuracion/cliente_supabase.dart';
 import '../../../nucleo/errores/excepciones_app.dart';
 import '../dominio/modelo_barberia_resumen.dart';
 import '../dominio/modelo_perfil.dart';
+
+String _generarNonce([int longitud = 32]) {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  final aleatorio = Random.secure();
+  return List.generate(longitud, (_) => caracteres[aleatorio.nextInt(caracteres.length)]).join();
+}
 
 abstract class RepositorioAutenticacion {
   Future<void> iniciarSesionConGoogle();
@@ -43,6 +50,8 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
       throw const ExcepcionDesconocida();
     } on SocketException {
       throw const ExcepcionRed();
+    } on AuthRetryableFetchException {
+      throw const ExcepcionRed();
     } on AuthException catch (e) {
       debugPrint('AuthException Google: ${e.message}');
       throw const ExcepcionDesconocida();
@@ -54,6 +63,7 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
     try {
       final resultado = await FacebookAuth.instance.login(
         permissions: const ['email', 'public_profile'],
+        nonce: _generarNonce(),
       );
       if (resultado.status == LoginStatus.cancelled) return;
       if (resultado.status != LoginStatus.success) {
@@ -69,6 +79,8 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
         nonce: token.nonce,
       );
     } on SocketException {
+      throw const ExcepcionRed();
+    } on AuthRetryableFetchException {
       throw const ExcepcionRed();
     } on AuthException catch (e) {
       debugPrint('AuthException Facebook: ${e.message}');
@@ -123,8 +135,20 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
 
   @override
   Future<void> cerrarSesion() async {
-    await _cliente.auth.signOut();
-    await GoogleSignIn.instance.signOut();
-    await FacebookAuth.instance.logOut();
+    try {
+      await _cliente.auth.signOut();
+    } on AuthException catch (e) {
+      debugPrint('AuthException al cerrar sesión: ${e.message}');
+    }
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (e) {
+      debugPrint('Error al cerrar sesión de Google: $e');
+    }
+    try {
+      await FacebookAuth.instance.logOut();
+    } catch (e) {
+      debugPrint('Error al cerrar sesión de Facebook: $e');
+    }
   }
 }
