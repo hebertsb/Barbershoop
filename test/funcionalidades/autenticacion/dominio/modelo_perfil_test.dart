@@ -58,4 +58,19 @@ void main() {
     expect(actualizado.id, original.id);
     expect(actualizado.nombre, original.nombre);
   });
+
+  test('desdeJson admite email nulo (Facebook sin permiso de correo)', () {
+    final perfil = ModeloPerfil.desdeJson({
+      'id': 'uid-4',
+      'email': null,
+      'barberia_id': null,
+      'rol': 'cliente',
+      'nombre': 'Sin Correo',
+      'url_foto': null,
+      'telefono': null,
+    });
+
+    expect(perfil.email, isNull);
+    expect(perfil.id, 'uid-4');
+  });
 }

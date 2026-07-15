@@ -44,7 +44,7 @@ alter table barberias enable row level security;
 
 create policy barberias_select on barberias
   for select using (
-    es_superadmin() or id = obtener_barberia_id_actual()
+    es_superadmin() or id = obtener_barberia_id_actual() or activo = true
   );
 
 create policy barberias_update_admin on barberias

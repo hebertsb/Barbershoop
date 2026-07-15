@@ -12,7 +12,7 @@ class ModeloPerfil {
   });
 
   final String id;
-  final String email;
+  final String? email;
   final String? barberiaId;
   final RolUsuario rol;
   final String? nombre;
@@ -22,7 +22,7 @@ class ModeloPerfil {
   factory ModeloPerfil.desdeJson(Map<String, dynamic> json) {
     return ModeloPerfil(
       id: json['id'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       barberiaId: json['barberia_id'] as String?,
       rol: RolUsuario.desdeTexto(json['rol'] as String),
       nombre: json['nombre'] as String?,
