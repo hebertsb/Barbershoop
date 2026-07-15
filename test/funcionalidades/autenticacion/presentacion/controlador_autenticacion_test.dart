@@ -117,4 +117,20 @@ void main() {
     final estado = contenedor.read(controladorAutenticacionProvider);
     expect(estado.value?.barberiaId, 'barberia-1');
   });
+
+  test('cerrarSesion deja el perfil en null', () async {
+    final falso = RepositorioAutenticacionFalso();
+    final contenedor = ProviderContainer(overrides: [
+      repositorioAutenticacionProvider.overrideWithValue(falso),
+    ]);
+    addTearDown(contenedor.dispose);
+
+    await contenedor.read(controladorAutenticacionProvider.future);
+    await contenedor.read(controladorAutenticacionProvider.notifier).iniciarSesionConGoogle();
+    await contenedor.read(controladorAutenticacionProvider.notifier).cerrarSesion();
+
+    final estado = contenedor.read(controladorAutenticacionProvider);
+    expect(estado.hasError, isFalse);
+    expect(estado.value, isNull);
+  });
 }
