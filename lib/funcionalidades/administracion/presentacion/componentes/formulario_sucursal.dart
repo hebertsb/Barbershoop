@@ -21,6 +21,7 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
   late final TextEditingController _cierreCtrl;
   late bool _activo;
   bool _cargando = false;
+  String? _errorMensaje;
 
   @override
   void initState() {
@@ -68,7 +69,10 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
   Future<void> _guardar() async {
     if (!_formularioKey.currentState!.validate()) return;
 
-    setState(() => _cargando = true);
+    setState(() {
+      _cargando = true;
+      _errorMensaje = null;
+    });
     try {
       final sucursal = ModeloSucursal(
         id: widget.sucursal?.id ?? '', // Upsert resolverá el ID vacío en Supabase
@@ -90,11 +94,7 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
       await widget.alGuardar(sucursal);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
-      }
+      if (mounted) setState(() => _errorMensaje = e.toString());
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
@@ -189,6 +189,13 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
                 value: _activo,
                 onChanged: (val) => setState(() => _activo = val),
               ),
+              if (_errorMensaje != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _errorMensaje!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ],
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _cargando ? null : _guardar,

@@ -28,6 +28,7 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
   String? _sucursalSeleccionadaId;
   final List<String> _especialidades = [];
   bool _cargando = false;
+  String? _errorMensaje;
 
   @override
   void initState() {
@@ -65,7 +66,10 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
       return;
     }
 
-    setState(() => _cargando = true);
+    setState(() {
+      _cargando = true;
+      _errorMensaje = null;
+    });
     try {
       await widget.alGuardar(
         _emailCtrl.text.trim().toLowerCase(),
@@ -74,11 +78,7 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
-      }
+      if (mounted) setState(() => _errorMensaje = e.toString());
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
@@ -187,6 +187,13 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
                       );
                     }).toList(),
               ),
+              if (_errorMensaje != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _errorMensaje!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ],
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _cargando ? null : _guardar,

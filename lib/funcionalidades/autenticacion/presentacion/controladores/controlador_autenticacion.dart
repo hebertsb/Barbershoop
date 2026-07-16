@@ -10,7 +10,7 @@ final repositorioAutenticacionProvider = Provider<RepositorioAutenticacion>((ref
 
 class ControladorAutenticacion extends AsyncNotifier<ModeloPerfil?> {
   @override
-  Future<ModeloPerfil?> build() {
+  Future<ModeloPerfil?> build() async {
     return ref.read(repositorioAutenticacionProvider).obtenerPerfilActual();
   }
 

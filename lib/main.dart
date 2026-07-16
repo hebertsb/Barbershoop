@@ -12,7 +12,16 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   await ClienteSupabase.inicializar();
-  await GoogleSignIn.instance.initialize(serverClientId: Constantes.googleWebClientId);
+  try {
+    await GoogleSignIn.instance
+        .initialize(serverClientId: Constantes.googleWebClientId)
+        .timeout(const Duration(seconds: 10));
+  } catch (e) {
+    // No bloquear el arranque de la app si Google Sign In no puede
+    // inicializarse a tiempo (red lenta/caída) — el resto de la app
+    // sigue funcionando, solo fallará el botón de Google hasta reintentar.
+    debugPrint('Google Sign In fallo/timeout: $e');
+  }
   runApp(const ProviderScope(child: BarberApp()));
 }
 

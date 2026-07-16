@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -88,14 +89,23 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
     }
   }
 
+  static const _tiempoLimiteRed = Duration(seconds: 20);
+
   @override
   Future<ModeloPerfil?> obtenerPerfilActual() async {
     final uid = _cliente.auth.currentUser?.id;
     if (uid == null) return null;
     try {
-      final fila = await _cliente.from('perfiles').select().eq('id', uid).maybeSingle();
+      final fila = await _cliente
+          .from('perfiles')
+          .select()
+          .eq('id', uid)
+          .maybeSingle()
+          .timeout(_tiempoLimiteRed);
       if (fila == null) return null;
       return ModeloPerfil.desdeJson(fila);
+    } on TimeoutException {
+      throw const ExcepcionRed();
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException {
@@ -110,8 +120,11 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
           .from('barberias')
           .select('id, nombre')
           .eq('activo', true)
-          .order('nombre');
+          .order('nombre')
+          .timeout(_tiempoLimiteRed);
       return filas.map(ModeloBarberiaResumen.desdeJson).toList();
+    } on TimeoutException {
+      throw const ExcepcionRed();
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException {
@@ -124,7 +137,13 @@ class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
     final uid = _cliente.auth.currentUser?.id;
     if (uid == null) throw const ExcepcionPermiso();
     try {
-      await _cliente.from('perfiles').update({'barberia_id': barberiaId}).eq('id', uid);
+      await _cliente
+          .from('perfiles')
+          .update({'barberia_id': barberiaId})
+          .eq('id', uid)
+          .timeout(_tiempoLimiteRed);
+    } on TimeoutException {
+      throw const ExcepcionRed();
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {

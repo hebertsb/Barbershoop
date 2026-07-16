@@ -93,22 +93,7 @@ final enrutadorAppProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/',
-        builder: (context, state) {
-          final estadoPerfil = ref.read(controladorAutenticacionProvider);
-          if (estadoPerfil.isLoading) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-          final perfil = estadoPerfil.valueOrNull;
-          
-          if (perfil?.rol == RolUsuario.admin || perfil?.rol == RolUsuario.superadmin) {
-            return const PantallaAdministracionDashboard();
-          }
-          
-          return PantallaBienvenidaProvisional(
-            rol: perfil?.rol ?? RolUsuario.cliente,
-            nombre: perfil?.nombre,
-          );
-        },
+        builder: (context, state) => const _PantallaInicio(),
       ),
       GoRoute(
         path: '/administracion/sucursales',
@@ -136,3 +121,25 @@ final enrutadorAppProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _PantallaInicio extends ConsumerWidget {
+  const _PantallaInicio();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final estadoPerfil = ref.watch(controladorAutenticacionProvider);
+    if (estadoPerfil.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final perfil = estadoPerfil.valueOrNull;
+
+    if (perfil?.rol == RolUsuario.admin || perfil?.rol == RolUsuario.superadmin) {
+      return const PantallaAdministracionDashboard();
+    }
+
+    return PantallaBienvenidaProvisional(
+      rol: perfil?.rol ?? RolUsuario.cliente,
+      nombre: perfil?.nombre,
+    );
+  }
+}
