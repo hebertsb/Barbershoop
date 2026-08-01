@@ -63,7 +63,9 @@ group by b.id, b.barberia_id, p.nombre;
 do $$
 begin
   if not exists (select 1 from pg_roles where rolname = 'lector_reportes_powerbi') then
-    create role lector_reportes_powerbi with login password 'CambiarClavePowerBi2026!';
+    create role lector_reportes_powerbi with login password 'barberia-app2026';
+  else
+    alter role lector_reportes_powerbi with password 'barberia-app2026';
   end if;
 end
 $$;
