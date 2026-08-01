@@ -53,4 +53,5 @@ supabase/.env.admin
 *.keystore
 key.properties
 secretos-locales/
+scratch/
 android/app/google-services.json
