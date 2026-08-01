@@ -1,0 +1,13 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../datos/repositorio_promociones.dart';
+import '../../dominio/modelo_uso_promocion.dart';
+
+/// Cuántas veces cada cliente usó una promoción específica. Solo admin
+/// (`obtener_usos_promocion_por_cliente`, 0043).
+final controladorUsosPromocionProvider =
+    FutureProvider.family<List<ModeloUsoPromocion>, String>((ref, promocionId) {
+      return ref
+          .read(repositorioPromocionesProvider)
+          .obtenerUsosPromocionPorCliente(promocionId);
+    });
