@@ -8,6 +8,10 @@ class ModeloSucursal {
     this.horarioApertura,
     this.horarioCierre,
     required this.activo,
+    this.urlImagen,
+    this.managerNombre,
+    this.latitud,
+    this.longitud,
   });
 
   final String id;
@@ -18,6 +22,10 @@ class ModeloSucursal {
   final String? horarioApertura;
   final String? horarioCierre;
   final bool activo;
+  final String? urlImagen;
+  final String? managerNombre;
+  final double? latitud;
+  final double? longitud;
 
   factory ModeloSucursal.desdeJson(Map<String, dynamic> json) {
     // Normalizar formato de hora (la DB devuelve "HH:MM:SS") a "HH:MM",
@@ -41,6 +49,10 @@ class ModeloSucursal {
       horarioApertura: normalizarHora(json['horario_apertura'] as String?),
       horarioCierre: normalizarHora(json['horario_cierre'] as String?),
       activo: json['activo'] as bool,
+      urlImagen: json['url_imagen'] as String?,
+      managerNombre: json['manager_nombre'] as String?,
+      latitud: (json['latitud'] as num?)?.toDouble(),
+      longitud: (json['longitud'] as num?)?.toDouble(),
     );
   }
 
@@ -54,6 +66,10 @@ class ModeloSucursal {
       'horario_apertura': horarioApertura,
       'horario_cierre': horarioCierre,
       'activo': activo,
+      'url_imagen': urlImagen,
+      'manager_nombre': managerNombre,
+      'latitud': latitud,
+      'longitud': longitud,
     };
   }
 
@@ -64,6 +80,10 @@ class ModeloSucursal {
     String? horarioApertura,
     String? horarioCierre,
     bool? activo,
+    String? urlImagen,
+    String? managerNombre,
+    double? latitud,
+    double? longitud,
   }) {
     return ModeloSucursal(
       id: id,
@@ -74,6 +94,10 @@ class ModeloSucursal {
       horarioApertura: horarioApertura ?? this.horarioApertura,
       horarioCierre: horarioCierre ?? this.horarioCierre,
       activo: activo ?? this.activo,
+      urlImagen: urlImagen ?? this.urlImagen,
+      managerNombre: managerNombre ?? this.managerNombre,
+      latitud: latitud ?? this.latitud,
+      longitud: longitud ?? this.longitud,
     );
   }
 }

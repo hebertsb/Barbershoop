@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../nucleo/componentes/selector_imagen.dart';
+import '../../../../nucleo/configuracion/constantes.dart';
 import '../../dominio/modelo_servicio.dart';
 
 class FormularioServicio extends StatefulWidget {
@@ -18,9 +20,12 @@ class _FormularioServicioState extends State<FormularioServicio> {
   late final TextEditingController _descripcionCtrl;
   late final TextEditingController _duracionCtrl;
   late final TextEditingController _precioCtrl;
+  final _scrollCtrl = ScrollController();
   late bool _activo;
   bool _cargando = false;
   String? _errorMensaje;
+  String? _urlImagen;
+  double _insetInferiorAnterior = 0;
 
   @override
   void initState() {
@@ -36,6 +41,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
       text: widget.servicio?.precio.toString() ?? '50.00',
     );
     _activo = widget.servicio?.activo ?? true;
+    _urlImagen = widget.servicio?.urlImagen;
   }
 
   @override
@@ -44,7 +50,28 @@ class _FormularioServicioState extends State<FormularioServicio> {
     _descripcionCtrl.dispose();
     _duracionCtrl.dispose();
     _precioCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
+  /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
+  /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
+  /// al crecer el viewport). Detectamos la transición y devolvemos el scroll
+  /// a 0 en el siguiente frame.
+  void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
+    final tecladoSeAcabaDeCerrar =
+        _insetInferiorAnterior > 0 && insetInferiorActual == 0;
+    _insetInferiorAnterior = insetInferiorActual;
+    if (!tecladoSeAcabaDeCerrar) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollCtrl.hasClients) return;
+      _scrollCtrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   Future<void> _guardar() async {
@@ -56,16 +83,18 @@ class _FormularioServicioState extends State<FormularioServicio> {
     });
     try {
       final servicio = ModeloServicio(
-        id: widget.servicio?.id ?? '', // Upsert resolverá el ID vacío en Supabase
+        id:
+            widget.servicio?.id ??
+            '', // Upsert resolverá el ID vacío en Supabase
         barberiaId: widget.servicio?.barberiaId ?? '',
         nombre: _nombreCtrl.text.trim(),
-        descripcion:
-            _descripcionCtrl.text.trim().isEmpty
-                ? null
-                : _descripcionCtrl.text.trim(),
+        descripcion: _descripcionCtrl.text.trim().isEmpty
+            ? null
+            : _descripcionCtrl.text.trim(),
         duracionMin: int.parse(_duracionCtrl.text.trim()),
         precio: double.parse(_precioCtrl.text.trim()),
         activo: _activo,
+        urlImagen: _urlImagen,
       );
 
       await widget.alGuardar(servicio);
@@ -79,9 +108,11 @@ class _FormularioServicioState extends State<FormularioServicio> {
 
   @override
   Widget build(BuildContext context) {
+    final insetInferior = MediaQuery.of(context).viewInsets.bottom;
+    _reajustarScrollSiSeCerroElTeclado(insetInferior);
     return Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+        bottom: insetInferior,
         left: 16,
         right: 16,
         top: 16,
@@ -89,6 +120,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
       child: Form(
         key: _formularioKey,
         child: SingleChildScrollView(
+          controller: _scrollCtrl,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,17 +133,22 @@ class _FormularioServicioState extends State<FormularioServicio> {
                 ),
               ),
               const SizedBox(height: 16),
+              SelectorImagen(
+                bucket: Constantes.bucketImagenesApp,
+                carpeta: 'servicios',
+                urlActual: _urlImagen,
+                alSubir: (url) => setState(() => _urlImagen = url),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _nombreCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Nombre del Servicio *',
                   border: OutlineInputBorder(),
                 ),
-                validator:
-                    (v) =>
-                        v == null || v.trim().isEmpty
-                            ? 'El nombre es requerido'
-                            : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'El nombre es requerido'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -180,10 +217,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
               ),
               if (_errorMensaje != null) ...[
                 const SizedBox(height: 16),
-                Text(
-                  _errorMensaje!,
-                  style: const TextStyle(color: Colors.red),
-                ),
+                Text(_errorMensaje!, style: const TextStyle(color: Colors.red)),
               ],
               const SizedBox(height: 24),
               ElevatedButton(
@@ -191,10 +225,9 @@ class _FormularioServicioState extends State<FormularioServicio> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child:
-                    _cargando
-                        ? const CircularProgressIndicator()
-                        : const Text('Guardar'),
+                child: _cargando
+                    ? const CircularProgressIndicator()
+                    : const Text('Guardar'),
               ),
               const SizedBox(height: 16),
             ],

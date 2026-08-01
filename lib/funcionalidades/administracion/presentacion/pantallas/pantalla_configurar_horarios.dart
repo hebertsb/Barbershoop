@@ -160,118 +160,133 @@ class _PantallaConfigurarHorariosState
           'Horarios: ${widget.barbero?.nombrePerfil ?? "Cargando..."}',
         ),
       ),
-      body:
-          _guardando
-              ? const Center(child: CircularProgressIndicator())
-              : horariosState.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text(error.toString())),
-                data: (horarios) {
-                  // Inicializar estado local si es la primera carga
-                  _inicializarConHorariosExistentes(horarios);
+      body: _guardando
+          ? const Center(child: CircularProgressIndicator())
+          : horariosState.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(child: Text(error.toString())),
+              data: (horarios) {
+                // Inicializar estado local si es la primera carga
+                _inicializarConHorariosExistentes(horarios);
 
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: 7,
-                          padding: const EdgeInsets.all(16),
-                          itemBuilder: (context, index) {
-                            // En la app ordenamos Lunes a Domingo para comodidad
-                            // pero el index sigue mapeado a Lunes=1, ..., Domingo=0.
-                            // Convertir: 0: Domingo, 1: Lunes, ..., 6: Sábado.
-                            // Haremos orden de Lunes a Domingo.
-                            final diaSemana = (index + 1) % 7;
-                            final activo = _diasActivos[diaSemana]!;
-                            final inicio = _horasInicio[diaSemana]!;
-                            final fin = _horasFin[diaSemana]!;
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: 7,
+                        padding: const EdgeInsets.all(16),
+                        itemBuilder: (context, index) {
+                          // En la app ordenamos Lunes a Domingo para comodidad
+                          // pero el index sigue mapeado a Lunes=1, ..., Domingo=0.
+                          // Convertir: 0: Domingo, 1: Lunes, ..., 6: Sábado.
+                          // Haremos orden de Lunes a Domingo.
+                          final diaSemana = (index + 1) % 7;
+                          final activo = _diasActivos[diaSemana]!;
+                          final inicio = _horasInicio[diaSemana]!;
+                          final fin = _horasFin[diaSemana]!;
 
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 16,
-                                ),
-                                child: Column(
-                                  children: [
+                          final colorScheme = Theme.of(context).colorScheme;
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: activo
+                                    ? colorScheme.primary
+                                    : colorScheme.outlineVariant,
+                              ),
+                            ),
+                            color: activo
+                                ? colorScheme.surfaceContainerHigh
+                                : null,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        _diasNombres[diaSemana],
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Switch(
+                                        value: activo,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            _diasActivos[diaSemana] = val;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  if (activo) ...[
+                                    const Divider(),
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text(
-                                          _diasNombres[diaSemana],
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                                        Expanded(
+                                          child: TextButton.icon(
+                                            onPressed: () => _seleccionarHora(
+                                              context,
+                                              diaSemana,
+                                              true,
+                                            ),
+                                            icon: const Icon(Icons.access_time),
+                                            label: Text(
+                                              'Apertura: ${inicio.format(context)}',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                         ),
-                                        Switch(
-                                          value: activo,
-                                          onChanged: (val) {
-                                            setState(() {
-                                              _diasActivos[diaSemana] = val;
-                                            });
-                                          },
+                                        Expanded(
+                                          child: TextButton.icon(
+                                            onPressed: () => _seleccionarHora(
+                                              context,
+                                              diaSemana,
+                                              false,
+                                            ),
+                                            icon: const Icon(Icons.access_time),
+                                            label: Text(
+                                              'Cierre: ${fin.format(context)}',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    if (activo) ...[
-                                      const Divider(),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          TextButton.icon(
-                                            onPressed:
-                                                () => _seleccionarHora(
-                                                  context,
-                                                  diaSemana,
-                                                  true,
-                                                ),
-                                            icon:
-                                                const Icon(Icons.access_time),
-                                            label: Text(
-                                              'Apertura: ${inicio.format(context)}',
-                                            ),
-                                          ),
-                                          TextButton.icon(
-                                            onPressed:
-                                                () => _seleccionarHora(
-                                                  context,
-                                                  diaSemana,
-                                                  false,
-                                                ),
-                                            icon:
-                                                const Icon(Icons.access_time),
-                                            label: Text(
-                                              'Cierre: ${fin.format(context)}',
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
                                   ],
-                                ),
+                                ],
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: ElevatedButton(
-                          onPressed: _guardar,
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(50),
-                          ),
-                          child: const Text('Guardar Configuración'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: ElevatedButton(
+                        onPressed: _guardar,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
                         ),
+                        child: const Text('Guardar Configuración'),
                       ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
+            ),
     );
   }
 }

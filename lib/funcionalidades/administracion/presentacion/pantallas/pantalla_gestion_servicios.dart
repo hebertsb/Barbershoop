@@ -1,129 +1,228 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../nucleo/configuracion/colores_app.dart';
+import '../../../../nucleo/configuracion/tipografia_app.dart';
+import '../../dominio/modelo_servicio.dart';
 import '../componentes/formulario_servicio.dart';
+import '../componentes/tarjeta_servicio.dart';
 import '../controladores/controlador_servicios.dart';
 
-class PantallaGestionServicios extends ConsumerWidget {
+class PantallaGestionServicios extends ConsumerStatefulWidget {
   const PantallaGestionServicios({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PantallaGestionServicios> createState() =>
+      _PantallaGestionServiciosState();
+}
+
+class _PantallaGestionServiciosState
+    extends ConsumerState<PantallaGestionServicios> {
+  bool _modoGrilla = true;
+  String _busqueda = '';
+
+  void _abrirFormulario([ModeloServicio? servicio]) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FormularioServicio(
+        servicio: servicio,
+        alGuardar: (nuevoServicio) {
+          return ref
+              .read(controladorServiciosProvider.notifier)
+              .guardarServicio(nuevoServicio);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final serviciosState = ref.watch(controladorServiciosProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     ref.listen(controladorServiciosProvider, (anterior, siguiente) {
       if (siguiente.hasError && !siguiente.isLoading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(siguiente.error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(siguiente.error.toString())));
       }
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gestionar Servicios')),
+      appBar: AppBar(
+        title: const Text('Servicios y Tarifas'),
+        actions: [
+          IconButton(
+            icon: Icon(_modoGrilla ? Icons.view_list : Icons.grid_view),
+            tooltip: _modoGrilla ? 'Cambiar a Lista' : 'Cambiar a Grilla',
+            onPressed: () => setState(() => _modoGrilla = !_modoGrilla),
+          ),
+        ],
+      ),
       body: serviciosState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
         data: (servicios) {
-          if (servicios.isEmpty) {
-            return const Center(child: Text('No hay servicios registrados.'));
-          }
+          final filtrados = servicios
+              .where(
+                (s) => s.nombre.toLowerCase().contains(_busqueda.toLowerCase()),
+              )
+              .toList();
 
-          return ListView.builder(
-            itemCount: servicios.length,
-            padding: const EdgeInsets.all(16),
-            itemBuilder: (context, index) {
-              final servicio = servicios[index];
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  title: Row(
-                    children: [
-                      Text(
-                        servicio.nombre,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 8),
-                      Chip(
-                        label: Text(
-                          servicio.activo ? 'Activo' : 'Inactivo',
-                          style: const TextStyle(fontSize: 10),
+          return Column(
+            children: [
+              // Barra de búsqueda y Filtros arriba
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Buscar servicio...',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHigh,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colorScheme.outlineVariant,
+                          ),
                         ),
-                        backgroundColor:
-                            servicio.activo
-                                ? Colors.green.withAlpha(40)
-                                : Colors.red.withAlpha(40),
-                        padding: EdgeInsets.zero,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
-                    ],
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (servicio.descripcion != null)
-                        Text(servicio.descripcion!),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 14,
-                            color: Colors.grey[600],
+                      onChanged: (val) => setState(() => _busqueda = val),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${filtrados.length} Servicios registrados',
+                            style: TipografiaApp.bodySm.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                          const SizedBox(width: 4),
-                          Text('${servicio.duracionMin} min'),
-                          const SizedBox(width: 16),
-                          Icon(
-                            Icons.attach_money,
-                            size: 14,
-                            color: Colors.grey[600],
+                        ),
+                        // Segmented Toggle Grilla / Lista
+                        SegmentedButton<bool>(
+                          segments: const [
+                            ButtonSegment<bool>(
+                              value: true,
+                              icon: Icon(Icons.grid_view, size: 18),
+                              label: Text('Cuadros'),
+                            ),
+                            ButtonSegment<bool>(
+                              value: false,
+                              icon: Icon(Icons.view_list, size: 18),
+                              label: Text('Lista'),
+                            ),
+                          ],
+                          selected: {_modoGrilla},
+                          onSelectionChanged: (set) {
+                            setState(() => _modoGrilla = set.first);
+                          },
+                          style: SegmentedButton.styleFrom(
+                            selectedBackgroundColor: ColoresApp.primario
+                                .withValues(alpha: 0.2),
+                            selectedForegroundColor: ColoresApp.primario,
                           ),
-                          const SizedBox(width: 2),
-                          Text('Bs. ${servicio.precio.toStringAsFixed(2)}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                  trailing: const Icon(Icons.edit),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder:
-                          (context) => FormularioServicio(
-                            servicio: servicio,
-                            alGuardar: (nuevoServicio) {
-                              return ref
-                                  .read(controladorServiciosProvider.notifier)
-                                  .guardarServicio(nuevoServicio);
-                            },
-                          ),
-                    );
-                  },
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+
+              // Contenido principal (Grilla o Lista)
+              Expanded(
+                child: filtrados.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No hay servicios para mostrar.',
+                          style: TipografiaApp.bodyMd.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    : _modoGrilla
+                    ? GridView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        // Alto fijo (no `childAspectRatio`): un aspect ratio
+                        // fijo estira la altura de la celda cuando hay pocas
+                        // columnas y la celda se ensancha (pantallas anchas),
+                        // dejando una franja vacía enorme debajo del texto
+                        // (bug real reportado en tablet horizontal).
+                        // `maxCrossAxisExtent` fija el ancho ideal por tarjeta
+                        // y Flutter decide solo cuántas columnas entran.
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 200,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              mainAxisExtent: 220,
+                            ),
+                        itemCount: filtrados.length,
+                        itemBuilder: (context, index) {
+                          final servicio = filtrados[index];
+                          return TarjetaServicio(
+                            servicio: servicio,
+                            compacto: true,
+                            onTap: () => _abrirFormulario(servicio),
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        itemCount: filtrados.length,
+                        itemBuilder: (context, index) {
+                          final servicio = filtrados[index];
+                          return TarjetaServicio(
+                            servicio: servicio,
+                            onTap: () => _abrirFormulario(servicio),
+                          );
+                        },
+                      ),
+              ),
+            ],
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder:
-                (context) => FormularioServicio(
-                  alGuardar: (nuevoServicio) {
-                    return ref
-                        .read(controladorServiciosProvider.notifier)
-                        .guardarServicio(nuevoServicio);
-                  },
-                ),
-          );
-        },
-        child: const Icon(Icons.add),
+      // Botón Grande "Añadir Nuevo +"
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ElevatedButton.icon(
+          onPressed: () => _abrirFormulario(),
+          icon: const Icon(Icons.add, size: 22),
+          label: const Text(
+            'NUEVO SERVICIO',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ColoresApp.primario,
+            foregroundColor: colorScheme.onPrimaryContainer,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            elevation: 4,
+          ),
+        ),
       ),
     );
   }

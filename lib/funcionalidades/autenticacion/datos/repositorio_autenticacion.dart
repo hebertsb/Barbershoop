@@ -13,9 +13,13 @@ import '../dominio/modelo_barberia_resumen.dart';
 import '../dominio/modelo_perfil.dart';
 
 String _generarNonce([int longitud = 32]) {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const caracteres =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   final aleatorio = Random.secure();
-  return List.generate(longitud, (_) => caracteres[aleatorio.nextInt(caracteres.length)]).join();
+  return List.generate(
+    longitud,
+    (_) => caracteres[aleatorio.nextInt(caracteres.length)],
+  ).join();
 }
 
 abstract class RepositorioAutenticacion {
@@ -29,7 +33,7 @@ abstract class RepositorioAutenticacion {
 
 class RepositorioAutenticacionSupabase implements RepositorioAutenticacion {
   RepositorioAutenticacionSupabase({SupabaseClient? cliente})
-      : _cliente = cliente ?? ClienteSupabase.instancia;
+    : _cliente = cliente ?? ClienteSupabase.instancia;
 
   final SupabaseClient _cliente;
 

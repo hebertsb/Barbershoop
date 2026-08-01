@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../nucleo/errores/excepciones_app.dart';
 import '../../datos/repositorio_administracion.dart';
 import '../../dominio/modelo_horario_barbero.dart';
+import 'controlador_barberos.dart';
 
 const _diasNombres = [
   'Domingo',
@@ -34,7 +35,8 @@ class ControladorHorariosBarbero
     state = const AsyncLoading<List<ModeloHorarioBarbero>>();
     state = await AsyncValue.guard(() async {
       for (final horario in horarios) {
-        if (_minutosDelDia(horario.horaFin) <= _minutosDelDia(horario.horaInicio)) {
+        if (_minutosDelDia(horario.horaFin) <=
+            _minutosDelDia(horario.horaInicio)) {
           throw ExcepcionDesconocida(
             'La hora de cierre debe ser posterior a la de apertura para el día '
             '${_diasNombres[horario.diaSemana]}.',
@@ -50,9 +52,20 @@ class ControladorHorariosBarbero
   }
 }
 
-final controladorHorariosBarberoProvider =
-    AsyncNotifierProvider.autoDispose.family<
-      ControladorHorariosBarbero,
-      List<ModeloHorarioBarbero>,
-      String
-    >(ControladorHorariosBarbero.new);
+final controladorHorariosBarberoProvider = AsyncNotifierProvider.autoDispose
+    .family<ControladorHorariosBarbero, List<ModeloHorarioBarbero>, String>(
+      ControladorHorariosBarbero.new,
+    );
+
+final horariosDeSucursalProvider = FutureProvider.autoDispose
+    .family<List<ModeloHorarioBarbero>, String>((ref, sucursalId) async {
+      final barberos = await ref.watch(controladorBarberosProvider.future);
+      final ids = barberos
+          .where((b) => b.sucursalId == sucursalId && b.activo)
+          .map((b) => b.id)
+          .toList();
+      if (ids.isEmpty) return [];
+      return ref
+          .read(repositorioAdministracionProvider)
+          .obtenerHorariosBarberoDeBarberos(ids);
+    });

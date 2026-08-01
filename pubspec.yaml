@@ -42,6 +42,12 @@ dependencies:
   package_info_plus: ^8.3.0
   google_sign_in: ^7.2.0
   flutter_facebook_auth: ^7.2.0
+  cached_network_image: ^3.4.1
+  google_fonts: ^6.2.1
+  url_launcher: ^6.3.2
+  intl: ^0.20.2
+  geolocator: ^13.0.2
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_test:

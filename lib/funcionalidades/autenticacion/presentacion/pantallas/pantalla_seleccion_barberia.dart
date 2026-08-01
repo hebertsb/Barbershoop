@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../controladores/controlador_autenticacion.dart';
 
 class PantallaSeleccionBarberia extends ConsumerWidget {
@@ -12,12 +13,13 @@ class PantallaSeleccionBarberia extends ConsumerWidget {
     final asignando = ref.watch(
       controladorAutenticacionProvider.select((estado) => estado.isLoading),
     );
+    final colorScheme = Theme.of(context).colorScheme;
 
     ref.listen(controladorAutenticacionProvider, (anterior, siguiente) {
       if (siguiente.hasError && !siguiente.isLoading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(siguiente.error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(siguiente.error.toString())));
       }
     });
 
@@ -28,19 +30,44 @@ class PantallaSeleccionBarberia extends ConsumerWidget {
         error: (error, _) => Center(child: Text(error.toString())),
         data: (lista) {
           if (lista.isEmpty) {
-            return const Center(child: Text('No hay barberías disponibles todavía.'));
+            return Center(
+              child: Text(
+                'No hay barberías disponibles todavía.',
+                style: TipografiaApp.bodyMd.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            );
           }
-          return ListView.builder(
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
             itemCount: lista.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, indice) {
               final barberia = lista[indice];
-              return ListTile(
-                title: Text(barberia.nombre),
-                onTap: asignando
-                    ? null
-                    : () => ref
-                        .read(controladorAutenticacionProvider.notifier)
-                        .asignarBarberia(barberia.id),
+              return Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  leading: Icon(Icons.storefront, color: colorScheme.primary),
+                  title: Text(
+                    barberia.nombre,
+                    style: TipografiaApp.bodyLg.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: colorScheme.outline,
+                  ),
+                  onTap: asignando
+                      ? null
+                      : () => ref
+                            .read(controladorAutenticacionProvider.notifier)
+                            .asignarBarberia(barberia.id),
+                ),
               );
             },
           );

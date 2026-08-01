@@ -7,6 +7,7 @@ class ModeloServicio {
     required this.duracionMin,
     required this.precio,
     required this.activo,
+    this.urlImagen,
   });
 
   final String id;
@@ -16,6 +17,7 @@ class ModeloServicio {
   final int duracionMin;
   final double precio;
   final bool activo;
+  final String? urlImagen;
 
   factory ModeloServicio.desdeJson(Map<String, dynamic> json) {
     return ModeloServicio(
@@ -26,6 +28,7 @@ class ModeloServicio {
       duracionMin: json['duracion_min'] as int,
       precio: (json['precio'] as num).toDouble(),
       activo: json['activo'] as bool,
+      urlImagen: json['url_imagen'] as String?,
     );
   }
 
@@ -38,6 +41,7 @@ class ModeloServicio {
       'duracion_min': duracionMin,
       'precio': precio,
       'activo': activo,
+      'url_imagen': urlImagen,
     };
   }
 
@@ -47,6 +51,7 @@ class ModeloServicio {
     int? duracionMin,
     double? precio,
     bool? activo,
+    String? urlImagen,
   }) {
     return ModeloServicio(
       id: id,
@@ -56,6 +61,7 @@ class ModeloServicio {
       duracionMin: duracionMin ?? this.duracionMin,
       precio: precio ?? this.precio,
       activo: activo ?? this.activo,
+      urlImagen: urlImagen ?? this.urlImagen,
     );
   }
 }
