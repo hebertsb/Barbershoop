@@ -3,6 +3,33 @@
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
+-- resenas (Calificaciones y opiniones de clientes a citas/barberos)
+-- ----------------------------------------------------------------------------
+
+create table if not exists resenas (
+  id uuid primary key default gen_random_uuid(),
+  barberia_id uuid not null references barberias(id) on delete cascade,
+  cita_id uuid references citas(id) on delete set null,
+  cliente_id uuid not null references perfiles(id) on delete cascade,
+  barbero_id uuid references barberos(id) on delete set null,
+  puntuacion int not null check (puntuacion >= 1 and puntuacion <= 5),
+  comentario text,
+  creado_en timestamptz not null default now()
+);
+
+alter table resenas enable row level security;
+
+create policy resenas_select on resenas
+  for select using (
+    es_superadmin() or barberia_id = obtener_barberia_id_actual()
+  );
+
+create policy resenas_insert on resenas
+  for insert with check (
+    cliente_id = auth.uid() or es_admin_o_superior()
+  );
+
+-- ----------------------------------------------------------------------------
 -- usos_promocion
 -- ----------------------------------------------------------------------------
 
@@ -111,7 +138,7 @@ end;
 $$ language plpgsql security definer;
 
 -- ----------------------------------------------------------------------------
--- Reseñas
+-- Reseñas RPCs
 -- ----------------------------------------------------------------------------
 
 create or replace function crear_resena(
