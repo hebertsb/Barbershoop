@@ -6,7 +6,7 @@ import '../../../administracion/presentacion/controladores/controlador_barberos.
 import '../../../administracion/presentacion/controladores/controlador_horarios_barbero.dart';
 import '../../../citas/dominio/disponibilidad_barbero.dart';
 import '../../../citas/presentacion/controladores/controlador_citas.dart';
-import '../controladores/controlador_turnos.dart';
+import '../../../turnos/presentacion/controladores/controlador_turnos.dart';
 
 /// Aviso corto, debajo del selector de servicio en `FormularioTurno`, de qué
 /// barberos de [sucursalId] tienen AHORA MISMO un hueco libre suficiente

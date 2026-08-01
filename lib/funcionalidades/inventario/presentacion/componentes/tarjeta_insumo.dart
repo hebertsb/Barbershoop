@@ -4,10 +4,16 @@ import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../dominio/modelo_insumo.dart';
 
 class TarjetaInsumo extends StatelessWidget {
-  const TarjetaInsumo({super.key, required this.insumo, this.onTap});
+  const TarjetaInsumo({
+    super.key,
+    required this.insumo,
+    this.onTap,
+    this.trailing,
+  });
 
   final ModeloInsumo insumo;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +46,7 @@ class TarjetaInsumo extends StatelessWidget {
                       color: colorScheme.error,
                       size: 18,
                     ),
+                  ?trailing,
                 ],
               ),
               if (insumo.categoria != null) ...[

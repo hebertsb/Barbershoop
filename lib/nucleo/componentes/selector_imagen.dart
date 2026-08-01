@@ -20,7 +20,7 @@ class SelectorImagen extends StatefulWidget {
     super.key,
     required this.bucket,
     required this.carpeta,
-    required this.urlActual,
+    this.urlActual,
     required this.alSubir,
     this.altura = 160,
   });

@@ -3,13 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:barber_app/funcionalidades/administracion/datos/repositorio_administracion.dart';
 import 'package:barber_app/funcionalidades/administracion/dominio/modelo_barbero.dart';
 import 'package:barber_app/funcionalidades/administracion/dominio/modelo_horario_barbero.dart';
+import 'package:barber_app/funcionalidades/administracion/dominio/modelo_punto_tendencia.dart';
+import 'package:barber_app/funcionalidades/administracion/dominio/modelo_resumen_ingresos.dart';
+import 'package:barber_app/funcionalidades/administracion/dominio/modelo_secretaria.dart';
 import 'package:barber_app/funcionalidades/administracion/dominio/modelo_servicio.dart';
 import 'package:barber_app/funcionalidades/administracion/dominio/modelo_sucursal.dart';
 import 'package:barber_app/funcionalidades/administracion/presentacion/controladores/controlador_barberos.dart';
 import 'package:barber_app/funcionalidades/administracion/presentacion/controladores/controlador_horarios_barbero.dart';
 import 'package:barber_app/funcionalidades/administracion/presentacion/controladores/controlador_servicios.dart';
 import 'package:barber_app/funcionalidades/administracion/presentacion/controladores/controlador_sucursales.dart';
-import 'package:barber_app/nucleo/errores/excepciones_app.dart';
 
 class RepositorioAdministracionFalso implements RepositorioAdministracion {
   List<ModeloSucursal> sucursales = [];
@@ -99,6 +101,115 @@ class RepositorioAdministracionFalso implements RepositorioAdministracion {
   Future<void> guardarHorariosBarbero(String barberoId, List<ModeloHorarioBarbero> nuevosHorarios) async {
     if (errorSimulado != null) throw errorSimulado!;
     horarios[barberoId] = nuevosHorarios;
+  }
+
+  @override
+  Future<ModeloResumenIngresos> obtenerResumenIngresos() async {
+    if (errorSimulado != null) throw errorSimulado!;
+    return const ModeloResumenIngresos(
+      ingresosHoy: 0,
+      ingresosMes: 0,
+      ingresosAnio: 0,
+      citasHoy: 0,
+    );
+  }
+
+  @override
+  Future<List<ModeloPuntoTendencia>> obtenerTendenciaIngresos(
+    String periodo,
+  ) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    return [];
+  }
+
+  @override
+  Future<List<ModeloBarbero>> obtenerBarberosPublicos({
+    String? sucursalId,
+  }) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    return barberos
+        .where(
+          (b) => b.activo && (sucursalId == null || b.sucursalId == sucursalId),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> guardarNivelBarbero(String barberoId, String? nivel) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    final index = barberos.indexWhere((b) => b.id == barberoId);
+    if (index != -1) {
+      barberos[index] = barberos[index].copyWith(nivel: nivel);
+    }
+  }
+
+  @override
+  Future<void> guardarSucursalYEspecialidades({
+    required String barberoId,
+    required String sucursalId,
+    required List<String> especialidades,
+  }) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    final index = barberos.indexWhere((b) => b.id == barberoId);
+    if (index != -1) {
+      barberos[index] = barberos[index].copyWith(
+        sucursalId: sucursalId,
+        especialidades: especialidades,
+      );
+    }
+  }
+
+  String? telefonoActualizado;
+
+  @override
+  Future<void> actualizarFotoPerfilPropio(String urlFoto) async {
+    if (errorSimulado != null) throw errorSimulado!;
+  }
+
+  @override
+  Future<void> actualizarTelefonoPropio(String? telefono) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    telefonoActualizado = telefono;
+  }
+
+  @override
+  Future<void> guardarPerfilBarbero({
+    required String? descripcion,
+    required List<String> especialidades,
+  }) async {
+    if (errorSimulado != null) throw errorSimulado!;
+  }
+
+  List<ModeloSecretaria> secretarias = [];
+  List<String> secretariasRevocadas = [];
+
+  @override
+  Future<List<ModeloSecretaria>> obtenerSecretarias() async {
+    if (errorSimulado != null) throw errorSimulado!;
+    return secretarias;
+  }
+
+  @override
+  Future<void> invitarSecretaria({
+    required String email,
+    required String sucursalId,
+  }) async {
+    if (errorSimulado != null) throw errorSimulado!;
+  }
+
+  @override
+  Future<void> revocarSecretaria(String perfilId) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    secretariasRevocadas.add(perfilId);
+    secretarias = secretarias.where((s) => s.perfilId != perfilId).toList();
+  }
+
+  @override
+  Future<List<ModeloHorarioBarbero>> obtenerHorariosBarberoDeBarberos(
+    List<String> barberoIds,
+  ) async {
+    if (errorSimulado != null) throw errorSimulado!;
+    return [for (final id in barberoIds) ...horarios[id] ?? []];
   }
 }
 

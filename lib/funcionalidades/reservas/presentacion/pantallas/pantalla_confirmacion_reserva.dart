@@ -50,7 +50,10 @@ class _PantallaConfirmacionReservaState
     // reaccionar.
     ModeloCita? cita;
     try {
-      cita = await ref.read(controladorReservaProvider.notifier).confirmar();
+      final resultado = await ref
+          .read(controladorReservaProvider.notifier)
+          .confirmar();
+      cita = resultado.cita;
       if (!mounted) return;
       // La cita ya existe: reiniciar el estado de inmediato, antes de tocar
       // cualquier otra cosa que pueda fallar (config de pagos, precio, nav).
