@@ -98,7 +98,7 @@ class ModeloProgramaRankingBarberos {
       'peso_clientes': pesoClientes,
       'peso_puntualidad': pesoPuntualidad,
       'peso_calificacion': pesoCalificacion,
-      'tipo_premio': tipoPremio.aTexto,
+      'tipo_premio': tipoPremio.aTexto(),
       'descripcion_premio': descripcionPremio,
       'estado': estado,
       'premio_entregado': premioEntregado,

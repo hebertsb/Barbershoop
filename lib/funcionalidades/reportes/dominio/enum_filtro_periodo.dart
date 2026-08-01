@@ -21,18 +21,21 @@ enum FiltroPeriodo {
   }
 
   /// Calcula el rango (inicio, fin) correspondiente a este período, en hora
-  /// local. `personalizado` no tiene un rango propio -- devuelve el día de
-  /// hoy como valor por defecto, quien lo use debe pedir las fechas exactas
-  /// aparte.
-  (DateTime, DateTime) obtenerRangoFechas() {
+  /// local. Para `personalizado`, usa [fechaInicioCustom]/[fechaFinCustom]
+  /// si vienen (si no, cae al día de hoy como valor por defecto).
+  (DateTime, DateTime) obtenerRangoFechas({
+    DateTime? fechaInicioCustom,
+    DateTime? fechaFinCustom,
+  }) {
     final ahora = DateTime.now();
     final hoyInicio = DateTime(ahora.year, ahora.month, ahora.day);
     final hoyFin = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
 
     switch (this) {
       case FiltroPeriodo.hoy:
-      case FiltroPeriodo.personalizado:
         return (hoyInicio, hoyFin);
+      case FiltroPeriodo.personalizado:
+        return (fechaInicioCustom ?? hoyInicio, fechaFinCustom ?? hoyFin);
       case FiltroPeriodo.estaSemana:
         final inicioSemana = hoyInicio.subtract(
           Duration(days: ahora.weekday - 1),

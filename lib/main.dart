@@ -33,7 +33,7 @@ class BarberApp extends ConsumerWidget {
     final enrutador = ref.watch(enrutadorAppProvider);
     return MaterialApp.router(
       title: 'BarberApp',
-      theme: TemaApp.claro,
+      theme: TemaApp.claro(),
       routerConfig: enrutador,
       debugShowCheckedModeBanner: false,
     );

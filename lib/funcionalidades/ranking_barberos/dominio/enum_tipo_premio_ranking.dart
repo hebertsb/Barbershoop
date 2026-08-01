@@ -1,13 +1,13 @@
 enum TipoPremioRanking {
-  bono,
+  dinero,
   diaLibre,
   reconocimiento,
   otro;
 
   static TipoPremioRanking desdeTexto(String texto) {
     switch (texto) {
-      case 'bono':
-        return TipoPremioRanking.bono;
+      case 'dinero':
+        return TipoPremioRanking.dinero;
       case 'dia_libre':
         return TipoPremioRanking.diaLibre;
       case 'reconocimiento':
@@ -21,8 +21,8 @@ enum TipoPremioRanking {
 
   String aTexto() {
     switch (this) {
-      case TipoPremioRanking.bono:
-        return 'bono';
+      case TipoPremioRanking.dinero:
+        return 'dinero';
       case TipoPremioRanking.diaLibre:
         return 'dia_libre';
       case TipoPremioRanking.reconocimiento:
@@ -34,8 +34,8 @@ enum TipoPremioRanking {
 
   String etiqueta() {
     switch (this) {
-      case TipoPremioRanking.bono:
-        return 'Bono';
+      case TipoPremioRanking.dinero:
+        return 'Dinero';
       case TipoPremioRanking.diaLibre:
         return 'Día libre';
       case TipoPremioRanking.reconocimiento:

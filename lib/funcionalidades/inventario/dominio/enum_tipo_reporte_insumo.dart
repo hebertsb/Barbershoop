@@ -26,4 +26,15 @@ enum TipoReporteInsumo {
         return 'danado';
     }
   }
+
+  String get etiqueta {
+    switch (this) {
+      case TipoReporteInsumo.usado:
+        return 'Usado';
+      case TipoReporteInsumo.perdido:
+        return 'Perdido';
+      case TipoReporteInsumo.danado:
+        return 'Dañado';
+    }
+  }
 }

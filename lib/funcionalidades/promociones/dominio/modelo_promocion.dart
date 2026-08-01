@@ -48,6 +48,16 @@ class ModeloPromocion {
   /// Premio de fidelidad: promoción reusada como cupón de un solo cliente.
   final String? clienteExclusivoId;
 
+  bool get esCombo => (serviciosIds?.length ?? 0) > 1;
+
+  /// "Corte + Barba" para un combo, o el nombre embebido de
+  /// [servicioId] para una promo de un solo servicio -- vacío si no hay
+  /// ninguno de los dos disponibles.
+  String get etiquetaServicios {
+    if (esCombo) return (nombresServiciosCombo ?? const []).join(' + ');
+    return nombreServicio ?? '';
+  }
+
   bool get estaVigente {
     if (!activo) return false;
     final hoy = DateTime.now();

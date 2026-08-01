@@ -13,6 +13,11 @@ class ModeloProgresoFidelidad {
   final int metaCitas;
   final bool puedeReclamar;
 
+  /// `true` cuando falta 1 sola cita para completar la meta -- usado para
+  /// destacar la píldora flotante ("¡ya casi!").
+  bool get estaPorCumplirMeta =>
+      !puedeReclamar && metaCitas - progresoActual <= 1;
+
   factory ModeloProgresoFidelidad.desdeJson(Map<String, dynamic> json) {
     return ModeloProgresoFidelidad(
       programaId: json['programa_id'] as String,

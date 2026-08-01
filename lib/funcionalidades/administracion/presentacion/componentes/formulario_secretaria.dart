@@ -2,30 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../../dominio/modelo_sucursal.dart';
 
-class FormularioBarbero extends StatefulWidget {
-  const FormularioBarbero({
+class FormularioSecretaria extends StatefulWidget {
+  const FormularioSecretaria({
     super.key,
     required this.sucursales,
     required this.alGuardar,
   });
 
   final List<ModeloSucursal> sucursales;
-  final Future<void> Function(
-    String email,
-    String sucursalId,
-    List<String> especialidades,
-  )
-  alGuardar;
+  final Future<void> Function(String email, String sucursalId) alGuardar;
 
   @override
-  State<FormularioBarbero> createState() => _FormularioBarberoState();
+  State<FormularioSecretaria> createState() => _FormularioSecretariaState();
 }
 
-class _FormularioBarberoState extends State<FormularioBarbero> {
+class _FormularioSecretariaState extends State<FormularioSecretaria> {
   final _formularioKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
-  final _especialidadCtrl = TextEditingController();
-  final List<String> _especialidades = [];
   String? _sucursalId;
   bool _cargando = false;
   String? _errorMensaje;
@@ -41,18 +34,7 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
   @override
   void dispose() {
     _emailCtrl.dispose();
-    _especialidadCtrl.dispose();
     super.dispose();
-  }
-
-  void _agregarEspecialidad() {
-    final texto = _especialidadCtrl.text.trim().toLowerCase();
-    if (texto.isNotEmpty && !_especialidades.contains(texto)) {
-      setState(() {
-        _especialidades.add(texto);
-        _especialidadCtrl.clear();
-      });
-    }
   }
 
   Future<void> _guardar() async {
@@ -64,11 +46,7 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
       _errorMensaje = null;
     });
     try {
-      await widget.alGuardar(
-        _emailCtrl.text.trim(),
-        _sucursalId!,
-        _especialidades,
-      );
+      await widget.alGuardar(_emailCtrl.text.trim(), _sucursalId!);
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) setState(() => _errorMensaje = e.toString());
@@ -93,7 +71,7 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Invitar barbero',
+              'Invitar secretaria',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -121,38 +99,6 @@ class _FormularioBarberoState extends State<FormularioBarbero> {
                   )
                   .toList(),
               onChanged: (v) => setState(() => _sucursalId = v),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _especialidadCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Especialidades',
-                      border: OutlineInputBorder(),
-                      hintText: 'Ej. barba, degrades, cejas',
-                    ),
-                    onFieldSubmitted: (_) => _agregarEspecialidad(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: _agregarEspecialidad,
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: _especialidades.map((esp) {
-                return InputChip(
-                  label: Text(esp),
-                  onDeleted: () => setState(() => _especialidades.remove(esp)),
-                );
-              }).toList(),
             ),
             if (_errorMensaje != null) ...[
               const SizedBox(height: 16),
