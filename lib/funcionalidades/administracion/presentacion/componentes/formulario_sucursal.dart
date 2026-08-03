@@ -111,10 +111,16 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
     });
     try {
       final centroMapa = _mapaKey.currentState?.obtenerCentro();
+      String formatearHora(String val) {
+        final v = val.trim();
+        if (v.isEmpty) return '09:00:00';
+        final partes = v.split(':');
+        if (partes.length == 2) return '$v:00';
+        return v;
+      }
+
       final sucursal = ModeloSucursal(
-        id:
-            widget.sucursal?.id ??
-            '', // Upsert resolverá el ID vacío en Supabase
+        id: widget.sucursal?.id ?? '',
         barberiaId: widget.sucursal?.barberiaId ?? '',
         nombre: _nombreCtrl.text.trim(),
         direccion: _direccionCtrl.text.trim().isEmpty
@@ -123,8 +129,8 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
         telefono: _telefonoCtrl.text.trim().isEmpty
             ? null
             : _telefonoCtrl.text.trim(),
-        horarioApertura: '${_aperturaCtrl.text.trim()}:00',
-        horarioCierre: '${_cierreCtrl.text.trim()}:00',
+        horarioApertura: formatearHora(_aperturaCtrl.text),
+        horarioCierre: formatearHora(_cierreCtrl.text),
         activo: _activo,
         urlImagen: _urlImagen,
         managerNombre: _managerCtrl.text.trim().isEmpty

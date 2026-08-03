@@ -43,6 +43,12 @@ class ModeloBarbero {
   /// Alias de [email] — Email del perfil del barbero.
   String? get emailPerfil => email;
 
+  /// Teléfono para WhatsApp (obtiene [telefonoPerfil] o [telefono]).
+  String? get numTelefonoWhatsapp =>
+      (telefonoPerfil != null && telefonoPerfil!.isNotEmpty)
+          ? telefonoPerfil
+          : (telefono != null && telefono!.isNotEmpty ? telefono : null);
+
   /// Calificación promedio del barbero.
   double get calificacionPromedio => 5.0;
 
@@ -53,20 +59,24 @@ class ModeloBarbero {
     String? pNombre;
     String? pEmail;
     String? pFoto;
+    String? pTelefono;
     final perfilData = json['perfiles'];
     if (perfilData is Map<String, dynamic>) {
       pNombre = perfilData['nombre'] as String?;
       pEmail = perfilData['email'] as String?;
       pFoto = (perfilData['url_foto'] ?? perfilData['foto_url']) as String?;
+      pTelefono = perfilData['telefono'] as String?;
     }
+
+    final telExt = (json['telefono_perfil'] ?? json['telefono'] ?? pTelefono) as String?;
 
     return ModeloBarbero(
       id: json['id'] as String? ?? '',
       barberiaId: json['barberia_id'] as String? ?? '',
       nombre: (json['nombre'] ?? json['nombre_perfil'] ?? pNombre) as String? ?? 'Barbero',
       email: (json['email'] ?? pEmail) as String?,
-      telefono: json['telefono'] as String?,
-      telefonoPerfil: (json['telefono_perfil'] ?? json['telefono']) as String?,
+      telefono: telExt,
+      telefonoPerfil: telExt,
       fotoUrl: (json['foto_url'] ?? json['url_foto'] ?? pFoto) as String?,
       nivel: json['nivel'] as String?,
       sucursalId: json['sucursal_id'] as String?,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../dominio/modelo_barbero.dart';
 import '../controladores/controlador_barberos.dart';
@@ -50,23 +49,24 @@ class SelectorNivelBarbero extends ConsumerWidget {
             : 'SIN NIVEL');
     final iconoBadge = _iconosNivel[nivelValido] ?? Icons.workspace_premium;
 
-    return PopupMenuButton<String?>(
+    return PopupMenuButton<String>(
       enabled: !bloqueado,
       tooltip: 'Cambiar Nivel de Barbero',
-      initialValue: nivelValido,
-      onSelected: (nuevoNivel) {
+      initialValue: nivelValido ?? 'none',
+      onSelected: (val) {
+        final nuevoNivel = (val == 'none' || val.isEmpty) ? null : val;
         ref
             .read(controladorBarberosProvider.notifier)
             .guardarNivel(barbero.id, nuevoNivel);
       },
       itemBuilder: (context) => [
-        const PopupMenuItem<String?>(
-          value: null,
+        const PopupMenuItem<String>(
+          value: 'none',
           child: Text('Sin nivel'),
         ),
         const PopupMenuDivider(),
         ..._niveles.map(
-          (n) => PopupMenuItem<String?>(
+          (n) => PopupMenuItem<String>(
             value: n,
             child: Row(
               children: [

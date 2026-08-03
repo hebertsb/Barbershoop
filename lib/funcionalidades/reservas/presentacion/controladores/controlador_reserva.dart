@@ -83,6 +83,9 @@ class ControladorReserva extends Notifier<EstadoReserva> {
     );
   }
 
+  void seleccionarCualquierBarbero() => seleccionarCualquiera();
+  void seleccionarBarbero(String barberoId) => seleccionarBarberoEspecifico(barberoId);
+
   void seleccionarHorario(DateTime fechaHora) {
     state = EstadoReserva(
       sucursalId: state.sucursalId,
