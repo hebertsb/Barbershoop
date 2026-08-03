@@ -263,29 +263,24 @@ class _PantallaGestionBarberosState
                             );
                           },
                         )
-                      : Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 800),
-                            child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              itemCount: filtrados.length,
-                              itemBuilder: (context, index) {
-                                final barbero = filtrados[index];
-                                return TarjetaBarberoLista(
-                                  barbero: barbero,
-                                  sucursalNombre: _obtenerNombreSucursal(
-                                    barbero.sucursalId,
-                                    sucursales,
-                                  ),
-                                  sucursales: sucursales,
-                                  bloqueadoSelector: _bloqueandoSelectores,
-                                );
-                              },
-                            ),
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
+                          itemCount: filtrados.length,
+                          itemBuilder: (context, index) {
+                            final barbero = filtrados[index];
+                            return TarjetaBarberoLista(
+                              barbero: barbero,
+                              sucursalNombre: _obtenerNombreSucursal(
+                                barbero.sucursalId,
+                                sucursales,
+                              ),
+                              sucursales: sucursales,
+                              bloqueadoSelector: _bloqueandoSelectores,
+                            );
+                          },
                         ),
                 ),
               ),

@@ -35,7 +35,8 @@ class TarjetaBarberoCuadro extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final resumenMedallas = ref.watch(controladorResumenMedallasProvider).value;
+    final resumenMedallas =
+        ref.watch(controladorResumenMedallasProvider).asData?.value;
     final medallas = resumenMedallas?[barbero.id] ?? const ResumenMedallas();
 
     return Card(

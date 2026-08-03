@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
@@ -104,7 +103,7 @@ class SelectorUbicacionMapaState extends State<SelectorUbicacionMapa> {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // Canvas gráfico de mapa interactivo con PIN
+          // Canvas de Mapa Interactivo con cuadrícula táctil y Marcador PIN
           GestureDetector(
             onPanUpdate: (details) {
               final deltaLat = -details.delta.dy * 0.0001;
@@ -112,40 +111,82 @@ class SelectorUbicacionMapaState extends State<SelectorUbicacionMapa> {
               _actualizarUbicacion(_lat + deltaLat, _lng + deltaLng);
             },
             child: Container(
-              height: 180,
+              height: 200,
               width: double.infinity,
               color: const Color(0xFF1E242B),
               child: Stack(
                 children: [
+                  // Patrón de cuadrícula tipo mapa
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _GridMapaPainter(colorScheme.outlineVariant),
+                    ),
+                  ),
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
                           Icons.location_on,
-                          size: 48,
+                          size: 46,
                           color: ColoresApp.primario,
                         ),
+                        const SizedBox(height: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                            horizontal: 12,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withAlpha(190),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.black.withAlpha(210),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: ColoresApp.primario),
                           ),
-                          child: Text(
-                            'Desliza para mover pin de ubicación',
-                            style: TipografiaApp.labelSm.copyWith(
-                              color: Colors.white,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.touch_app,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Arrastra para ajustar ubicación',
+                                style: TipografiaApp.labelSm.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
+                  // Badge de Coordenadas Actuales
+                  Positioned(
+                    bottom: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${_lat.toStringAsFixed(4)}, ${_lng.toStringAsFixed(4)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Botón GPS Ubicación Actual
                   Positioned(
                     top: 8,
                     right: 8,
@@ -238,4 +279,27 @@ class SelectorUbicacionMapaState extends State<SelectorUbicacionMapa> {
       ),
     );
   }
+}
+
+class _GridMapaPainter extends CustomPainter {
+  final Color colorBorde;
+  _GridMapaPainter(this.colorBorde);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = colorBorde.withAlpha(40)
+      ..strokeWidth = 1;
+
+    const step = 30.0;
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

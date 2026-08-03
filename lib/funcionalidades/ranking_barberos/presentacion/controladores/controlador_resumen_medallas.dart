@@ -8,8 +8,12 @@ import '../../dominio/resumen_medallas_barbero.dart';
 /// de Gestión de Barberos sin pedir una por tarjeta.
 final controladorResumenMedallasProvider =
     FutureProvider<Map<String, ResumenMedallas>>((ref) async {
-      final insignias = await ref
-          .read(repositorioRankingBarberosProvider)
-          .obtenerTodasLasInsignias();
-      return agruparMedallasPorBarbero(insignias);
+      try {
+        final insignias = await ref
+            .read(repositorioRankingBarberosProvider)
+            .obtenerTodasLasInsignias();
+        return agruparMedallasPorBarbero(insignias);
+      } catch (_) {
+        return <String, ResumenMedallas>{};
+      }
     });
