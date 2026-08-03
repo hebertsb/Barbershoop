@@ -4,30 +4,37 @@ class ModeloPerfil {
   const ModeloPerfil({
     required this.id,
     required this.email,
-    required this.barberiaId,
-    required this.rol,
     required this.nombre,
-    required this.urlFoto,
-    required this.telefono,
-  });
+    required this.rol,
+    this.barberiaId,
+    this.sucursalId,
+    this.telefono,
+    String? fotoUrl,
+    String? urlFoto,
+  }) : _fotoUrl = fotoUrl ?? urlFoto;
 
   final String id;
-  final String? email;
-  final String? barberiaId;
+  final String email;
+  final String nombre;
   final RolUsuario rol;
-  final String? nombre;
-  final String? urlFoto;
+  final String? barberiaId;
+  final String? sucursalId;
   final String? telefono;
+  final String? _fotoUrl;
+
+  String? get fotoUrl => _fotoUrl;
+  String? get urlFoto => _fotoUrl;
 
   factory ModeloPerfil.desdeJson(Map<String, dynamic> json) {
     return ModeloPerfil(
-      id: json['id'] as String,
-      email: json['email'] as String?,
+      id: json['id'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      nombre: json['nombre'] as String? ?? '',
+      rol: RolUsuario.desdeTexto(json['rol'] as String? ?? ''),
       barberiaId: json['barberia_id'] as String?,
-      rol: RolUsuario.desdeTexto(json['rol'] as String),
-      nombre: json['nombre'] as String?,
-      urlFoto: json['url_foto'] as String?,
+      sucursalId: json['sucursal_id'] as String?,
       telefono: json['telefono'] as String?,
+      fotoUrl: (json['foto_url'] ?? json['url_foto']) as String?,
     );
   }
 
@@ -35,29 +42,35 @@ class ModeloPerfil {
     return {
       'id': id,
       'email': email,
-      'barberia_id': barberiaId,
-      'rol': rol.name,
       'nombre': nombre,
-      'url_foto': urlFoto,
+      'rol': rol.name,
+      'barberia_id': barberiaId,
+      'sucursal_id': sucursalId,
       'telefono': telefono,
+      'foto_url': _fotoUrl,
     };
   }
 
   ModeloPerfil copyWith({
-    String? barberiaId,
-    RolUsuario? rol,
+    String? id,
+    String? email,
     String? nombre,
-    String? urlFoto,
+    RolUsuario? rol,
+    String? barberiaId,
+    String? sucursalId,
     String? telefono,
+    String? fotoUrl,
+    String? urlFoto,
   }) {
     return ModeloPerfil(
-      id: id,
-      email: email,
-      barberiaId: barberiaId ?? this.barberiaId,
-      rol: rol ?? this.rol,
+      id: id ?? this.id,
+      email: email ?? this.email,
       nombre: nombre ?? this.nombre,
-      urlFoto: urlFoto ?? this.urlFoto,
+      rol: rol ?? this.rol,
+      barberiaId: barberiaId ?? this.barberiaId,
+      sucursalId: sucursalId ?? this.sucursalId,
       telefono: telefono ?? this.telefono,
+      fotoUrl: fotoUrl ?? urlFoto ?? _fotoUrl,
     );
   }
 }

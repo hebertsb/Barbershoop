@@ -17,8 +17,8 @@ class TarjetaServicio extends StatelessWidget {
   final ModeloServicio servicio;
   final VoidCallback onTap;
 
-  /// Modo reducido para uso en `GridView` (celda de alto fijo): imagen más
-  /// baja, descripción a 1 línea y sin margen propio (el grid ya aplica
+  /// Modo reducido para uso en `GridView` (celda de alto fijo): imagen ms
+  /// baja, descripcin a 1 lnea y sin margen propio (el grid ya aplica
   /// espaciado). En la vista Lista se deja en `false` (comportamiento actual).
   final bool compacto;
 

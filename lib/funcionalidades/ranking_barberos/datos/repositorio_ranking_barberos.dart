@@ -12,12 +12,15 @@ import '../dominio/modelo_resultado_ranking_barbero.dart';
 abstract class RepositorioRankingBarberos {
   Future<List<ModeloInsigniaRankingBarbero>> obtenerInsignias();
 
+  /// Obtiene TODAS las insignias de la barbería (para estadísticas de admin).
+  Future<List<ModeloInsigniaRankingBarbero>> obtenerTodasLasInsignias();
+
   // Barbero: su propia sucursal + su vitrina de insignias
   Future<List<ModeloProgramaRankingBarberos>> obtenerProgramasDeMiSucursal();
   Future<List<ModeloResultadoRankingBarbero>> obtenerRanking(String programaId);
   Future<List<ModeloInsigniaRankingBarbero>> obtenerMisInsignias();
 
-  // Admin: gestión de programas
+  // Admin: gestin de programas
   Future<List<ModeloProgramaRankingBarberos>> obtenerProgramas();
   Future<ModeloProgramaRankingBarberos> guardarPrograma(
     ModeloProgramaRankingBarberos programa,
@@ -35,7 +38,7 @@ class RepositorioRankingBarberosSupabase implements RepositorioRankingBarberos {
   Future<String> _obtenerBarberiaId() async {
     final uid = _cliente.auth.currentUser?.id;
     if (uid == null) {
-      throw const ExcepcionPermiso('Sesión no iniciada.');
+      throw const ExcepcionPermiso('Sesin no iniciada.');
     }
     final fila = await _cliente
         .from('perfiles')
@@ -44,7 +47,7 @@ class RepositorioRankingBarberosSupabase implements RepositorioRankingBarberos {
         .maybeSingle();
     final id = fila?['barberia_id'] as String?;
     if (id == null) {
-      throw const ExcepcionPermiso('No tienes una barbería asignada.');
+      throw const ExcepcionPermiso('No tienes una barbera asignada.');
     }
     return id;
   }
@@ -55,6 +58,23 @@ class RepositorioRankingBarberosSupabase implements RepositorioRankingBarberos {
       final filas = await _cliente
           .from('insignias_ranking_barberos')
           .select('*, programas_ranking_barberos(titulo)')
+          .order('otorgada_en', ascending: false);
+      return filas.map(ModeloInsigniaRankingBarbero.desdeJson).toList();
+    } on SocketException {
+      throw const ExcepcionRed();
+    } on PostgrestException {
+      throw const ExcepcionDesconocida();
+    }
+  }
+
+  @override
+  Future<List<ModeloInsigniaRankingBarbero>> obtenerTodasLasInsignias() async {
+    try {
+      final barberiaId = await _obtenerBarberiaId();
+      final filas = await _cliente
+          .from('insignias_ranking_barberos')
+          .select('*, programas_ranking_barberos(titulo)')
+          .eq('barberia_id', barberiaId)
           .order('otorgada_en', ascending: false);
       return filas.map(ModeloInsigniaRankingBarbero.desdeJson).toList();
     } on SocketException {

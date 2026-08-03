@@ -27,7 +27,7 @@ class _PantallaConfirmacionReservaState
   String? _errorMensaje;
 
   /// Busca un servicio por id, tolerando que no se encuentre (borrado o
-  /// desactivado, o lista aún no cargada).
+  /// desactivado, o lista an no cargada).
   ModeloServicio? _buscarServicio(
     List<ModeloServicio> servicios,
     String? servicioId,
@@ -44,9 +44,9 @@ class _PantallaConfirmacionReservaState
     });
 
     // Una vez que la cita queda creada en la DB, la reserva es un hecho
-    // irreversible desde el cliente: ningún fallo posterior debe permitir
-    // reintentar `confirmar()` (crearía una segunda cita para el mismo
-    // horario). Por eso se guarda acá y el catch la usa para decidir cómo
+    // irreversible desde el cliente: ningn fallo posterior debe permitir
+    // reintentar `confirmar()` (creara una segunda cita para el mismo
+    // horario). Por eso se guarda ac y el catch la usa para decidir cmo
     // reaccionar.
     ModeloCita? cita;
     try {
@@ -72,8 +72,8 @@ class _PantallaConfirmacionReservaState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Tu cita se reservó. No pudimos calcular el monto a pagar '
-              'automáticamente, contactá al local.',
+              'Tu cita se reserv. No pudimos calcular el monto a pagar '
+              'automticamente, contact al local.',
             ),
           ),
         );
@@ -84,14 +84,14 @@ class _PantallaConfirmacionReservaState
       if (requierePago) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('¡Reserva confirmada! Ahora pagá para asegurarla.'),
+            content: Text('Reserva confirmada! Ahora pag para asegurarla.'),
           ),
         );
         // `push` (no `go`): deja esta pantalla en el stack para que
-        // `PantallaPagoQr` reciba la flecha de "volver" automática del
+        // `PantallaPagoQr` reciba la flecha de "volver" automtica del
         // AppBar y el gesto de back del sistema funcione. Si el cliente
-        // vuelve para acá, el estado de la reserva ya fue reiniciado arriba
-        // y "Confirmar reserva" fallará con un mensaje claro (no reintenta
+        // vuelve para ac, el estado de la reserva ya fue reiniciado arriba
+        // y "Confirmar reserva" fallar con un mensaje claro (no reintenta
         // la reserva ni crea una cita duplicada).
         context.push(
           '/pago/${cita.id}',
@@ -99,20 +99,20 @@ class _PantallaConfirmacionReservaState
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('¡Reserva confirmada!')),
+          const SnackBar(content: Text('Reserva confirmada!')),
         );
         context.go('/mis-citas');
       }
     } catch (e) {
       if (!mounted) return;
       if (cita != null) {
-        // La cita ya se reservó antes del fallo: no hay nada que
+        // La cita ya se reserv antes del fallo: no hay nada que
         // "reintentar", solo informar y mandar a Mis citas.
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Tu cita se reservó, pero hubo un problema al preparar el '
-              'pago. Revisá "Mis citas".',
+              'Tu cita se reserv, pero hubo un problema al preparar el '
+              'pago. Revis "Mis citas".',
             ),
           ),
         );
@@ -191,7 +191,7 @@ class _PantallaConfirmacionReservaState
             const SizedBox(height: 16),
             Text(
               modoPago == ModoPago.obligatorio || modoPago == ModoPago.sena
-                  ? 'Vas a pagar por QR después de confirmar.'
+                  ? 'Vas a pagar por QR despus de confirmar.'
                   : 'Se paga en el local al momento del servicio.',
               style: TipografiaApp.bodySm.copyWith(color: colorScheme.onSurfaceVariant),
             ),

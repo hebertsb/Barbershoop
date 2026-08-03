@@ -4,7 +4,7 @@ import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../dominio/modelo_resultado_ranking_barbero.dart';
 
 /// Podio visual del top 3 (orden 2-1-3). Tocar un puesto expande inline el
-/// desglose por factor (citas, ingresos, clientes, puntualidad, calificación
+/// desglose por factor (citas, ingresos, clientes, puntualidad, calificacin
 /// de clientes) debajo.
 class PodioRanking extends StatefulWidget {
   const PodioRanking({super.key, required this.resultados});
@@ -138,7 +138,7 @@ class _PodioRankingState extends State<PodioRanking> {
               style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             Text(
-              '$valor · $puesto° lugar',
+              '$valor  $puesto lugar',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ],
@@ -156,7 +156,7 @@ class _PodioRankingState extends State<PodioRanking> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${r.nombre} — Puntaje ${r.puntaje.toStringAsFixed(1)}',
+            '${r.nombre}  Puntaje ${r.puntaje.toStringAsFixed(1)}',
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const Divider(),
@@ -177,10 +177,10 @@ class _PodioRankingState extends State<PodioRanking> {
             r.puestoPuntualidad,
           ),
           fila(
-            'Calificación de clientes',
+            'Calificacin de clientes',
             r.calificacionPromedio > 0
-                ? '${r.calificacionPromedio.toStringAsFixed(1)} ⭐'
-                : 'Sin reseñas',
+                ? '${r.calificacionPromedio.toStringAsFixed(1)} '
+                : 'Sin reseas',
             r.puestoCalificacion,
           ),
         ],

@@ -12,7 +12,7 @@ class ResumenMedallas {
 
 /// Cuenta las medallas de un barbero por puesto (1 = oro, 2 = plata,
 /// 3 = bronce) -- usado tanto en la vitrina del propio barbero como en el
-/// resumen compacto de Gestión de Barberos.
+/// resumen compacto de Gestin de Barberos.
 ResumenMedallas resumenMedallasDesde(
   List<ModeloInsigniaRankingBarbero> insignias,
 ) {
@@ -32,9 +32,9 @@ ResumenMedallas resumenMedallasDesde(
   return ResumenMedallas(oro: oro, plata: plata, bronce: bronce);
 }
 
-/// Agrupa insignias de varios barberos (ej. toda la barbería) en un mapa
+/// Agrupa insignias de varios barberos (ej. toda la barbera) en un mapa
 /// barberoId -> [ResumenMedallas], para mostrar el resumen compacto en
-/// Gestión de Barberos con una sola consulta en vez de una por tarjeta.
+/// Gestin de Barberos con una sola consulta en vez de una por tarjeta.
 Map<String, ResumenMedallas> agruparMedallasPorBarbero(
   List<ModeloInsigniaRankingBarbero> insignias,
 ) {

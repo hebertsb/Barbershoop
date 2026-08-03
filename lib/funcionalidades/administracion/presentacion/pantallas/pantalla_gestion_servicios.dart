@@ -73,7 +73,7 @@ class _PantallaGestionServiciosState
 
           return Column(
             children: [
-              // Barra de búsqueda y Filtros arriba
+              // Barra de bsqueda y Filtros arriba
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -158,10 +158,10 @@ class _PantallaGestionServiciosState
                         // Alto fijo (no `childAspectRatio`): un aspect ratio
                         // fijo estira la altura de la celda cuando hay pocas
                         // columnas y la celda se ensancha (pantallas anchas),
-                        // dejando una franja vacía enorme debajo del texto
+                        // dejando una franja vaca enorme debajo del texto
                         // (bug real reportado en tablet horizontal).
                         // `maxCrossAxisExtent` fija el ancho ideal por tarjeta
-                        // y Flutter decide solo cuántas columnas entran.
+                        // y Flutter decide solo cuntas columnas entran.
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 200,
@@ -198,7 +198,7 @@ class _PantallaGestionServiciosState
           );
         },
       ),
-      // Botón Grande "Añadir Nuevo +"
+      // Botn Grande "Aadir Nuevo +"
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),

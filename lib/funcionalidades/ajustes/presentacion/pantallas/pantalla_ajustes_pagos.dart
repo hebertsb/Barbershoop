@@ -9,8 +9,8 @@ import '../../dominio/modelo_configuracion_pagos.dart';
 import '../componentes/seccion_tolerancia_no_asistio.dart';
 import '../controladores/controlador_ajustes_pagos.dart';
 
-/// Pantalla de admin para configurar el modo de pago de la barbería: QR del
-/// banco, modo (obligatorio/opcional/seña), % de seña y minutos de gracia.
+/// Pantalla de admin para configurar el modo de pago de la barbera: QR del
+/// banco, modo (obligatorio/opcional/sea), % de sea y minutos de gracia.
 class PantallaAjustesPagos extends ConsumerStatefulWidget {
   const PantallaAjustesPagos({super.key});
 
@@ -28,8 +28,8 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
   String? _urlQrBanco;
   bool _guardando = false;
 
-  // Una vez que llegó el primer dato del controlador, los campos de arriba
-  // pasan a ser la única fuente de verdad de este formulario: un
+  // Una vez que lleg el primer dato del controlador, los campos de arriba
+  // pasan a ser la nica fuente de verdad de este formulario: un
   // `AsyncLoading`/`AsyncError` posterior (los que dispara `guardar()` sobre
   // el propio provider) ya no debe volver a pisarlos ni tapar el formulario.
   bool _inicializado = false;
@@ -59,12 +59,12 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Configuración guardada.')),
+          const SnackBar(content: Text('Configuracin guardada.')),
         );
       }
     } catch (e) {
       // El formulario (campos de estado local) no se toca: el admin no
-      // pierde lo que ya tenía tipeado/seleccionado si el guardado falla.
+      // pierde lo que ya tena tipeado/seleccionado si el guardado falla.
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -83,7 +83,7 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
     // Solo se usa el `AsyncValue` del provider para la carga INICIAL. Una vez
     // inicializado el formulario, `guardar()` puede volver a poner el
     // provider en loading/error (reasigna `state` entero sin conservar el
-    // valor previo) pero eso ya no debe ocultar el formulario: se maneja acá
+    // valor previo) pero eso ya no debe ocultar el formulario: se maneja ac
     // abajo con el `_guardando` local y el try/catch de `_guardar()`.
     if (!_inicializado) {
       if (configState.hasValue) {
@@ -157,7 +157,7 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
                           value: ModoPago.opcional,
                         ),
                         RadioListTile<ModoPago>(
-                          title: Text('Solo seña'),
+                          title: Text('Solo sea'),
                           subtitle: Text('El cliente paga un % por adelantado'),
                           value: ModoPago.sena,
                         ),
@@ -170,7 +170,7 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
                       key: const ValueKey('porcentajeSena'),
                       initialValue: _porcentajeSena?.toString(),
                       decoration: const InputDecoration(
-                        labelText: '% de seña',
+                        labelText: '% de sea',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
@@ -178,7 +178,7 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
                           _porcentajeSena = int.tryParse(v) ?? _porcentajeSena,
                       validator: (v) {
                         final valor = int.tryParse(v ?? '');
-                        if (valor == null) return 'Ingresa un número válido';
+                        if (valor == null) return 'Ingresa un nmero vlido';
                         if (valor < 0 || valor > 100) {
                           return 'Debe estar entre 0 y 100';
                         }
@@ -201,7 +201,7 @@ class _PantallaAjustesPagosState extends ConsumerState<PantallaAjustesPagos> {
                           int.tryParse(v) ?? _minutosGraciaPago,
                       validator: (v) {
                         final valor = int.tryParse(v ?? '');
-                        if (valor == null) return 'Ingresa un número válido';
+                        if (valor == null) return 'Ingresa un nmero vlido';
                         if (valor < 1) return 'Debe ser al menos 1';
                         return null;
                       },

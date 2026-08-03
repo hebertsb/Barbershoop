@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../controladores/controlador_tolerancia_no_asistio.dart';
 
-/// Sección de Ajustes de pago para configurar los minutos de tolerancia tras
+/// Seccin de Ajustes de pago para configurar los minutos de tolerancia tras
 /// la hora de una cita `pendiente` antes de que el cron
-/// `marcar_no_asistio_vencidas` (`0028`) la marque automáticamente como
+/// `marcar_no_asistio_vencidas` (`0028`) la marque automticamente como
 /// `no_asistio`. Independiente del formulario de [ModeloConfiguracionPagos]
 /// de la pantalla que la contiene: usa su propio controlador, su propio
-/// `Form` y su propio botón "Guardar" para no complicar (ni arriesgar) el
+/// `Form` y su propio botn "Guardar" para no complicar (ni arriesgar) el
 /// guardado de pagos ya existente.
 class SeccionToleranciaNoAsistio extends ConsumerStatefulWidget {
   const SeccionToleranciaNoAsistio({super.key});
@@ -72,8 +72,8 @@ class _SeccionToleranciaNoAsistioState
         ),
         const SizedBox(height: 4),
         Text(
-          'Minutos después de la hora de la cita antes de marcarla '
-          'automáticamente como no asistida.',
+          'Minutos despus de la hora de la cita antes de marcarla '
+          'automticamente como no asistida.',
           style: TipografiaApp.bodySm.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -103,7 +103,7 @@ class _SeccionToleranciaNoAsistioState
                   onChanged: (v) => _minutos = int.tryParse(v) ?? _minutos,
                   validator: (v) {
                     final valor = int.tryParse(v ?? '');
-                    if (valor == null) return 'Ingresa un número válido';
+                    if (valor == null) return 'Ingresa un nmero vlido';
                     if (valor < 1) return 'Debe ser al menos 1';
                     return null;
                   },

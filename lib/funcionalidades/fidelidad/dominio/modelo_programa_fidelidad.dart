@@ -1,45 +1,68 @@
+/// Programa de fidelidad que premia a los clientes por acumular citas.
 class ModeloProgramaFidelidad {
-  const ModeloProgramaFidelidad({
+  ModeloProgramaFidelidad({
     required this.id,
     required this.barberiaId,
-    required this.titulo,
-    required this.metaCitas,
-    required this.activo,
-    this.serviciosIds = const [],
+    String? nombre,
+    String? titulo,
+    int? sellosRequeridos,
+    int? metaCitas,
+    String? recompensa,
+    this.activo = true,
     this.fechaInicio,
     this.fechaFin,
-  });
+    this.descripcion,
+    this.servicioId,
+    List<String>? serviciosIds,
+  })  : nombre = nombre ?? titulo ?? 'Programa Fidelidad',
+        sellosRequeridos = sellosRequeridos ?? metaCitas ?? 10,
+        recompensa = recompensa ?? 'Corte gratis',
+        serviciosIdsCache = serviciosIds ?? (servicioId != null ? [servicioId] : const []);
 
   final String id;
   final String barberiaId;
-  final String titulo;
-  final int metaCitas;
+  final String nombre;
+  final int sellosRequeridos;
+  final String recompensa;
   final bool activo;
-
-  /// Servicios que cuentan para el progreso -- vacío = cuentan todos.
-  final List<String> serviciosIds;
-
-  /// Rango fijo de vigencia del programa (mismo criterio que
-  /// `promociones.fecha_inicio`/`fecha_fin`) -- `null` = sin límite en ese
-  /// extremo.
   final DateTime? fechaInicio;
   final DateTime? fechaFin;
+  final String? descripcion;
+  final String? servicioId;
+  final List<String> serviciosIdsCache;
+
+  // ── Getters alias para compatibilidad con la UI ──────────────────────────
+
+  /// Alias de [nombre].
+  String get titulo => nombre;
+
+  /// Cantidad de citas meta: alias de [sellosRequeridos].
+  int get metaCitas => sellosRequeridos;
+
+  /// IDs de servicios aplicables.
+  List<String> get serviciosIds => serviciosIdsCache;
 
   factory ModeloProgramaFidelidad.desdeJson(Map<String, dynamic> json) {
+    final sId = json['servicio_id'] as String?;
+    final sIds = (json['servicios_ids'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList();
     return ModeloProgramaFidelidad(
       id: json['id'] as String,
       barberiaId: json['barberia_id'] as String,
-      titulo: json['titulo'] as String,
-      metaCitas: json['meta_citas'] as int,
-      activo: json['activo'] as bool,
-      serviciosIds:
-          (json['servicios_ids'] as List?)?.cast<String>() ?? const [],
-      fechaInicio: json['fecha_inicio'] != null
-          ? DateTime.parse(json['fecha_inicio'] as String)
-          : null,
-      fechaFin: json['fecha_fin'] != null
-          ? DateTime.parse(json['fecha_fin'] as String)
-          : null,
+      nombre: (json['nombre'] ?? json['titulo']) as String? ?? 'Programa Fidelidad',
+      sellosRequeridos: (json['sellos_requeridos'] ?? json['meta_citas']) as int? ?? 10,
+      recompensa: json['recompensa'] as String? ?? 'Corte gratis',
+      activo: json['activo'] as bool? ?? true,
+      fechaInicio: json['fecha_inicio'] == null
+          ? null
+          : DateTime.parse(json['fecha_inicio'] as String),
+      fechaFin: json['fecha_fin'] == null
+          ? null
+          : DateTime.parse(json['fecha_fin'] as String),
+      descripcion: json['descripcion'] as String?,
+      servicioId: sId,
+      serviciosIds: sIds ?? (sId != null ? [sId] : const []),
     );
   }
 
@@ -47,12 +70,14 @@ class ModeloProgramaFidelidad {
     return {
       'id': id,
       'barberia_id': barberiaId,
-      'titulo': titulo,
-      'meta_citas': metaCitas,
+      'nombre': nombre,
+      'sellos_requeridos': sellosRequeridos,
+      'recompensa': recompensa,
       'activo': activo,
-      'servicios_ids': serviciosIds,
-      'fecha_inicio': fechaInicio?.toIso8601String().split('T').first,
-      'fecha_fin': fechaFin?.toIso8601String().split('T').first,
+      if (fechaInicio != null) 'fecha_inicio': fechaInicio!.toIso8601String(),
+      if (fechaFin != null) 'fecha_fin': fechaFin!.toIso8601String(),
+      if (descripcion != null) 'descripcion': descripcion,
+      if (servicioId != null) 'servicio_id': servicioId,
     };
   }
 }

@@ -5,4 +5,5 @@ import 'package:flutter/foundation.dart';
 /// eventos de auth de Supabase y cambios en el estado del controlador.
 class NotificadorSesion extends ChangeNotifier {
   void notificar() => notifyListeners();
+  void notificarCambio() => notifyListeners();
 }

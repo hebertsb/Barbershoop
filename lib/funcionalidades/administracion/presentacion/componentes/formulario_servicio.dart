@@ -57,7 +57,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
   /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
   /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
   /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
-  /// al crecer el viewport). Detectamos la transición y devolvemos el scroll
+  /// al crecer el viewport). Detectamos la transicin y devolvemos el scroll
   /// a 0 en el siguiente frame.
   void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
     final tecladoSeAcabaDeCerrar =
@@ -85,7 +85,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
       final servicio = ModeloServicio(
         id:
             widget.servicio?.id ??
-            '', // Upsert resolverá el ID vacío en Supabase
+            '', // Upsert resolver el ID vaco en Supabase
         barberiaId: widget.servicio?.barberiaId ?? '',
         nombre: _nombreCtrl.text.trim(),
         descripcion: _descripcionCtrl.text.trim().isEmpty
@@ -154,7 +154,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
               TextFormField(
                 controller: _descripcionCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Descripción',
+                  labelText: 'Descripcin',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -166,7 +166,7 @@ class _FormularioServicioState extends State<FormularioServicio> {
                     child: TextFormField(
                       controller: _duracionCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Duración (min) *',
+                        labelText: 'Duracin (min) *',
                         border: OutlineInputBorder(),
                         suffixText: 'min',
                       ),

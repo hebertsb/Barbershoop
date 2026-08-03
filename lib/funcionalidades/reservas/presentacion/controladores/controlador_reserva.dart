@@ -133,14 +133,14 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       promocionId: actual.promocion?.id,
     );
 
-    // La cita nueva ya está creada: cancelar la vieja es "mejor esfuerzo".
-    // Si falla (ej. el cliente ya no tiene conexión), NO se debe hacer
-    // fallar esta llamada -- ya reservó con éxito y perder eso sería peor
+    // La cita nueva ya est creada: cancelar la vieja es "mejor esfuerzo".
+    // Si falla (ej. el cliente ya no tiene conexin), NO se debe hacer
+    // fallar esta llamada -- ya reserv con xito y perder eso sera peor
     // que dejarle una cita vieja pendiente (puede cancelarla a mano desde
     // "Mis citas", o el propio local la ve duplicada y la resuelve). Se
     // reporta en el valor de retorno para que la UI pueda avisarle al
-    // cliente (además de quedar logueado, por si algún día hay reporte de
-    // errores en producción).
+    // cliente (adems de quedar logueado, por si algn da hay reporte de
+    // errores en produccin).
     var cancelacionAnteriorFallo = false;
     if (actual.citaIdAReemplazar != null) {
       try {

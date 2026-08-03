@@ -4,7 +4,7 @@ import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 
 /// Leyenda de colores "Libre" / "Bloqueado" mostrada sobre la grilla cuando
-/// hay un barbero específico elegido (único caso con horarios bloqueados).
+/// hay un barbero especfico elegido (nico caso con horarios bloqueados).
 class LeyendaLibreBloqueado extends StatelessWidget {
   const LeyendaLibreBloqueado({super.key});
 

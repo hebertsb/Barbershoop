@@ -1,34 +1,44 @@
 class ModeloServicio {
-  const ModeloServicio({
+  ModeloServicio({
     required this.id,
     required this.barberiaId,
     required this.nombre,
     this.descripcion,
-    required this.duracionMin,
     required this.precio,
-    required this.activo,
-    this.urlImagen,
-  });
+    int? duracionMinutos,
+    int? duracionMin,
+    this.sucursalId,
+    this.fotoUrl,
+    String? urlImagen,
+    this.activo = true,
+  })  : duracionMinutos = duracionMinutos ?? duracionMin ?? 30,
+        _urlImagenAlias = urlImagen;
 
   final String id;
   final String barberiaId;
   final String nombre;
   final String? descripcion;
-  final int duracionMin;
   final double precio;
+  final int duracionMinutos;
+  final String? sucursalId;
+  final String? fotoUrl;
+  final String? _urlImagenAlias;
   final bool activo;
-  final String? urlImagen;
+
+  int get duracionMin => duracionMinutos;
+  String? get urlImagen => _urlImagenAlias ?? fotoUrl;
 
   factory ModeloServicio.desdeJson(Map<String, dynamic> json) {
     return ModeloServicio(
-      id: json['id'] as String,
-      barberiaId: json['barberia_id'] as String,
-      nombre: json['nombre'] as String,
+      id: json['id'] as String? ?? '',
+      barberiaId: json['barberia_id'] as String? ?? '',
+      nombre: json['nombre'] as String? ?? 'Servicio',
       descripcion: json['descripcion'] as String?,
-      duracionMin: json['duracion_min'] as int,
-      precio: (json['precio'] as num).toDouble(),
-      activo: json['activo'] as bool,
-      urlImagen: json['url_imagen'] as String?,
+      precio: (json['precio'] as num? ?? 0).toDouble(),
+      duracionMinutos: (json['duracion_minutos'] ?? json['duracion_min']) as int? ?? 30,
+      sucursalId: json['sucursal_id'] as String?,
+      fotoUrl: (json['foto_url'] ?? json['url_imagen']) as String?,
+      activo: json['activo'] as bool? ?? true,
     );
   }
 
@@ -38,30 +48,11 @@ class ModeloServicio {
       'barberia_id': barberiaId,
       'nombre': nombre,
       'descripcion': descripcion,
-      'duracion_min': duracionMin,
       'precio': precio,
+      'duracion_minutos': duracionMinutos,
+      'sucursal_id': sucursalId,
+      'foto_url': urlImagen,
       'activo': activo,
-      'url_imagen': urlImagen,
     };
-  }
-
-  ModeloServicio copyWith({
-    String? nombre,
-    String? descripcion,
-    int? duracionMin,
-    double? precio,
-    bool? activo,
-    String? urlImagen,
-  }) {
-    return ModeloServicio(
-      id: id,
-      barberiaId: barberiaId,
-      nombre: nombre ?? this.nombre,
-      descripcion: descripcion ?? this.descripcion,
-      duracionMin: duracionMin ?? this.duracionMin,
-      precio: precio ?? this.precio,
-      activo: activo ?? this.activo,
-      urlImagen: urlImagen ?? this.urlImagen,
-    );
   }
 }

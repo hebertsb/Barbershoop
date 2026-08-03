@@ -45,7 +45,7 @@ class PantallaGestionProgramasFidelidad extends ConsumerWidget {
         data: (programas) {
           if (programas.isEmpty) {
             return const Center(
-              child: Text('Todavía no creaste ningún programa de fidelidad.'),
+              child: Text('Todava no creaste ningn programa de fidelidad.'),
             );
           }
           return ListView.builder(
@@ -64,7 +64,7 @@ class PantallaGestionProgramasFidelidad extends ConsumerWidget {
                   title: Text(programa.titulo),
                   subtitle: Text(
                     'Meta: ${programa.metaCitas} citas'
-                    '${rangoFechas != null ? ' · Válido $rangoFechas' : ''}',
+                    '${rangoFechas != null ? '  Vlido $rangoFechas' : ''}',
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

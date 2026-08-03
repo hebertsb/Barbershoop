@@ -49,23 +49,33 @@ class TarjetaBarberoCuadro extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: ColoresApp.primario, width: 2),
               ),
-              child: CircleAvatar(
-                radius: 36,
-                backgroundColor: colorScheme.surfaceContainerHigh,
-                backgroundImage: barbero.urlFotoPerfil != null
-                    ? CachedNetworkImageProvider(
-                        barbero.urlFotoPerfil!,
-                        maxWidth: 120,
-                        maxHeight: 120,
-                      )
-                    : null,
-                child: barbero.urlFotoPerfil == null
-                    ? Icon(
-                        Icons.person,
-                        size: 36,
-                        color: colorScheme.onSurfaceVariant,
-                      )
-                    : null,
+              child: ClipOval(
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: barbero.urlFotoPerfil != null &&
+                          barbero.urlFotoPerfil!.isNotEmpty
+                      ? Image.network(
+                          barbero.urlFotoPerfil!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => CircleAvatar(
+                            backgroundColor: colorScheme.surfaceContainerHigh,
+                            child: Icon(
+                              Icons.person,
+                              size: 36,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        )
+                      : CircleAvatar(
+                          backgroundColor: colorScheme.surfaceContainerHigh,
+                          child: Icon(
+                            Icons.person,
+                            size: 36,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -97,9 +107,9 @@ class TarjetaBarberoCuadro extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 [
-                  if (medallas.oro > 0) '🥇×${medallas.oro}',
-                  if (medallas.plata > 0) '🥈×${medallas.plata}',
-                  if (medallas.bronce > 0) '🥉×${medallas.bronce}',
+                  if (medallas.oro > 0) '${medallas.oro}',
+                  if (medallas.plata > 0) '${medallas.plata}',
+                  if (medallas.bronce > 0) '${medallas.bronce}',
                 ].join(' '),
                 style: const TextStyle(fontSize: 11),
               ),

@@ -1,13 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Paleta de colores centralizada de BarberApp ("Modern Grooming Authority").
-/// Fuente: VISTA/modern_grooming_authority/DESIGN.md.
-/// Cambiar un color acá lo cambia en toda la app.
-///
-/// Los campos con prefijo `on` (ej. `onSuperficie`, `onPrimarioContenedor`)
-/// mantienen intencionalmente el inglés "on" para reflejar la convención
-/// `ColorScheme.onX` de Flutter y facilitar su cableado más adelante; no es
-/// un desliz de la convención de idioma en español.
 class ColoresApp {
   ColoresApp._();
 

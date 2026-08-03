@@ -6,8 +6,8 @@ import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../dominio/modelo_promocion.dart';
 import '../controladores/controlador_usos_promocion.dart';
 
-/// Solo lectura: cuántas veces cada cliente usó (reservó con) esta
-/// promoción. Visible solo para admin.
+/// Solo lectura: cuntas veces cada cliente us (reserv con) esta
+/// promocin. Visible solo para admin.
 class PantallaUsosPromocion extends ConsumerWidget {
   const PantallaUsosPromocion({super.key, required this.promocion});
 
@@ -43,8 +43,8 @@ class PantallaUsosPromocion extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       promocion.limiteUsosPorCliente == null
-                          ? 'Esta promoción no tiene límite de usos por cliente.'
-                          : 'Límite: ${promocion.limiteUsosPorCliente} uso(s) por cliente.',
+                          ? 'Esta promocin no tiene lmite de usos por cliente.'
+                          : 'Lmite: ${promocion.limiteUsosPorCliente} uso(s) por cliente.',
                       style: TipografiaApp.bodySm.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -62,7 +62,7 @@ class PantallaUsosPromocion extends ConsumerWidget {
                 if (usos.isEmpty) {
                   return Center(
                     child: Text(
-                      'Todavía nadie reservó con esta promoción.',
+                      'Todava nadie reserv con esta promocin.',
                       style: TipografiaApp.bodyMd.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),

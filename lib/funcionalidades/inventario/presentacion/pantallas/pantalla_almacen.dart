@@ -82,7 +82,7 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Almacén'),
+        title: const Text('Almacn'),
         actions: [
           if (sucursalesActivas.length > 1)
             Padding(
@@ -270,11 +270,11 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Eliminar insumo?'),
+        title: const Text('Eliminar insumo?'),
         content: Text(
-          'Se va a eliminar "$nombreInsumo" y también sus asignaciones a '
-          'barberos y su historial de reportes (dañado/agotado/perdido). '
-          'Esta acción no se puede deshacer.',
+          'Se va a eliminar "$nombreInsumo" y tambin sus asignaciones a '
+          'barberos y su historial de reportes (daado/agotado/perdido). '
+          'Esta accin no se puede deshacer.',
         ),
         actions: [
           TextButton(

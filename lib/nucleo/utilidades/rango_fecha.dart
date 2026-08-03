@@ -1,8 +1,11 @@
-/// Rango [inicio, fin) que cubre todo el día LOCAL de [local], expresado en
-/// instantes UTC -- para comparar contra columnas `timestamptz` de Postgres
-/// sin desfasar por zona horaria.
-({DateTime inicio, DateTime fin}) rangoDeHoyEnUtc(DateTime local) {
-  final inicioLocal = DateTime(local.year, local.month, local.day);
-  final finLocal = inicioLocal.add(const Duration(days: 1));
-  return (inicio: inicioLocal.toUtc(), fin: finLocal.toUtc());
+class RangoFecha {
+  const RangoFecha({required this.inicio, required this.fin});
+  final DateTime inicio;
+  final DateTime fin;
+}
+
+RangoFecha rangoDeHoyEnUtc(DateTime fecha) {
+  final inicio = DateTime.utc(fecha.year, fecha.month, fecha.day);
+  final fin = inicio.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+  return RangoFecha(inicio: inicio, fin: fin);
 }

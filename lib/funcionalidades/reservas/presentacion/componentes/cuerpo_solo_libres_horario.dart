@@ -7,7 +7,7 @@ import 'grilla_botones_horario.dart';
 import 'sin_horarios_disponibles.dart';
 
 /// Cuerpo en modo "cualquiera disponible": solo libres, sin bloqueados,
-/// agrupados en Mañana/Tarde (mismo agrupamiento visual, sin leyenda ni
+/// agrupados en Maana/Tarde (mismo agrupamiento visual, sin leyenda ni
 /// tachado porque no hay concepto de "bloqueado" cruzando varios barberos).
 class CuerpoSoloLibresHorario extends StatelessWidget {
   const CuerpoSoloLibresHorario({super.key, required this.future});
@@ -46,7 +46,7 @@ class CuerpoSoloLibresHorario extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           children: [
             if (manana.isNotEmpty) ...[
-              const EncabezadoSeccionHorario(texto: 'MAÑANA'),
+              const EncabezadoSeccionHorario(texto: 'MAANA'),
               const SizedBox(height: 8),
               GrillaBotonesHorario(items: _aItems(manana)),
               const SizedBox(height: 20),

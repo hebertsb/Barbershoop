@@ -4,16 +4,16 @@ import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../dominio/enum_filtro_periodo.dart';
 
-/// Selector de período compartido por las pantallas de reportes
+/// Selector de perodo compartido por las pantallas de reportes
 /// (`PantallaReportesIngresos` y `PantallaControlAuditoria`).
 ///
 /// Reemplaza la fila horizontal de `FilterChip` con scroll por un
 /// `SegmentedButton` de Material 3 con las 4 opciones fijas de
 /// [FiltroPeriodo] (excluye [FiltroPeriodo.personalizado], que se elige
-/// aparte con el ícono de calendario).
+/// aparte con el cono de calendario).
 ///
-/// No depende de ningún provider específico: recibe el estado ya resuelto
-/// por parámetro y expone callbacks, para poder usarse con controladores
+/// No depende de ningn provider especfico: recibe el estado ya resuelto
+/// por parmetro y expone callbacks, para poder usarse con controladores
 /// distintos (`controladorReportesProvider`, `controladorControlAuditoriaProvider`)
 /// sin duplicar este widget.
 class SelectorPeriodoReporte extends StatelessWidget {
@@ -28,7 +28,7 @@ class SelectorPeriodoReporte extends StatelessWidget {
   /// Filtro seleccionado actualmente (incluye [FiltroPeriodo.personalizado]).
   final FiltroPeriodo filtroActual;
 
-  /// Rango de fechas ya resuelto (vía `FiltroPeriodo.obtenerRangoFechas`),
+  /// Rango de fechas ya resuelto (va `FiltroPeriodo.obtenerRangoFechas`),
   /// usado solo para mostrar el texto del rango cuando el filtro es
   /// personalizado.
   final (DateTime inicio, DateTime fin) rangoFechas;
@@ -36,7 +36,7 @@ class SelectorPeriodoReporte extends StatelessWidget {
   /// Se invoca al tocar una de las 4 opciones fijas del segmented button.
   final void Function(FiltroPeriodo filtro) alCambiarFiltro;
 
-  /// Se invoca al tocar el ícono de calendario (abre `showDateRangePicker`).
+  /// Se invoca al tocar el cono de calendario (abre `showDateRangePicker`).
   final Future<void> Function() alElegirPersonalizado;
 
   static const _opcionesFijas = [
@@ -47,8 +47,8 @@ class SelectorPeriodoReporte extends StatelessWidget {
   ];
 
   /// Etiqueta corta para que las 4 opciones entren en una sola fila sin
-  /// scroll. `FiltroPeriodo.etiqueta` (más larga, ej. "Esta semana") se
-  /// sigue usando en otros lugares de la app; esto es solo cosmético de
+  /// scroll. `FiltroPeriodo.etiqueta` (ms larga, ej. "Esta semana") se
+  /// sigue usando en otros lugares de la app; esto es solo cosmtico de
   /// este selector.
   String _etiquetaCorta(FiltroPeriodo filtro) {
     switch (filtro) {
@@ -59,7 +59,7 @@ class SelectorPeriodoReporte extends StatelessWidget {
       case FiltroPeriodo.esteMes:
         return 'Mes';
       case FiltroPeriodo.esteAnio:
-        return 'Año';
+        return 'Ao';
       case FiltroPeriodo.personalizado:
         return 'Personalizado';
     }

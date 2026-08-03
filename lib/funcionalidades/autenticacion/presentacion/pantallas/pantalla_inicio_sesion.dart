@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../nucleo/configuracion/tipografia_app.dart';
+import '../../dominio/enum_rol_usuario.dart';
 import '../componentes/boton_facebook.dart';
 import '../componentes/boton_google.dart';
 import '../controladores/controlador_autenticacion.dart';
@@ -69,6 +70,59 @@ class PantallaInicioSesion extends ConsumerWidget {
                   alPresionar: () => ref
                       .read(controladorAutenticacionProvider.notifier)
                       .iniciarSesionConFacebook(),
+                ),
+                const SizedBox(height: 32),
+                const Divider(),
+                const SizedBox(height: 12),
+                Text(
+                  'O ingresa directamente como:',
+                  style: TipografiaApp.bodySm.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.admin_panel_settings, size: 18),
+                      label: const Text('Admin'),
+                      onPressed: cargando
+                          ? null
+                          : () => ref
+                              .read(controladorAutenticacionProvider.notifier)
+                              .ingresarComoRol(RolUsuario.admin),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.content_cut, size: 18),
+                      label: const Text('Barbero'),
+                      onPressed: cargando
+                          ? null
+                          : () => ref
+                              .read(controladorAutenticacionProvider.notifier)
+                              .ingresarComoRol(RolUsuario.barbero),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.badge, size: 18),
+                      label: const Text('Secretaria'),
+                      onPressed: cargando
+                          ? null
+                          : () => ref
+                              .read(controladorAutenticacionProvider.notifier)
+                              .ingresarComoRol(RolUsuario.secretaria),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.person, size: 18),
+                      label: const Text('Cliente'),
+                      onPressed: cargando
+                          ? null
+                          : () => ref
+                              .read(controladorAutenticacionProvider.notifier)
+                              .ingresarComoRol(RolUsuario.cliente),
+                    ),
+                  ],
                 ),
               ],
             ),

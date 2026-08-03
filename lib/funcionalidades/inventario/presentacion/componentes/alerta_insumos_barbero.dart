@@ -5,9 +5,9 @@ import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../controladores/controlador_alerta_stock.dart';
 
 /// Aviso compacto en el panel de Inicio del barbero cuando hay insumos bajo
-/// el stock mínimo. Cuenta insumos de TODA la barbería (limitación conocida
+/// el stock mnimo. Cuenta insumos de TODA la barbera (limitacin conocida
 /// de [controladorAlertaStockProvider], no filtra por sucursal). No muestra
-/// nada si no hay insumos bajo mínimo.
+/// nada si no hay insumos bajo mnimo.
 class AlertaInsumosBarbero extends ConsumerWidget {
   const AlertaInsumosBarbero({super.key});
 
@@ -40,8 +40,8 @@ class AlertaInsumosBarbero extends ConsumerWidget {
               Expanded(
                 child: Text(
                   cantidad == 1
-                      ? 'Hay 1 insumo con stock bajo mínimo.'
-                      : 'Hay $cantidad insumos con stock bajo mínimo.',
+                      ? 'Hay 1 insumo con stock bajo mnimo.'
+                      : 'Hay $cantidad insumos con stock bajo mnimo.',
                   style: TipografiaApp.bodySm.copyWith(
                     color: colorScheme.onSurface,
                   ),

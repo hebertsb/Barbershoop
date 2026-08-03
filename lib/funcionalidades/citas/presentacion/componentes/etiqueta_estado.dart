@@ -1,37 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../../../nucleo/configuracion/colores_estado_app.dart';
-import '../../../../nucleo/configuracion/tipografia_app.dart';
-import '../../../turnos/dominio/enum_estado_turno.dart';
-import '../../dominio/disponibilidad_barbero.dart';
 import '../../dominio/enum_estado_cita.dart';
-
-Color colorParaEstadoCita(EstadoCita estado, ColoresEstadoApp colores) {
-  switch (estado) {
-    case EstadoCita.pendiente:
-      return colores.pendiente;
-    case EstadoCita.confirmada:
-      return colores.confirmada;
-    case EstadoCita.completada:
-      return colores.completada;
-    case EstadoCita.cancelada:
-    case EstadoCita.noAsistio:
-      return colores.cancelada;
-  }
-}
-
-Color colorParaEstadoTurno(EstadoTurno estado, ColoresEstadoApp colores) {
-  switch (estado) {
-    case EstadoTurno.esperando:
-      return colores.pendiente;
-    case EstadoTurno.enAtencion:
-      return colores.confirmada;
-    case EstadoTurno.completado:
-      return colores.completada;
-    case EstadoTurno.cancelado:
-      return colores.cancelada;
-  }
-}
+import '../../../turnos/dominio/enum_estado_turno.dart';
 
 String textoEstadoCita(EstadoCita estado) {
   switch (estado) {
@@ -39,6 +8,8 @@ String textoEstadoCita(EstadoCita estado) {
       return 'Pendiente';
     case EstadoCita.confirmada:
       return 'Confirmada';
+    case EstadoCita.enProceso:
+      return 'En Proceso';
     case EstadoCita.completada:
       return 'Completada';
     case EstadoCita.cancelada:
@@ -48,10 +19,29 @@ String textoEstadoCita(EstadoCita estado) {
   }
 }
 
+Color colorParaEstadoCita(EstadoCita estado, [dynamic colores]) {
+  switch (estado) {
+    case EstadoCita.pendiente:
+      return Colors.orange;
+    case EstadoCita.confirmada:
+      return Colors.blue;
+    case EstadoCita.enProceso:
+      return Colors.purple;
+    case EstadoCita.completada:
+      return Colors.green;
+    case EstadoCita.cancelada:
+      return Colors.red;
+    case EstadoCita.noAsistio:
+      return Colors.grey;
+  }
+}
+
 String textoEstadoTurno(EstadoTurno estado) {
   switch (estado) {
+    case EstadoTurno.pendiente:
     case EstadoTurno.esperando:
       return 'Esperando';
+    case EstadoTurno.enProceso:
     case EstadoTurno.enAtencion:
       return 'En atención';
     case EstadoTurno.completado:
@@ -61,37 +51,106 @@ String textoEstadoTurno(EstadoTurno estado) {
   }
 }
 
-String textoDisponibilidadBarbero(EstadoDisponibilidadBarbero estado) {
-  if (!estado.ocupado) return 'Libre';
-  if (estado.libreDesde == null) return 'Ocupado';
-  final hora = estado.libreDesde!.toLocal();
-  final horaTexto =
-      '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}';
-  return 'Ocupado hasta $horaTexto';
+Color colorParaEstadoTurno(EstadoTurno estado, [dynamic colores]) {
+  switch (estado) {
+    case EstadoTurno.pendiente:
+    case EstadoTurno.esperando:
+      return Colors.orange;
+    case EstadoTurno.enProceso:
+    case EstadoTurno.enAtencion:
+      return Colors.blue;
+    case EstadoTurno.completado:
+      return Colors.green;
+    case EstadoTurno.cancelado:
+      return Colors.red;
+  }
 }
 
-Color colorDisponibilidadBarbero(
-  EstadoDisponibilidadBarbero estado,
-  ColoresEstadoApp colores,
-) {
-  return estado.ocupado ? colores.pendiente : colores.completada;
-}
 
-class EtiquetaEstado extends StatelessWidget {
-  const EtiquetaEstado({super.key, required this.texto, required this.color});
+/// Widget de etiqueta de estado de cita.
+/// Acepta dos modos:
+/// 1. Con [estado] (obligatorio para citas): calcula texto y color automáticamente.
+/// 2. Sin [estado]: usa [texto] y [color] directamente (para mensajes libres).
+class EtiquetaEstadoCita extends StatelessWidget {
+  const EtiquetaEstadoCita({
+    super.key,
+    this.estado,
+    this.texto,
+    this.color,
+  }) : assert(
+          estado != null || texto != null,
+          'Se requiere estado o texto',
+        );
 
-  final String texto;
-  final Color color;
+  final EstadoCita? estado;
+  final String? texto;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final strTexto =
+        texto ?? (estado != null ? textoEstadoCita(estado!) : '');
+    final colorFinal =
+        color ?? (estado != null ? colorParaEstadoCita(estado!) : Colors.grey);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(999),
+        color: colorFinal.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Text(texto, style: TipografiaApp.labelSm.copyWith(color: color)),
+      child: Text(
+        strTexto,
+        style: TextStyle(
+          color: colorFinal,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
+/// Alias de [EtiquetaEstadoCita] para uso genérico sin pasar estado.
+typedef EtiquetaEstado = EtiquetaEstadoCita;
+
+class EtiquetaEstadoTurno extends StatelessWidget {
+  const EtiquetaEstadoTurno({super.key, required this.estado});
+  final EstadoTurno estado;
+
+  @override
+  Widget build(BuildContext context) {
+    String txt = textoEstadoTurno(estado);
+    Color color = Colors.orange;
+    switch (estado) {
+      case EstadoTurno.pendiente:
+      case EstadoTurno.esperando:
+        txt = 'Esperando';
+        color = Colors.orange;
+      case EstadoTurno.enProceso:
+      case EstadoTurno.enAtencion:
+        txt = 'En atención';
+        color = Colors.blue;
+      case EstadoTurno.completado:
+        txt = 'Completado';
+        color = Colors.green;
+      case EstadoTurno.cancelado:
+        txt = 'Cancelado';
+        color = Colors.red;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        txt,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }

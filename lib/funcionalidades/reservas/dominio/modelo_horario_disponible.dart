@@ -1,16 +1,18 @@
 class ModeloHorarioDisponible {
   const ModeloHorarioDisponible({
-    required this.barberoId,
-    required this.horaInicio,
+    required this.hora,
+    required this.disponible,
   });
 
-  final String barberoId;
-  final DateTime horaInicio;
+  final DateTime hora;
+  final bool disponible;
+
+  DateTime get horaInicio => hora;
 
   factory ModeloHorarioDisponible.desdeJson(Map<String, dynamic> json) {
     return ModeloHorarioDisponible(
-      barberoId: json['barbero_id'] as String,
-      horaInicio: DateTime.parse(json['hora_inicio'] as String),
+      hora: DateTime.parse(json['hora'] as String),
+      disponible: json['disponible'] as bool? ?? true,
     );
   }
 }

@@ -24,7 +24,7 @@ class PantallaBienvenidaProvisional extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesión',
+            tooltip: 'Cerrar sesin',
             onPressed: () => ref
                 .read(controladorAutenticacionProvider.notifier)
                 .cerrarSesion(),

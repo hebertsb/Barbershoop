@@ -94,7 +94,7 @@ Future<void> completarTurnoConCobro({
       const SnackBar(
         content: Text(
           'No se pudo verificar si esta cita ya tiene un pago registrado. '
-          'Revisá antes de cobrar.',
+          'Revis antes de cobrar.',
         ),
       ),
     );
@@ -121,7 +121,7 @@ void _mostrarDialogoYaPagado({
       title: const Text('Cita ya pagada'),
       content: Text(
         'Esta cita ya fue pagada por QR (Bs. ${montoPagado.toStringAsFixed(2)}). '
-        '¿Marcar como completada?',
+        'Marcar como completada?',
       ),
       actions: [
         TextButton(

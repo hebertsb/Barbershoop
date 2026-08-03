@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 
-/// Tarjeta compacta de un KPI del dashboard de reportes: título, valor
-/// grande, ícono, y opcionalmente un subtítulo o una mini-tendencia
-/// (sparkline) de los últimos puntos.
+/// Tarjeta compacta de un KPI del dashboard de reportes: ttulo, valor
+/// grande, cono, y opcionalmente un subttulo o una mini-tendencia
+/// (sparkline) de los ltimos puntos.
 class TarjetaKpiReporte extends StatelessWidget {
   const TarjetaKpiReporte({
     super.key,

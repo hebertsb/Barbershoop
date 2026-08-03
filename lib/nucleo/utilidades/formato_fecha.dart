@@ -1,13 +1,17 @@
-String _dosDigitos(int n) => n.toString().padLeft(2, '0');
-
-String formatoHora(DateTime fecha) {
-  return '${_dosDigitos(fecha.hour)}:${_dosDigitos(fecha.minute)}';
+String formatoFechaCorta(DateTime dt) {
+  final d = dt.day.toString().padLeft(2, '0');
+  final m = dt.month.toString().padLeft(2, '0');
+  final y = dt.year.toString();
+  return '$d/$m/$y';
 }
 
-String formatoFechaCorta(DateTime fecha) {
-  return '${_dosDigitos(fecha.day)}/${_dosDigitos(fecha.month)}/${fecha.year}';
+String formatoHora(DateTime dt) {
+  final h = dt.hour.toString().padLeft(2, '0');
+  final m = dt.minute.toString().padLeft(2, '0');
+  return '$h:$m';
 }
 
-String formatoFechaHora(DateTime fecha) {
-  return '${formatoFechaCorta(fecha)} — ${formatoHora(fecha)}';
+/// Devuelve fecha y hora combinadas: "02/08/2026 · 14:30"
+String formatoFechaHora(DateTime dt) {
+  return '${formatoFechaCorta(dt)} · ${formatoHora(dt)}';
 }

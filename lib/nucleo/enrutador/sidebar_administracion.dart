@@ -8,11 +8,11 @@ import '../configuracion/colores_app.dart';
 import '../configuracion/tipografia_app.dart';
 
 /// Sidebar fijo para admin/superadmin en pantalla ancha (>= 840dp):
-/// reemplaza tanto la barra inferior como el menú "Más" -- muestra los 3
+/// reemplaza tanto la barra inferior como el men "Ms" -- muestra los 3
 /// accesos fijos de siempre arriba (Inicio, Agenda, Reportes) y TODAS las
-/// secciones de `catalogoAccesosAdmin` agrupadas por categoría abajo, sin
-/// nada oculto detrás de un modal. Reutiliza el mismo catálogo que ya usan
-/// el "Acceso Rápido" rotativo y el menú "Más" en pantalla angosta -- cero
+/// secciones de `catalogoAccesosAdmin` agrupadas por categora abajo, sin
+/// nada oculto detrs de un modal. Reutiliza el mismo catlogo que ya usan
+/// el "Acceso Rpido" rotativo y el men "Ms" en pantalla angosta -- cero
 /// datos duplicados.
 class SidebarAdministracion extends ConsumerWidget {
   const SidebarAdministracion({super.key, required this.navigationShell});

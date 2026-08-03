@@ -3,8 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'funcionalidades/actualizacion_app/dominio/modelo_version_app.dart';
+import 'funcionalidades/actualizacion_app/presentacion/componentes/dialogo_actualizacion.dart';
 import 'nucleo/configuracion/cliente_supabase.dart';
 import 'nucleo/configuracion/constantes.dart';
+import 'nucleo/configuracion/navegador_raiz.dart';
 import 'nucleo/configuracion/tema_app.dart';
 import 'nucleo/enrutador/enrutador_app.dart';
 
@@ -17,24 +20,56 @@ Future<void> main() async {
         .initialize(serverClientId: Constantes.googleWebClientId)
         .timeout(const Duration(seconds: 10));
   } catch (e) {
-    // No bloquear el arranque de la app si Google Sign In no puede
-    // inicializarse a tiempo (red lenta/caída) — el resto de la app
-    // sigue funcionando, solo fallará el botón de Google hasta reintentar.
-    debugPrint('Google Sign In fallo/timeout: $e');
+    debugPrint('Google Sign In fallo/timeout: ');
   }
   runApp(const ProviderScope(child: BarberApp()));
 }
 
-class BarberApp extends ConsumerWidget {
+class BarberApp extends ConsumerStatefulWidget {
   const BarberApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BarberApp> createState() => _BarberAppState();
+}
+
+class _BarberAppState extends ConsumerState<BarberApp> {
+  bool _dialogoActualizacionMostrado = false;
+
+  void _mostrarDialogoActualizacionSiCorresponde(
+    ModeloVersionApp? version, {
+    int intentosRestantes = 5,
+  }) {
+    if (version == null || _dialogoActualizacionMostrado) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_dialogoActualizacionMostrado) return;
+      final contexto = navegadorRaizKey.currentContext;
+      if (contexto == null) {
+        if (intentosRestantes > 0) {
+          _mostrarDialogoActualizacionSiCorresponde(
+            version,
+            intentosRestantes: intentosRestantes - 1,
+          );
+        }
+        return;
+      }
+      _dialogoActualizacionMostrado = true;
+      showDialog<void>(
+        context: contexto,
+        barrierDismissible: !version.obligatoria,
+        builder: (_) => DialogoActualizacion(version: version),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final enrutador = ref.watch(enrutadorAppProvider);
     return MaterialApp.router(
       title: 'BarberApp',
-      theme: TemaApp.claro(),
       routerConfig: enrutador,
+      theme: TemaApp.claro(),
+      darkTheme: TemaApp.oscuro(),
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
     );
   }

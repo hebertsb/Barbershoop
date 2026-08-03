@@ -8,13 +8,13 @@ import '../../../citas/dominio/disponibilidad_barbero.dart';
 import '../../../citas/presentacion/controladores/controlador_citas.dart';
 import '../../../turnos/presentacion/controladores/controlador_turnos.dart';
 
-/// Aviso corto, debajo del selector de servicio en `FormularioTurno`, de qué
+/// Aviso corto, debajo del selector de servicio en `FormularioTurno`, de qu
 /// barberos de [sucursalId] tienen AHORA MISMO un hueco libre suficiente
-/// para la duración del servicio [servicioSeleccionadoId].
+/// para la duracin del servicio [servicioSeleccionadoId].
 ///
 /// Mira los mismos providers que ya usa `PantallaAgenda` para su panel de
-/// disponibilidad (citas, turnos, barberos, horarios de la sucursal) — como
-/// son providers `family` ya activos mientras la agenda está montada detrás
+/// disponibilidad (citas, turnos, barberos, horarios de la sucursal)  como
+/// son providers `family` ya activos mientras la agenda est montada detrs
 /// del bottom sheet, no dispara ninguna consulta nueva, solo reutiliza el
 /// estado ya cargado. Puramente informativo: nunca bloquea el registro del
 /// walk-in, que igual puede anotarse en la cola aunque nadie tenga hueco.
@@ -43,8 +43,8 @@ class AvisoDisponibilidadServicio extends ConsumerWidget {
     final barberosAsync = ref.watch(controladorBarberosProvider);
     final horariosAsync = ref.watch(horariosDeSucursalProvider(sucursalId));
 
-    // "Sin datos todavía" = primera carga en curso o error: no hay base real
-    // para afirmar que nadie tiene hueco, así que esa conclusión negativa se
+    // "Sin datos todava" = primera carga en curso o error: no hay base real
+    // para afirmar que nadie tiene hueco, as que esa conclusin negativa se
     // omite y se muestra un aviso neutro en su lugar.
     final datosIncompletos = [
       citasAsync,
@@ -101,7 +101,7 @@ class AvisoDisponibilidadServicio extends ConsumerWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Ningún barbero tiene hueco libre ahora para este servicio.',
+                'Ningn barbero tiene hueco libre ahora para este servicio.',
                 style: TextStyle(
                   fontSize: 13,
                   color: colorScheme.onErrorContainer,

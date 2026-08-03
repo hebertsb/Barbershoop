@@ -12,8 +12,8 @@ import '../../dominio/modelo_turno.dart';
 import '../componentes/dialogo_nuevo_turno.dart';
 import '../controladores/controlador_turnos.dart';
 
-/// Pantalla de gestión de turnos presenciales (walk-in) para el rol
-/// barbero/secretaria. Muestra la cola del día, permite crear nuevos turnos
+/// Pantalla de gestin de turnos presenciales (walk-in) para el rol
+/// barbero/secretaria. Muestra la cola del da, permite crear nuevos turnos
 /// (con cliente registrado o walk-in), llamar al siguiente y completar con cobro.
 class PantallaGestionTurnos extends ConsumerWidget {
   const PantallaGestionTurnos({super.key});
@@ -37,7 +37,7 @@ class PantallaGestionTurnos extends ConsumerWidget {
       }
       return const Scaffold(
         body: Center(
-          child: Text('No tenés una sucursal asignada.'),
+          child: Text('No tens una sucursal asignada.'),
         ),
       );
     }
@@ -115,7 +115,7 @@ class PantallaGestionTurnos extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tocá + para agregar un turno de mostrador',
+                    'Toc + para agregar un turno de mostrador',
                     style: TipografiaApp.bodySm.copyWith(
                       color: Theme.of(context).colorScheme.outlineVariant,
                     ),
@@ -138,7 +138,7 @@ class PantallaGestionTurnos extends ConsumerWidget {
                     .firstOrNull;
                 return _TarjetaTurno(
                   turno: turno,
-                  nombreServicio: servicio?.nombre ?? '—',
+                  nombreServicio: servicio?.nombre ?? '',
                   barberoId: miBarbero?.id,
                   sucursalId: sucursalId,
                 );
@@ -182,8 +182,8 @@ class _TarjetaTurno extends ConsumerWidget {
 
   Color _colorEstado(BuildContext context, EstadoTurno estado) {
     return switch (estado) {
-      EstadoTurno.esperando => ColoresApp.estadoPendiente,
-      EstadoTurno.enAtencion => ColoresApp.estadoConfirmada,
+      EstadoTurno.pendiente || EstadoTurno.esperando => ColoresApp.estadoPendiente,
+      EstadoTurno.enProceso || EstadoTurno.enAtencion => ColoresApp.estadoConfirmada,
       EstadoTurno.completado => ColoresApp.estadoCompletada,
       EstadoTurno.cancelado => ColoresApp.estadoCancelada,
     };
@@ -223,7 +223,7 @@ class _TarjetaTurno extends ConsumerWidget {
                     border: Border.all(color: colorEstado.withAlpha(100)),
                   ),
                   child: Text(
-                    'N° ${turno.numero}',
+                    'N ${turno.numero ?? ''}',
                     style: TipografiaApp.labelSm.copyWith(
                       color: colorEstado,
                       fontWeight: FontWeight.bold,
@@ -234,7 +234,7 @@ class _TarjetaTurno extends ConsumerWidget {
                 _EtiquetaEstado(estado: estado),
                 const Spacer(),
                 Text(
-                  formatoHora(turno.horaLlegada),
+                  formatoHora(turno.horaLlegada ?? turno.creadoEn ?? DateTime.now()),
                   style: TipografiaApp.bodySm.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -244,11 +244,7 @@ class _TarjetaTurno extends ConsumerWidget {
             const SizedBox(height: 10),
             // Identificador del cliente
             Text(
-              turno.clienteWalkinId != null
-                  ? 'Cliente walk-in'
-                  : turno.clienteId != null
-                      ? 'Cliente registrado'
-                      : 'Sin identificar',
+              turno.clienteNombre,
               style:
                   TipografiaApp.bodyLg.copyWith(fontWeight: FontWeight.w600),
             ),
@@ -259,7 +255,7 @@ class _TarjetaTurno extends ConsumerWidget {
                 color: colorScheme.primary,
               ),
             ),
-            // Botones de acción según estado
+            // Botones de accin segn estado
             if (_mostrarBotones(estado)) ...[
               const SizedBox(height: 12),
               const Divider(height: 1),
@@ -335,8 +331,8 @@ class _TarjetaTurno extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('¿Cancelar turno?'),
-        content: Text('¿Cancelás el turno N° ${turno.numero}?'),
+        title: const Text('Cancelar turno?'),
+        content: Text('Cancels el turno N ${turno.numero}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -344,7 +340,7 @@ class _TarjetaTurno extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sí, cancelar'),
+            child: const Text('S, cancelar'),
           ),
         ],
       ),
@@ -370,8 +366,8 @@ class _EtiquetaEstado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (texto, color) = switch (estado) {
-      EstadoTurno.esperando => ('Esperando', ColoresApp.estadoPendiente),
-      EstadoTurno.enAtencion => ('En atención', ColoresApp.estadoConfirmada),
+      EstadoTurno.pendiente || EstadoTurno.esperando => ('Esperando', ColoresApp.estadoPendiente),
+      EstadoTurno.enProceso || EstadoTurno.enAtencion => ('En atención', ColoresApp.estadoConfirmada),
       EstadoTurno.completado => ('Completado', ColoresApp.estadoCompletada),
       EstadoTurno.cancelado => ('Cancelado', ColoresApp.estadoCancelada),
     };

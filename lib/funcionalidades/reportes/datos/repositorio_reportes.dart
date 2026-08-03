@@ -37,23 +37,23 @@ abstract class RepositorioReportes {
     required DateTime fechaFin,
   });
 
-  /// Citas `completada` de un día específico (hora local `America/La_Paz`),
-  /// para que el dueño revise remotamente qué se atendió ese día.
+  /// Citas `completada` de un da especfico (hora local `America/La_Paz`),
+  /// para que el dueo revise remotamente qu se atendi ese da.
   Future<List<ModeloCitaAtendidaDia>> obtenerCitasAtendidasDia(DateTime fecha);
 
-  /// Clientes (perfiles `rol = 'cliente'`) registrados en un día específico
+  /// Clientes (perfiles `rol = 'cliente'`) registrados en un da especfico
   /// (hora local `America/La_Paz`).
   Future<List<ModeloClienteNuevoDia>> obtenerClientesNuevosDia(DateTime fecha);
 
   /// Citas `completada` cuyo pago confirmado es menor al `precio_cobrado`
-  /// registrado -- señal de plata no reportada o cobrada de menos.
+  /// registrado -- seal de plata no reportada o cobrada de menos.
   Future<List<ModeloCitaSinPago>> obtenerCitasSinPagoCompleto({
     required DateTime fechaInicio,
     required DateTime fechaFin,
   });
 
-  /// Ingresos confirmados agrupados por método de pago (efectivo vs
-  /// QR/otros métodos digitales).
+  /// Ingresos confirmados agrupados por mtodo de pago (efectivo vs
+  /// QR/otros mtodos digitales).
   Future<List<ModeloIngresoPorMetodo>> obtenerIngresosPorMetodoPago({
     required DateTime fechaInicio,
     required DateTime fechaFin,
@@ -66,8 +66,8 @@ abstract class RepositorioReportes {
     required DateTime fechaFin,
   });
 
-  /// Actividad de cada usuario (secretaria/barbero) según las columnas de
-  /// auditoría `completado_por`/`cancelado_por` de `citas` (migración 0050).
+  /// Actividad de cada usuario (secretaria/barbero) segn las columnas de
+  /// auditora `completado_por`/`cancelado_por` de `citas` (migracin 0050).
   Future<List<ModeloActividadUsuario>> obtenerActividadPorUsuario({
     required DateTime fechaInicio,
     required DateTime fechaFin,

@@ -6,14 +6,14 @@ import '../componentes/podio_ranking.dart';
 import '../controladores/controlador_ranking_barbero.dart';
 
 /// Pantalla del barbero: su podio (top 3 de su sucursal) y su vitrina
-/// histórica de insignias ganadas. Accesible desde el menú "Más".
+/// histrica de insignias ganadas. Accesible desde el men "Ms".
 class PantallaRankingBarbero extends ConsumerWidget {
   const PantallaRankingBarbero({super.key});
 
   String _medalla(int puesto) => switch (puesto) {
-    1 => '🥇',
-    2 => '🥈',
-    _ => '🥉',
+    1 => '',
+    2 => '',
+    _ => '',
   };
 
   @override
@@ -34,7 +34,7 @@ class PantallaRankingBarbero extends ConsumerWidget {
                   padding: EdgeInsets.symmetric(vertical: 32),
                   child: Center(
                     child: Text(
-                      'Tu sucursal no tiene ningún programa de ranking.',
+                      'Tu sucursal no tiene ningn programa de ranking.',
                     ),
                   ),
                 )
@@ -55,12 +55,12 @@ class PantallaRankingBarbero extends ConsumerWidget {
               ],
               const SizedBox(height: 32),
               Text(
-                '🏆 Mis insignias (${datos.misInsignias.length})',
+                ' Mis insignias (${datos.misInsignias.length})',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               if (datos.misInsignias.isEmpty)
-                const Text('Todavía no ganaste ninguna insignia.')
+                const Text('Todava no ganaste ninguna insignia.')
               else
                 for (final insignia in datos.misInsignias)
                   ListTile(

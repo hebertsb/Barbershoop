@@ -2,23 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:barber_app/nucleo/configuracion/colores_app.dart';
-import 'package:barber_app/nucleo/configuracion/tipografia_app.dart';
-import 'package:barber_app/funcionalidades/administracion/datos/repositorio_accesos_admin.dart';
-import 'package:barber_app/funcionalidades/administracion/dominio/catalogo_accesos_admin.dart';
-import 'package:barber_app/funcionalidades/administracion/presentacion/componentes/tarjeta_grafico_tendencia.dart';
-import 'package:barber_app/funcionalidades/autenticacion/presentacion/controladores/controlador_autenticacion.dart';
+import '../../../../nucleo/configuracion/colores_app.dart';
+import '../../../../nucleo/configuracion/tipografia_app.dart';
+import '../../../../nucleo/utilidades/formato_moneda.dart';
+import '../../../autenticacion/presentacion/controladores/controlador_autenticacion.dart';
+import '../../../inventario/presentacion/controladores/controlador_alerta_stock.dart';
+import '../../datos/repositorio_accesos_admin.dart';
+import '../../dominio/catalogo_accesos_admin.dart';
+import '../componentes/tarjeta_grafico_tendencia.dart';
+import '../controladores/controlador_acceso_rapido_admin.dart';
+import '../controladores/controlador_barberos.dart';
+import '../controladores/controlador_dashboard.dart';
 
-/// Dashboard principal de administración.
-/// Muestra: saludo con el nombre del admin, gráfico de tendencia de ingresos
-/// de la semana, y la grilla de accesos rápidos (primeros 4 del catálogo o
-/// los 4 más usados según historial).
+/// Calcula el % de cambio de ingresos hoy vs. ayer, formateado con signo.
+/// Guard de división por cero (`ayer == 0`): si además hoy > 0 es un
+/// arranque desde cero real, se muestra "+100%"; si ambos son 0 no hay
+/// cambio que mostrar, "0%".
+String _calcularPorcentajeCambio(double hoy, double ayer) {
+  if (ayer == 0) {
+    return hoy > 0 ? '+100%' : '0%';
+  }
+  final cambio = ((hoy - ayer) / ayer * 100).round();
+  return '${cambio >= 0 ? '+' : ''}$cambio%';
+}
 
-/// Provider que obtiene las rutas más usadas por el admin para los accesos
-/// rápidos del dashboard.
-final _rutasTopProvider = FutureProvider.autoDispose<List<String>>((ref) {
-  return ref.read(repositorioAccesosAdminProvider).obtenerRutasTopAccesos();
-});
+/// Diferencia real de citas hoy vs. ayer, formateada con signo (ej. '+3',
+/// '-2', '0').
+String _calcularDiferenciaCitas(int hoy, int ayer) {
+  final diferencia = hoy - ayer;
+  return '${diferencia > 0 ? '+' : ''}$diferencia';
+}
 
 class PantallaAdministracionDashboard extends ConsumerWidget {
   const PantallaAdministracionDashboard({super.key});
@@ -26,252 +39,567 @@ class PantallaAdministracionDashboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final perfil = ref.watch(controladorAutenticacionProvider).value;
-    final rutasTopState = ref.watch(_rutasTopProvider);
+    final resumenState = ref.watch(controladorDashboardProvider);
+    final barberosState = ref.watch(controladorBarberosProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
+    // Mientras carga o si falla, se usan las primeras 4 del catálogo como
+    // fallback fijo -- la sección "Acceso Rápido" nunca se ve vacía ni
+    // salta de golpe una vez que el uso real termina de resolver.
+    final accesosRapidos =
+        ref.watch(controladorAccesoRapidoAdminProvider).value ??
+        catalogoAccesosAdmin.take(4).toList();
+
+    final barberosActivos = (barberosState.value ?? [])
+        .where((b) => b.activo)
+        .length;
+    final totalBarberos = (barberosState.value ?? []).length;
+
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Panel de Administración'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_outlined),
-            tooltip: 'Cerrar sesión',
-            onPressed: () => ref
-                .read(controladorAutenticacionProvider.notifier)
-                .cerrarSesion(),
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sin notificaciones nuevas')),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Cerrar Sesión',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Cerrar sesión'),
+                  content: const Text('¿Estás seguro de que deseas salir?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ref
+                            .read(controladorAutenticacionProvider.notifier)
+                            .cerrarSesion();
+                      },
+                      child: const Text('Salir'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(controladorAutenticacionProvider);
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // ── Saludo ────────────────────────────────────────────────────
-            if (perfil?.nombre != null) ...[
-              Text(
-                'Hola, ${perfil!.nombre!} 👋',
-                style: TipografiaApp.headlineSm.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(controladorDashboardProvider);
+            ref.invalidate(controladorBarberosProvider);
+            ref.invalidate(controladorAlertaStockProvider);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Vista General
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Vista General',
+                            style: TipografiaApp.headlineLgMobile.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Métricas de Desempeño de Hoy · ${perfil?.nombre ?? "Admin"}',
+                            style: TipografiaApp.bodySm.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_month,
+                            size: 14,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'HOY',
+                            style: TipografiaApp.labelSm.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Aquí está el resumen de tu barbería',
-                style: TipografiaApp.bodySm.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                const SizedBox(height: 20),
+
+                // Top Bento Grid Cards - Diferentes Tamaños según VISTA Mockup
+                resumenState.when(
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  error: (e, s) => Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'No se pudieron cargar los indicadores.',
+                      style: TextStyle(color: colorScheme.error),
+                    ),
+                  ),
+                  data: (resumen) => Column(
+                    children: [
+                      // 1. Tarjeta Grande Principal: INGRESOS DE HOY
+                      _TarjetaIngresosHero(
+                        monto: formatoMoneda(resumen.ingresosHoy),
+                        porcentaje: _calcularPorcentajeCambio(
+                          resumen.ingresosHoy,
+                          resumen.ingresosAyer,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // 2. Fila con 2 Tarjetas Medianas Cuadradas
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _TarjetaKpiBento(
+                              titulo: 'CITAS TOTALES',
+                              valor: '${resumen.citasHoy}',
+                              icono: Icons.calendar_today,
+                              tendenciaTexto: _calcularDiferenciaCitas(
+                                resumen.citasHoy,
+                                resumen.citasAyer,
+                              ),
+                              tendenciaColor:
+                                  resumen.citasHoy >= resumen.citasAyer
+                                  ? ColoresApp.estadoCompletada
+                                  : ColoresApp.estadoCancelada,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _TarjetaKpiBento(
+                              titulo: 'BARBEROS ACTIVOS',
+                              valor: totalBarberos > 0
+                                  ? '$barberosActivos / $totalBarberos'
+                                  : '$barberosActivos',
+                              icono: Icons.content_cut,
+                              tendenciaTexto: 'ACTIVOS',
+                              tendenciaColor: ColoresApp.primario,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
 
-            // ── Gráfico de tendencia ──────────────────────────────────────
-            const TarjetaGraficoTendencia(),
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            // ── Accesos rápidos ───────────────────────────────────────────
-            Text(
-              'Acceso Rápido',
-              style: TipografiaApp.headlineSm.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 12),
+                // 3. Tarjeta Ancha Estilo Gráfico Bento: Tendencia de Ingresos
+                const TarjetaGraficoTendencia(),
 
-            rutasTopState.when(
-              data: (rutasTop) {
-                final accesos = elegirAccesosRapidos(rutasTop);
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: accesos.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.4,
+                const SizedBox(height: 24),
+
+                // 4. Seccion Accesos Rapidos Estilo Bento Card Cuadrados
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colorScheme.outlineVariant),
                   ),
-                  itemBuilder: (context, index) {
-                    final acceso = accesos[index];
-                    return _TarjetaAccesoRapido(acceso: acceso);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) {
-                // Si falla, usar el catálogo completo como fallback
-                final accesos = elegirAccesosRapidos([]);
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: accesos.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Acceso Rápido',
+                        style: TipografiaApp.headlineSm.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      for (final acceso in accesosRapidos) ...[
+                        _BotonAccesoBento(
+                          titulo: acceso.titulo,
+                          icono: acceso.icono,
+                          onTap: () {
+                            ref
+                                .read(repositorioAccesosAdminProvider)
+                                .registrarAcceso(acceso.ruta);
+                            context.push(acceso.ruta);
+                          },
+                        ),
+                        if (acceso != accesosRapidos.last)
+                          const SizedBox(height: 10),
+                      ],
+                    ],
                   ),
-                  itemBuilder: (context, index) {
-                    final acceso = accesos[index];
-                    return _TarjetaAccesoRapido(acceso: acceso);
+                ),
+
+                const SizedBox(height: 24),
+
+                // 5. Alertas de Stock Bajo (Bento Card Destacado)
+                Consumer(
+                  builder: (context, ref, _) {
+                    final alertaStock = ref.watch(
+                      controladorAlertaStockProvider,
+                    );
+                    final cantidad = alertaStock.value ?? 0;
+
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: cantidad > 0
+                              ? ColoresApp.estadoCancelada
+                              : colorScheme.outlineVariant,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: cantidad > 0
+                                    ? ColoresApp.estadoCancelada
+                                    : colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Alertas de Stock Bajo',
+                                style: TipografiaApp.headlineSm.copyWith(
+                                  color: colorScheme.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  cantidad > 0
+                                      ? 'Existen $cantidad insumos con stock por debajo del mínimo crítico.'
+                                      : 'Todos los insumos del almacén tienen stock suficiente.',
+                                  style: TipografiaApp.bodySm.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    context.push('/administracion/almacen'),
+                                child: Text(
+                                  'REABASTECER',
+                                  style: TipografiaApp.labelSm.copyWith(
+                                    color: ColoresApp.primario,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
                   },
-                );
-              },
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-
-            // ── Todas las secciones ───────────────────────────────────────
-            Text(
-              'Todas las secciones',
-              style: TipografiaApp.headlineSm.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            ...agruparAccesosPorCategoria(catalogoAccesosAdmin).map(
-              (grupo) => _GrupoAccesos(
-                categoria: grupo.key,
-                accesos: grupo.value,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Tarjeta de acceso rápido
-// ---------------------------------------------------------------------------
+/// Tarjeta Hero de Ingresos Grandes (idéntica a VISTA/panel_de_administracion_es)
+class _TarjetaIngresosHero extends StatelessWidget {
+  const _TarjetaIngresosHero({required this.monto, required this.porcentaje});
 
-class _TarjetaAccesoRapido extends ConsumerWidget {
-  const _TarjetaAccesoRapido({required this.acceso});
-  final AccesoAdmin acceso;
+  final String monto;
+  final String porcentaje;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainer,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          ref.read(repositorioAccesosAdminProvider).registrarAcceso(acceso.ruta);
-          context.push(acceso.ruta);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: ColoresApp.primario.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: ColoresApp.primario.withValues(alpha: 0.08),
+            blurRadius: 16,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                acceso.icono,
-                color: ColoresApp.primario,
-                size: 28,
-              ),
-              const Spacer(),
-              Text(
-                acceso.titulo,
-                style: TipografiaApp.bodyMd.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: colorScheme.outlineVariant),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                acceso.subtitulo,
-                style: TipografiaApp.bodySm.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 11,
+                child: Icon(
+                  Icons.attach_money,
+                  color: ColoresApp.primario,
+                  size: 24,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: ColoresApp.estadoCompletada.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.trending_up,
+                      size: 14,
+                      color: ColoresApp.estadoCompletada,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      porcentaje,
+                      style: TipografiaApp.labelSm.copyWith(
+                        color: ColoresApp.estadoCompletada,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          Text(
+            'INGRESOS DE HOY',
+            style: TipografiaApp.labelSm.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              monto,
+              style: TipografiaApp.headlineXl.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Grupo de accesos por categoría (para la sección "Todas las secciones")
-// ---------------------------------------------------------------------------
+class _TarjetaKpiBento extends StatelessWidget {
+  const _TarjetaKpiBento({
+    required this.titulo,
+    required this.valor,
+    required this.icono,
+    required this.tendenciaTexto,
+    required this.tendenciaColor,
+  });
 
-class _GrupoAccesos extends ConsumerWidget {
-  const _GrupoAccesos({required this.categoria, required this.accesos});
-  final String categoria;
-  final List<AccesoAdmin> accesos;
+  final String titulo;
+  final String valor;
+  final IconData icono;
+  final String tendenciaTexto;
+  final Color tendenciaColor;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(
-            categoria,
-            style: TipografiaApp.labelMd.copyWith(
-              color: ColoresApp.primario,
-              letterSpacing: 1.2,
-            ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Icon(icono, color: ColoresApp.primario, size: 20),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: tendenciaColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  tendenciaTexto,
+                  style: TipografiaApp.labelSm.copyWith(
+                    color: tendenciaColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        ...accesos.map(
-          (acceso) => ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(acceso.icono, color: ColoresApp.primario, size: 20),
-            ),
-            title: Text(
-              acceso.titulo,
-              style: TipografiaApp.bodyMd.copyWith(
-                color: colorScheme.onSurface,
-              ),
-            ),
-            subtitle: Text(
-              acceso.subtitulo,
-              style: TipografiaApp.bodySm.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            trailing: Icon(
-              Icons.chevron_right,
+          const SizedBox(height: 14),
+          Text(
+            titulo,
+            style: TipografiaApp.labelSm.copyWith(
               color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
             ),
-            onTap: () {
-              ref
-                  .read(repositorioAccesosAdminProvider)
-                  .registrarAcceso(acceso.ruta);
-              context.push(acceso.ruta);
-            },
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              valor,
+              style: TipografiaApp.headlineSm.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BotonAccesoBento extends StatelessWidget {
+  const _BotonAccesoBento({
+    required this.titulo,
+    required this.icono,
+    required this.onTap,
+  });
+
+  final String titulo;
+  final IconData icono;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colorScheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Icon(icono, color: colorScheme.onSurfaceVariant, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  titulo,
+                  style: TipografiaApp.bodyMd.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
+            ],
           ),
         ),
-        const Divider(height: 16),
-      ],
+      ),
     );
   }
 }

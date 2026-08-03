@@ -1,47 +1,29 @@
 enum TipoPremioRanking {
   dinero,
   diaLibre,
-  reconocimiento,
-  otro;
+  kitProductos,
+  descuentoServicio;
 
-  static TipoPremioRanking desdeTexto(String texto) {
-    switch (texto) {
-      case 'dinero':
-        return TipoPremioRanking.dinero;
-      case 'dia_libre':
-        return TipoPremioRanking.diaLibre;
-      case 'reconocimiento':
-        return TipoPremioRanking.reconocimiento;
-      case 'otro':
-        return TipoPremioRanking.otro;
-      default:
-        return TipoPremioRanking.otro;
-    }
-  }
+  String get aTexto => name;
 
-  String aTexto() {
+  /// Etiqueta legible en español para mostrar en la UI.
+  String get etiqueta {
     switch (this) {
       case TipoPremioRanking.dinero:
-        return 'dinero';
-      case TipoPremioRanking.diaLibre:
-        return 'dia_libre';
-      case TipoPremioRanking.reconocimiento:
-        return 'reconocimiento';
-      case TipoPremioRanking.otro:
-        return 'otro';
-    }
-  }
-
-  String etiqueta() {
-    switch (this) {
-      case TipoPremioRanking.dinero:
-        return 'Dinero';
+        return 'Premio en dinero';
       case TipoPremioRanking.diaLibre:
         return 'Día libre';
-      case TipoPremioRanking.reconocimiento:
-        return 'Reconocimiento';
-      case TipoPremioRanking.otro:
-        return 'Otro';
+      case TipoPremioRanking.kitProductos:
+        return 'Kit de productos';
+      case TipoPremioRanking.descuentoServicio:
+        return 'Descuento en servicio';
     }
+  }
+
+  static TipoPremioRanking desdeTexto(String texto) {
+    return TipoPremioRanking.values.firstWhere(
+      (v) => v.name == texto,
+      orElse: () => TipoPremioRanking.dinero,
+    );
   }
 }

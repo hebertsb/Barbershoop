@@ -1,12 +1,13 @@
 enum RolUsuario {
-  cliente,
-  barbero,
+  superadmin,
   admin,
-  superadmin;
+  barbero,
+  secretaria,
+  cliente;
 
   static RolUsuario desdeTexto(String texto) {
     return RolUsuario.values.firstWhere(
-      (valor) => valor.name == texto,
+      (v) => v.name == texto,
       orElse: () => RolUsuario.cliente,
     );
   }

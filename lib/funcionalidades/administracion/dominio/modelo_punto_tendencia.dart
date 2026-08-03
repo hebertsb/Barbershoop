@@ -1,5 +1,8 @@
 class ModeloPuntoTendencia {
-  const ModeloPuntoTendencia({required this.fecha, required this.monto});
+  const ModeloPuntoTendencia({
+    required this.fecha,
+    required this.monto,
+  });
 
   final DateTime fecha;
   final double monto;

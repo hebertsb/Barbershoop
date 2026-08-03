@@ -21,7 +21,7 @@ class _PantallaReportarInsumoState
   final _cantidadCtrl = TextEditingController(text: '1');
   final _descripcionCtrl = TextEditingController();
   String? _insumoIdSeleccionado;
-  int _cantidadDisponible = 0;
+  double _cantidadDisponible = 0;
   TipoReporteInsumo _tipo = TipoReporteInsumo.danado;
   String? _urlFoto;
   bool _cargando = false;
@@ -41,11 +41,11 @@ class _PantallaReportarInsumoState
   }
 
   /// Reacciona de forma proactiva al foco de los campos de texto: apenas
-  /// alguno toma foco (teclado abriéndose) bloquea los dos dropdowns YA,
-  /// antes de que el usuario llegue a tocarlos. Así el hit-test de un toque
-  /// posterior sobre cualquiera de ellos ve `absorbing == true` y su menú
-  /// nunca se abre con el layout todavía en posición "con teclado abierto".
-  /// Al perder el foco del todo, espera a que termine la animación de cierre
+  /// alguno toma foco (teclado abrindose) bloquea los dos dropdowns YA,
+  /// antes de que el usuario llegue a tocarlos. As el hit-test de un toque
+  /// posterior sobre cualquiera de ellos ve `absorbing == true` y su men
+  /// nunca se abre con el layout todava en posicin "con teclado abierto".
+  /// Al perder el foco del todo, espera a que termine la animacin de cierre
   /// del teclado (~300ms) antes de reactivarlos. Ambos dropdowns comparten
   /// el mismo `_bloqueandoDropdown`/`_focusScopeNode`.
   void _alCambiarFoco() {
@@ -70,7 +70,7 @@ class _PantallaReportarInsumoState
   Future<void> _enviar() async {
     if (!_formularioKey.currentState!.validate()) return;
     if (_insumoIdSeleccionado == null) {
-      setState(() => _errorMensaje = 'Elegí un insumo.');
+      setState(() => _errorMensaje = 'Eleg un insumo.');
       return;
     }
     setState(() {
@@ -129,7 +129,7 @@ class _PantallaReportarInsumoState
                           (i) => DropdownMenuItem(
                             value: i.insumoId,
                             child: Text(
-                              '${i.nombreInsumo} (tenés ${i.cantidadAsignada})',
+                              '${i.nombreInsumo} (tens ${i.cantidadAsignada})',
                             ),
                           ),
                         )
@@ -183,7 +183,7 @@ class _PantallaReportarInsumoState
                   if (parsed == null || parsed <= 0) return 'Debe ser > 0';
                   if (_insumoIdSeleccionado != null &&
                       parsed > _cantidadDisponible) {
-                    return 'No tenés esa cantidad asignada';
+                    return 'No tens esa cantidad asignada';
                   }
                   return null;
                 },
@@ -192,7 +192,7 @@ class _PantallaReportarInsumoState
               TextFormField(
                 controller: _descripcionCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Descripción',
+                  labelText: 'Descripcin',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,

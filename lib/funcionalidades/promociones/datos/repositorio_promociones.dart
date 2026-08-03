@@ -18,8 +18,8 @@ abstract class RepositorioPromociones {
   });
   Future<void> eliminarPromocion(String promocionId);
 
-  /// Solo admin: cuántas veces cada cliente usó (reservó con) esta
-  /// promoción específica. Vía `obtener_usos_promocion_por_cliente` (0043).
+  /// Solo admin: cuntas veces cada cliente us (reserv con) esta
+  /// promocin especfica. Va `obtener_usos_promocion_por_cliente` (0043).
   Future<List<ModeloUsoPromocion>> obtenerUsosPromocionPorCliente(
     String promocionId,
   );
@@ -34,7 +34,7 @@ class RepositorioPromocionesSupabase implements RepositorioPromociones {
   Future<String> _obtenerBarberiaId() async {
     final uid = _cliente.auth.currentUser?.id;
     if (uid == null) {
-      throw const ExcepcionPermiso('Sesión no iniciada.');
+      throw const ExcepcionPermiso('Sesin no iniciada.');
     }
     final fila = await _cliente
         .from('perfiles')
@@ -43,7 +43,7 @@ class RepositorioPromocionesSupabase implements RepositorioPromociones {
         .maybeSingle();
     final id = fila?['barberia_id'] as String?;
     if (id == null) {
-      throw const ExcepcionPermiso('No tienes una barbería asignada.');
+      throw const ExcepcionPermiso('No tienes una barbera asignada.');
     }
     return id;
   }

@@ -6,6 +6,7 @@ import '../../dominio/disponibilidad_barbero.dart';
 import '../../dominio/enum_estado_cita.dart';
 import '../../dominio/item_agenda.dart';
 import 'etiqueta_estado.dart';
+import 'panel_disponibilidad_barberos.dart';
 
 class TarjetaAgendaItem extends StatelessWidget {
   const TarjetaAgendaItem({
@@ -73,13 +74,13 @@ class TarjetaAgendaItem extends StatelessWidget {
                         TextButton(
                           onPressed: () => alMarcarNoAsistio(cita.id),
                           child: Text(
-                            'No asistió',
+                            'No asisti',
                             style: TextStyle(color: colores.cancelada),
                           ),
                         ),
                       TextButton(
                         onPressed: () => alConfirmarLlegada(cita.id),
-                        child: const Text('Cliente llegó'),
+                        child: const Text('Cliente lleg'),
                       ),
                     ],
                   ),
@@ -100,7 +101,7 @@ class TarjetaAgendaItem extends StatelessWidget {
                 children: [
                   Text(
                     turno.citaId != null
-                        ? 'Reservado — Turno #${turno.numero}'
+                        ? 'Reservado  Turno #${turno.numero}'
                         : 'Turno #${turno.numero}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -129,7 +130,7 @@ class TarjetaAgendaItem extends StatelessWidget {
                                   enabled: !estado.ocupado,
                                   child: Text(
                                     '${estado.barbero.nombrePerfil ?? 'Sin nombre'}'
-                                    '${estado.ocupado ? ' — ${textoDisponibilidadBarbero(estado)}' : ''}',
+                                    '${estado.ocupado ? '  ${textoDisponibilidadBarbero(estado)}' : ''}',
                                   ),
                                 ),
                               )

@@ -6,7 +6,7 @@ import '../../datos/repositorio_ajustes.dart';
 
 /// Minutos de tolerancia tras la `fecha_hora` de una cita `pendiente` antes
 /// de que el cron `marcar_no_asistio_vencidas` (`0028`) la marque
-/// automáticamente como `no_asistio`. Independiente de la configuración de
+/// automticamente como `no_asistio`. Independiente de la configuracin de
 /// pagos (`ModeloConfiguracionPagos`): no es un ajuste de pago, es de
 /// asistencia/reservas, aunque comparta la tabla `configuraciones_barberia`.
 class ControladorToleranciaNoAsistio extends AsyncNotifier<int> {

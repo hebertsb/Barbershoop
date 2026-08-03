@@ -1,34 +1,21 @@
 enum EstadoTurno {
-  esperando,
-  enAtencion,
+  pendiente,
+  enProceso,
   completado,
-  cancelado;
+  cancelado,
+
+  /// Alias de [pendiente]: el cliente llegó y está esperando ser atendido.
+  esperando,
+
+  /// Alias de [enProceso]: el barbero está atendiendo al cliente ahora.
+  enAtencion;
+
+  String aTexto() => name;
 
   static EstadoTurno desdeTexto(String texto) {
-    switch (texto) {
-      case 'esperando':
-        return EstadoTurno.esperando;
-      case 'en_atencion':
-        return EstadoTurno.enAtencion;
-      case 'completado':
-        return EstadoTurno.completado;
-      case 'cancelado':
-        return EstadoTurno.cancelado;
-      default:
-        return EstadoTurno.esperando;
-    }
-  }
-
-  String aTexto() {
-    switch (this) {
-      case EstadoTurno.esperando:
-        return 'esperando';
-      case EstadoTurno.enAtencion:
-        return 'en_atencion';
-      case EstadoTurno.completado:
-        return 'completado';
-      case EstadoTurno.cancelado:
-        return 'cancelado';
-    }
+    return EstadoTurno.values.firstWhere(
+      (v) => v.name == texto,
+      orElse: () => EstadoTurno.pendiente,
+    );
   }
 }

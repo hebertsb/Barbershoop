@@ -55,3 +55,6 @@ key.properties
 secretos-locales/
 scratch/
 android/app/google-services.json
+barberapp-landing/
+*.apk
+android/build/

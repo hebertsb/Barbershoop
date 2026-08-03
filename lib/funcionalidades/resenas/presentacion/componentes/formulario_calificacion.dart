@@ -29,7 +29,7 @@ class _FormularioCalificacionState extends State<FormularioCalificacion> {
   /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
   /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
   /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
-  /// al crecer el viewport). Detectamos la transición y devolvemos el scroll
+  /// al crecer el viewport). Detectamos la transicin y devolvemos el scroll
   /// a 0 en el siguiente frame.
   void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
     final tecladoSeAcabaDeCerrar =
@@ -48,7 +48,7 @@ class _FormularioCalificacionState extends State<FormularioCalificacion> {
 
   Future<void> _confirmar() async {
     if (_calificacion == 0) {
-      setState(() => _errorMensaje = 'Elegí una calificación.');
+      setState(() => _errorMensaje = 'Eleg una calificacin.');
       return;
     }
     setState(() {
@@ -87,7 +87,7 @@ class _FormularioCalificacionState extends State<FormularioCalificacion> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              '¿Cómo estuvo tu corte?',
+              'Cmo estuvo tu corte?',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -127,7 +127,7 @@ class _FormularioCalificacionState extends State<FormularioCalificacion> {
               ),
               child: _cargando
                   ? const CircularProgressIndicator()
-                  : const Text('Enviar calificación'),
+                  : const Text('Enviar calificacin'),
             ),
             const SizedBox(height: 16),
           ],

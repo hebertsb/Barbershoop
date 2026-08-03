@@ -5,8 +5,8 @@ import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../dominio/modelo_cliente_nuevo_dia.dart';
 
-/// Lista de clientes (perfiles `rol = 'cliente'`) registrados en un día, para
-/// la pantalla de Actividad del Día. Muestra nombre, teléfono y hora de alta.
+/// Lista de clientes (perfiles `rol = 'cliente'`) registrados en un da, para
+/// la pantalla de Actividad del Da. Muestra nombre, telfono y hora de alta.
 class ListaClientesNuevosDia extends StatelessWidget {
   const ListaClientesNuevosDia({super.key, required this.clientes});
 
@@ -18,7 +18,7 @@ class ListaClientesNuevosDia extends StatelessWidget {
 
     if (clientes.isEmpty) {
       return _MensajeVacio(
-        texto: 'No se registraron clientes nuevos este día.',
+        texto: 'No se registraron clientes nuevos este da.',
         colorScheme: colorScheme,
       );
     }

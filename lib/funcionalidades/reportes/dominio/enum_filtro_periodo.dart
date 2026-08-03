@@ -20,31 +20,43 @@ enum FiltroPeriodo {
     }
   }
 
-  /// Calcula el rango (inicio, fin) correspondiente a este período, en hora
-  /// local. Para `personalizado`, usa [fechaInicioCustom]/[fechaFinCustom]
-  /// si vienen (si no, cae al día de hoy como valor por defecto).
-  (DateTime, DateTime) obtenerRangoFechas({
+  (DateTime inicio, DateTime fin) obtenerRangoFechas({
     DateTime? fechaInicioCustom,
     DateTime? fechaFinCustom,
   }) {
     final ahora = DateTime.now();
-    final hoyInicio = DateTime(ahora.year, ahora.month, ahora.day);
-    final hoyFin = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
-
     switch (this) {
       case FiltroPeriodo.hoy:
-        return (hoyInicio, hoyFin);
-      case FiltroPeriodo.personalizado:
-        return (fechaInicioCustom ?? hoyInicio, fechaFinCustom ?? hoyFin);
+        final inicio = DateTime(ahora.year, ahora.month, ahora.day, 0, 0, 0);
+        final fin = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
+        return (inicio, fin);
       case FiltroPeriodo.estaSemana:
-        final inicioSemana = hoyInicio.subtract(
-          Duration(days: ahora.weekday - 1),
+        final inicioSemana = ahora.subtract(Duration(days: ahora.weekday - 1));
+        final inicio = DateTime(
+          inicioSemana.year,
+          inicioSemana.month,
+          inicioSemana.day,
+          0,
+          0,
+          0,
         );
-        return (inicioSemana, hoyFin);
+        final fin = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
+        return (inicio, fin);
       case FiltroPeriodo.esteMes:
-        return (DateTime(ahora.year, ahora.month), hoyFin);
+        final inicio = DateTime(ahora.year, ahora.month, 1, 0, 0, 0);
+        final fin = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
+        return (inicio, fin);
       case FiltroPeriodo.esteAnio:
-        return (DateTime(ahora.year), hoyFin);
+        final inicio = DateTime(ahora.year, 1, 1, 0, 0, 0);
+        final fin = DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
+        return (inicio, fin);
+      case FiltroPeriodo.personalizado:
+        final inicio =
+            fechaInicioCustom ?? DateTime(ahora.year, ahora.month, 1);
+        final fin =
+            fechaFinCustom ??
+            DateTime(ahora.year, ahora.month, ahora.day, 23, 59, 59);
+        return (inicio, fin);
     }
   }
 }

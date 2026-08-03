@@ -4,50 +4,56 @@ import 'enum_metodo_pago.dart';
 class ModeloPago {
   const ModeloPago({
     required this.id,
-    required this.barberiaId,
     required this.citaId,
     required this.monto,
     required this.metodo,
     required this.estado,
-    this.urlComprobante,
-    this.verificadoPor,
-    required this.fecha,
-    this.nombreCliente,
-    this.fechaHoraCita,
+    this.comprobanteUrl,
+    this.creadoEn,
+    this.clienteNombreCache,
+    this.fechaHoraCitaCache,
   });
 
   final String id;
-  final String barberiaId;
   final String citaId;
   final double monto;
   final MetodoPago metodo;
   final EstadoPago estado;
-  final String? urlComprobante;
-  final String? verificadoPor;
-  final DateTime fecha;
+  final String? comprobanteUrl;
+  final DateTime? creadoEn;
+  final String? clienteNombreCache;
+  final DateTime? fechaHoraCitaCache;
 
-  // Campos informativos obtenidos via embed a citas/perfiles, solo presentes
-  // cuando la consulta los pide explícitamente (ej. la bandeja de verificación).
-  final String? nombreCliente;
-  final DateTime? fechaHoraCita;
+  /// Alias de [comprobanteUrl].
+  String? get urlComprobante => comprobanteUrl;
+
+  /// Nombre del cliente pagador.
+  String? get nombreCliente => clienteNombreCache;
+
+  /// Fecha y hora de la cita asociada.
+  DateTime? get fechaHoraCita => fechaHoraCitaCache ?? creadoEn;
 
   factory ModeloPago.desdeJson(Map<String, dynamic> json) {
-    final citaJson = json['citas'] as Map<String, dynamic>?;
-    final perfilJson = citaJson?['perfiles'] as Map<String, dynamic>?;
+    String? cNombre;
+    DateTime? fCita;
+    final citaMap = json['citas'];
+    if (citaMap is Map<String, dynamic>) {
+      cNombre = (citaMap['cliente_nombre'] ?? citaMap['nombre_cliente']) as String?;
+      if (citaMap['fecha'] != null) {
+        fCita = DateTime.tryParse(citaMap['fecha'] as String);
+      }
+    }
+
     return ModeloPago(
-      id: json['id'] as String,
-      barberiaId: json['barberia_id'] as String,
-      citaId: json['cita_id'] as String,
-      monto: (json['monto'] as num).toDouble(),
-      metodo: MetodoPago.desdeTexto(json['metodo'] as String),
-      estado: EstadoPago.desdeTexto(json['estado'] as String),
-      urlComprobante: json['url_comprobante'] as String?,
-      verificadoPor: json['verificado_por'] as String?,
-      fecha: DateTime.parse(json['fecha'] as String),
-      nombreCliente: perfilJson?['nombre'] as String?,
-      fechaHoraCita: citaJson?['fecha_hora'] != null
-          ? DateTime.parse(citaJson!['fecha_hora'] as String)
-          : null,
+      id: json['id'] as String? ?? '',
+      citaId: json['cita_id'] as String? ?? '',
+      monto: (json['monto'] as num? ?? 0).toDouble(),
+      metodo: MetodoPago.desdeTexto(json['metodo'] as String? ?? ''),
+      estado: EstadoPago.desdeTexto(json['estado'] as String? ?? ''),
+      comprobanteUrl: (json['comprobante_url'] ?? json['url_comprobante']) as String?,
+      creadoEn: json['creado_en'] == null ? null : DateTime.tryParse(json['creado_en'] as String),
+      clienteNombreCache: cNombre ?? json['cliente_nombre'] as String?,
+      fechaHoraCitaCache: fCita ?? (json['fecha_cita'] == null ? null : DateTime.tryParse(json['fecha_cita'] as String)),
     );
   }
 }

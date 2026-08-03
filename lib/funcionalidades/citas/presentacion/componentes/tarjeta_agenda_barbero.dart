@@ -54,7 +54,7 @@ class TarjetaAgendaBarbero extends StatelessWidget {
               if (cita.estado == EstadoCita.confirmada)
                 OutlinedButton(
                   onPressed: () => alConfirmarLlegada(cita.id),
-                  child: const Text('Llegó'),
+                  child: const Text('Lleg'),
                 )
               else
                 EtiquetaEstado(
@@ -67,7 +67,7 @@ class TarjetaAgendaBarbero extends StatelessWidget {
                   itemBuilder: (context) => [
                     PopupMenuItem(
                       onTap: () => alMarcarNoAsistio(cita.id),
-                      child: const Text('No asistió'),
+                      child: const Text('No asisti'),
                     ),
                   ],
                 ),
@@ -79,11 +79,15 @@ class TarjetaAgendaBarbero extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         child: ListTile(
           leading: Text(
-            formatoHora(turno.horaLlegada),
+            turno.horaLlegada != null
+                ? formatoHora(turno.horaLlegada!)
+                : '--:--',
             style: TipografiaApp.bodySm.copyWith(fontWeight: FontWeight.bold),
           ),
-          title: Text(_nombreServicio(turno.servicioId)),
-          subtitle: Text('Turno #${turno.numero}'),
+          title: Text(_nombreServicio(turno.servicioId ?? '')),
+          subtitle: Text(
+            turno.numero != null ? 'Turno #${turno.numero}' : turno.clienteNombre,
+          ),
           trailing: turno.estado == EstadoTurno.enAtencion
               ? FilledButton(
                   onPressed: () => alCompletar(turno.id),

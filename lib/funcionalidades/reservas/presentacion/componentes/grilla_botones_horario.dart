@@ -4,16 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../controladores/controlador_reserva.dart';
 
-/// Un ítem de la grilla de horarios: la hora concreta a reservar, el texto
-/// ya formateado a mostrar y si está libre (si no lo está, se pinta
+/// Un tem de la grilla de horarios: la hora concreta a reservar, el texto
+/// ya formateado a mostrar y si est libre (si no lo est, se pinta
 /// tachado y deshabilitado). Tanto la grilla con bloqueados
 /// (`CuerpoGrillaHorario`) como la de solo libres (`CuerpoSoloLibresHorario`)
-/// arman una lista de este tipo antes de delegar el pintado aquí.
+/// arman una lista de este tipo antes de delegar el pintado aqu.
 typedef ItemGrillaHorario = ({DateTime hora, String texto, bool libre});
 
-/// Grilla de 3 columnas con los botones de horario. Los ítems libres son
+/// Grilla de 3 columnas con los botones de horario. Los tems libres son
 /// botones que, al presionarlos, seleccionan la hora y avanzan a confirmar;
-/// los bloqueados se muestran tachados y sin acción.
+/// los bloqueados se muestran tachados y sin accin.
 class GrillaBotonesHorario extends ConsumerWidget {
   const GrillaBotonesHorario({super.key, required this.items});
 

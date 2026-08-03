@@ -1,29 +1,16 @@
 enum MetodoPago {
   efectivo,
+  qr,
   qrManual,
-  pasarela;
+  tarjeta,
+  transferencia;
+
+  String aTexto() => name;
 
   static MetodoPago desdeTexto(String texto) {
-    switch (texto) {
-      case 'efectivo':
-        return MetodoPago.efectivo;
-      case 'qr_manual':
-        return MetodoPago.qrManual;
-      case 'pasarela':
-        return MetodoPago.pasarela;
-      default:
-        return MetodoPago.efectivo;
-    }
-  }
-
-  String aTexto() {
-    switch (this) {
-      case MetodoPago.efectivo:
-        return 'efectivo';
-      case MetodoPago.qrManual:
-        return 'qr_manual';
-      case MetodoPago.pasarela:
-        return 'pasarela';
-    }
+    return MetodoPago.values.firstWhere(
+      (v) => v.name == texto,
+      orElse: () => MetodoPago.efectivo,
+    );
   }
 }

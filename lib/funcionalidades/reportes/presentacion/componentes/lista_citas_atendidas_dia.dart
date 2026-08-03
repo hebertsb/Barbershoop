@@ -6,8 +6,8 @@ import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../../../nucleo/utilidades/formato_moneda.dart';
 import '../../dominio/modelo_cita_atendida_dia.dart';
 
-/// Lista de citas `completada` de un día, para la pantalla de Actividad del
-/// Día. Muestra hora, cliente, servicio (o combo), barbero y monto cobrado.
+/// Lista de citas `completada` de un da, para la pantalla de Actividad del
+/// Da. Muestra hora, cliente, servicio (o combo), barbero y monto cobrado.
 class ListaCitasAtendidasDia extends StatelessWidget {
   const ListaCitasAtendidasDia({super.key, required this.citas});
 
@@ -19,7 +19,7 @@ class ListaCitasAtendidasDia extends StatelessWidget {
 
     if (citas.isEmpty) {
       return _MensajeVacio(
-        texto: 'No hubo citas atendidas este día.',
+        texto: 'No hubo citas atendidas este da.',
         colorScheme: colorScheme,
       );
     }
@@ -61,7 +61,7 @@ class ListaCitasAtendidasDia extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${cita.servicioNombre} · ${cita.barberoNombre}',
+                            '${cita.servicioNombre}  ${cita.barberoNombre}',
                             style: TipografiaApp.bodySm.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),

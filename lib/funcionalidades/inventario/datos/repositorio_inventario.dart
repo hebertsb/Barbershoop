@@ -49,7 +49,7 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
   Future<String> _obtenerBarberiaId() async {
     final uid = _cliente.auth.currentUser?.id;
     if (uid == null) {
-      throw const ExcepcionPermiso('Sesión no iniciada.');
+      throw const ExcepcionPermiso('Sesin no iniciada.');
     }
     final fila = await _cliente
         .from('perfiles')
@@ -58,7 +58,7 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
         .maybeSingle();
     final id = fila?['barberia_id'] as String?;
     if (id == null) {
-      throw const ExcepcionPermiso('No tienes una barbería asignada.');
+      throw const ExcepcionPermiso('No tienes una barbera asignada.');
     }
     return id;
   }
@@ -66,7 +66,7 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
   Future<String> _obtenerBarberoIdActual() async {
     final uid = _cliente.auth.currentUser?.id;
     if (uid == null) {
-      throw const ExcepcionPermiso('Sesión no iniciada.');
+      throw const ExcepcionPermiso('Sesin no iniciada.');
     }
     final fila = await _cliente
         .from('barberos')

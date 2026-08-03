@@ -1,36 +1,64 @@
 class ModeloInsumo {
-  const ModeloInsumo({
+  ModeloInsumo({
     required this.id,
     required this.barberiaId,
-    required this.sucursalId,
     required this.nombre,
-    this.categoria,
-    required this.stock,
-    required this.stockMinimo,
-    this.costoUnitario,
-  });
+    this.descripcion,
+    num? stockActual,
+    num? stock,
+    num? stockMinimo,
+    this.unidadMedida = 'unidad',
+    String? sucursalId,
+    String? categoria,
+    num? costoUnitario,
+    this.activo = true,
+  })  : stockActual = (stockActual ?? stock ?? 0).toDouble(),
+        stockMinimo = (stockMinimo ?? 0).toDouble(),
+        sucursalIdCache = sucursalId,
+        categoriaCache = categoria,
+        costoUnitarioCache = costoUnitario?.toDouble();
 
   final String id;
   final String barberiaId;
-  final String sucursalId;
   final String nombre;
-  final String? categoria;
-  final int stock;
-  final int stockMinimo;
-  final double? costoUnitario;
+  final String? descripcion;
+  final double stockActual;
+  final double stockMinimo;
+  final String unidadMedida;
+  final String? sucursalIdCache;
+  final String? categoriaCache;
+  final double? costoUnitarioCache;
+  final bool activo;
 
-  bool get bajoMinimo => stock <= stockMinimo;
+  /// Alias de [stockActual].
+  double get stock => stockActual;
+
+  /// Categória del insumo.
+  String? get categoria => categoriaCache;
+
+  /// Costo unitario del insumo.
+  double? get costoUnitario => costoUnitarioCache;
+
+  /// ID de la sucursal asignada.
+  String? get sucursalId => sucursalIdCache;
+
+  /// Indica si el stock cayó por debajo o igual al stock mínimo.
+  bool get bajoMinimo => stockActual <= stockMinimo;
 
   factory ModeloInsumo.desdeJson(Map<String, dynamic> json) {
+    final st = json['stock_actual'] ?? json['stock'];
     return ModeloInsumo(
-      id: json['id'] as String,
-      barberiaId: json['barberia_id'] as String,
-      sucursalId: json['sucursal_id'] as String,
-      nombre: json['nombre'] as String,
+      id: json['id'] as String? ?? '',
+      barberiaId: json['barberia_id'] as String? ?? '',
+      nombre: json['nombre'] as String? ?? 'Insumo',
+      descripcion: json['descripcion'] as String?,
+      stockActual: (st as num? ?? 0).toDouble(),
+      stockMinimo: (json['stock_minimo'] as num? ?? 0).toDouble(),
+      unidadMedida: json['unidad_medida'] as String? ?? 'unidad',
+      sucursalId: json['sucursal_id'] as String?,
       categoria: json['categoria'] as String?,
-      stock: json['stock'] as int,
-      stockMinimo: json['stock_minimo'] as int,
       costoUnitario: (json['costo_unitario'] as num?)?.toDouble(),
+      activo: json['activo'] as bool? ?? true,
     );
   }
 
@@ -38,31 +66,15 @@ class ModeloInsumo {
     return {
       'id': id,
       'barberia_id': barberiaId,
-      'sucursal_id': sucursalId,
       'nombre': nombre,
-      'categoria': categoria,
-      'stock': stock,
+      'descripcion': descripcion,
+      'stock_actual': stockActual,
       'stock_minimo': stockMinimo,
-      'costo_unitario': costoUnitario,
+      'unidad_medida': unidadMedida,
+      if (sucursalIdCache != null) 'sucursal_id': sucursalIdCache,
+      if (categoriaCache != null) 'categoria': categoriaCache,
+      if (costoUnitarioCache != null) 'costo_unitario': costoUnitarioCache,
+      'activo': activo,
     };
-  }
-
-  ModeloInsumo copyWith({
-    String? nombre,
-    String? categoria,
-    int? stock,
-    int? stockMinimo,
-    double? costoUnitario,
-  }) {
-    return ModeloInsumo(
-      id: id,
-      barberiaId: barberiaId,
-      sucursalId: sucursalId,
-      nombre: nombre ?? this.nombre,
-      categoria: categoria ?? this.categoria,
-      stock: stock ?? this.stock,
-      stockMinimo: stockMinimo ?? this.stockMinimo,
-      costoUnitario: costoUnitario ?? this.costoUnitario,
-    );
   }
 }

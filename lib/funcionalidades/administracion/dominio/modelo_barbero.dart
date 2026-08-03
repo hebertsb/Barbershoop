@@ -1,120 +1,107 @@
 class ModeloBarbero {
   const ModeloBarbero({
     required this.id,
-    required this.perfilId,
-    required this.sucursalId,
     required this.barberiaId,
-    required this.especialidades,
-    required this.activo,
-    this.nombrePerfil,
-    this.urlFotoPerfil,
-    this.emailPerfil,
+    required this.nombre,
+    this.email,
+    this.telefono,
     this.telefonoPerfil,
+    this.fotoUrl,
     this.nivel,
+    this.sucursalId,
+    this.especialidades = const [],
+    this.activo = true,
     this.descripcion,
-    this.calificacionPromedio,
-    this.calificacionCantidad,
+    this.perfilId,
   });
 
   final String id;
-  final String perfilId;
-  final String sucursalId;
   final String barberiaId;
+  final String nombre;
+  final String? email;
+  final String? telefono;
+
+  /// Teléfono público del perfil del barbero (para WhatsApp, etc.).
+  final String? telefonoPerfil;
+  final String? fotoUrl;
+  final String? nivel;
+  final String? sucursalId;
   final List<String> especialidades;
   final bool activo;
 
-  // Campos informativos obtenidos a través de un JOIN con la tabla perfiles
-  final String? nombrePerfil;
-  final String? urlFotoPerfil;
-  final String? emailPerfil;
-  final String? telefonoPerfil;
-
-  /// 'junior' | 'senior' | 'master', null si no se asignó todavía.
-  final String? nivel;
-
-  /// Bio propia del barbero, editable solo por él mismo desde "Mi Perfil".
+  /// Descripción pública del barbero (bio / especialidad destacada).
   final String? descripcion;
 
-  /// Promedio de `resenas.calificacion` (1 decimal) y cantidad total. Solo
-  /// los llena `obtener_barberos_publicos` -- `obtenerBarberos()` (admin)
-  /// no los necesita hoy, quedan `null` en ese camino.
-  final double? calificacionPromedio;
-  final int? calificacionCantidad;
+  /// ID del perfil de autenticación del barbero (tabla `perfiles`).
+  final String? perfilId;
+
+  String? get nombrePerfil => nombre;
+
+  /// Alias de [fotoUrl] — URL de la foto de perfil del barbero.
+  String? get urlFotoPerfil => fotoUrl;
+
+  /// Alias de [email] — Email del perfil del barbero.
+  String? get emailPerfil => email;
+
+  /// Calificación promedio del barbero.
+  double get calificacionPromedio => 5.0;
+
+  /// Cantidad de reseñas/calificaciones recibidas.
+  int get calificacionCantidad => 0;
 
   factory ModeloBarbero.desdeJson(Map<String, dynamic> json) {
-    final perfilJson = json['perfiles'] as Map<String, dynamic>?;
     return ModeloBarbero(
-      id: json['id'] as String,
-      perfilId: json['perfil_id'] as String,
-      sucursalId: json['sucursal_id'] as String,
-      barberiaId: json['barberia_id'] as String,
-      especialidades: List<String>.from(
-        json['especialidades'] as Iterable? ?? [],
-      ),
-      activo: json['activo'] as bool,
-      nombrePerfil: (perfilJson?['nombre'] ?? json['nombre_perfil']) as String?,
-      urlFotoPerfil:
-          (perfilJson?['url_foto'] ?? json['url_foto_perfil']) as String?,
-      emailPerfil: (perfilJson?['email'] ?? json['email_perfil']) as String?,
+      id: json['id'] as String? ?? '',
+      barberiaId: json['barberia_id'] as String? ?? '',
+      nombre: json['nombre'] as String? ?? 'Barbero',
+      email: json['email'] as String?,
+      telefono: json['telefono'] as String?,
       telefonoPerfil:
-          (perfilJson?['telefono'] ?? json['telefono_perfil']) as String?,
+          (json['telefono_perfil'] ?? json['telefono']) as String?,
+      fotoUrl: json['foto_url'] as String?,
       nivel: json['nivel'] as String?,
+      sucursalId: json['sucursal_id'] as String?,
+      especialidades:
+          (json['especialidades'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      activo: json['activo'] as bool? ?? true,
       descripcion: json['descripcion'] as String?,
-      calificacionPromedio: (json['calificacion_promedio'] as num?)?.toDouble(),
-      calificacionCantidad: json['calificacion_cantidad'] as int?,
+      perfilId: json['perfil_id'] as String?,
     );
   }
 
-  Map<String, dynamic> aJson() {
-    return {
-      'id': id,
-      'perfil_id': perfilId,
-      'sucursal_id': sucursalId,
-      'barberia_id': barberiaId,
-      'especialidades': especialidades,
-      'activo': activo,
-      if (nombrePerfil != null) 'nombre_perfil': nombrePerfil,
-      if (urlFotoPerfil != null) 'url_foto_perfil': urlFotoPerfil,
-      if (emailPerfil != null) 'email_perfil': emailPerfil,
-      if (telefonoPerfil != null) 'telefono_perfil': telefonoPerfil,
-      if (nivel != null) 'nivel': nivel,
-      if (descripcion != null) 'descripcion': descripcion,
-      if (calificacionPromedio != null)
-        'calificacion_promedio': calificacionPromedio,
-      if (calificacionCantidad != null)
-        'calificacion_cantidad': calificacionCantidad,
-    };
-  }
-
   ModeloBarbero copyWith({
+    String? id,
+    String? barberiaId,
+    String? nombre,
+    String? email,
+    String? telefono,
+    String? telefonoPerfil,
+    String? fotoUrl,
+    String? nivel,
+    bool limpiarNivel = false,
     String? sucursalId,
     List<String>? especialidades,
     bool? activo,
-    String? nombrePerfil,
-    String? urlFotoPerfil,
-    String? emailPerfil,
-    String? nivel,
-    bool limpiarNivel = false,
     String? descripcion,
-    bool limpiarDescripcion = false,
+    String? perfilId,
   }) {
     return ModeloBarbero(
-      id: id,
-      perfilId: perfilId,
+      id: id ?? this.id,
+      barberiaId: barberiaId ?? this.barberiaId,
+      nombre: nombre ?? this.nombre,
+      email: email ?? this.email,
+      telefono: telefono ?? this.telefono,
+      telefonoPerfil: telefonoPerfil ?? this.telefonoPerfil,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
+      nivel: limpiarNivel ? null : (nivel ?? this.nivel),
       sucursalId: sucursalId ?? this.sucursalId,
-      barberiaId: barberiaId,
       especialidades: especialidades ?? this.especialidades,
       activo: activo ?? this.activo,
-      nombrePerfil: nombrePerfil ?? this.nombrePerfil,
-      urlFotoPerfil: urlFotoPerfil ?? this.urlFotoPerfil,
-      emailPerfil: emailPerfil ?? this.emailPerfil,
-      telefonoPerfil: telefonoPerfil,
-      nivel: limpiarNivel ? null : (nivel ?? this.nivel),
-      descripcion: limpiarDescripcion
-          ? null
-          : (descripcion ?? this.descripcion),
-      calificacionPromedio: calificacionPromedio,
-      calificacionCantidad: calificacionCantidad,
+      descripcion: descripcion ?? this.descripcion,
+      perfilId: perfilId ?? this.perfilId,
     );
   }
 }

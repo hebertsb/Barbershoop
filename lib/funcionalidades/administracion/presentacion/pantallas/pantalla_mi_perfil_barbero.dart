@@ -7,10 +7,10 @@ import '../../../../nucleo/utilidades/contacto_whatsapp.dart';
 import '../../../autenticacion/presentacion/controladores/controlador_autenticacion.dart';
 import '../controladores/controlador_barberos.dart';
 
-/// Pantalla donde el barbero edita su propio perfil público: foto,
-/// descripción y especialidades. `controladorBarberosProvider` trae todos
+/// Pantalla donde el barbero edita su propio perfil pblico: foto,
+/// descripcin y especialidades. `controladorBarberosProvider` trae todos
 /// los barberos del tenant (RLS de `barberos` solo exige mismo
-/// `barberia_id`, no rol admin) y acá se filtra a la propia fila por
+/// `barberia_id`, no rol admin) y ac se filtra a la propia fila por
 /// `perfilId`.
 class PantallaMiPerfilBarbero extends ConsumerStatefulWidget {
   const PantallaMiPerfilBarbero({super.key});
@@ -55,7 +55,7 @@ class _PantallaMiPerfilBarberoState
         ? null
         : normalizarTelefonoWhatsapp(telefonoTexto);
     if (telefonoTexto.isNotEmpty && telefonoNormalizado == null) {
-      setState(() => _errorMensaje = 'El número de celular no es válido.');
+      setState(() => _errorMensaje = 'El nmero de celular no es vlido.');
       return;
     }
 
@@ -94,15 +94,15 @@ class _PantallaMiPerfilBarberoState
         .toList();
 
     // Precarga una sola vez, cuando los datos del propio barbero llegan por
-    // primera vez -- si se hiciera en cada build, pisaría lo que el usuario
-    // ya escribió cada vez que el provider se refresca de fondo.
+    // primera vez -- si se hiciera en cada build, pisara lo que el usuario
+    // ya escribi cada vez que el provider se refresca de fondo.
     if (!_inicializado && miBarbero.isNotEmpty) {
       _inicializado = true;
       _descripcionCtrl.text = miBarbero.first.descripcion ?? '';
       _telefonoCtrl.text = miBarbero.first.telefonoPerfil ?? '';
       // Se fusionan las especialidades de TODAS las filas (una por sucursal)
       // en vez de tomar solo la primera: "Guardar" sobreescribe todas las
-      // filas a la vez, así que quedarse con .first perdería en silencio
+      // filas a la vez, as que quedarse con .first perdera en silencio
       // las especialidades cargadas en otra sucursal.
       final especialidadesUnicas = <String>{};
       for (final b in miBarbero) {
@@ -129,8 +129,8 @@ class _PantallaMiPerfilBarberoState
             TextFormField(
               controller: _descripcionCtrl,
               decoration: const InputDecoration(
-                labelText: 'Descripción',
-                hintText: 'Ej. Especialista en fades y diseño de barba',
+                labelText: 'Descripcin',
+                hintText: 'Ej. Especialista en fades y diseo de barba',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -143,7 +143,7 @@ class _PantallaMiPerfilBarberoState
                 labelText: 'Celular (WhatsApp)',
                 hintText: 'Ej. +591 71234567',
                 helperText:
-                    'Opcional. Si lo cargás, tus clientes van a poder '
+                    'Opcional. Si lo cargs, tus clientes van a poder '
                     'contactarte por WhatsApp desde su cita.',
                 border: OutlineInputBorder(),
               ),

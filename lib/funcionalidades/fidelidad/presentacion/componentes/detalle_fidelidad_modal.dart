@@ -28,7 +28,7 @@ class DetalleFidelidadModal extends ConsumerWidget {
               data: (programas) {
                 if (programas.isEmpty) {
                   return const Text(
-                    'Todavía no tenés progreso en ningún programa.',
+                    'Todava no tens progreso en ningn programa.',
                   );
                 }
                 return Column(
@@ -73,8 +73,8 @@ class DetalleFidelidadModal extends ConsumerWidget {
                                       ).showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                            '¡Premio reclamado! Ya lo tenés '
-                                            'disponible para tu próxima '
+                                            'Premio reclamado! Ya lo tens '
+                                            'disponible para tu prxima '
                                             'reserva.',
                                           ),
                                         ),

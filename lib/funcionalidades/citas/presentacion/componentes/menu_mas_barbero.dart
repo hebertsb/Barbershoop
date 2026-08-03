@@ -23,20 +23,20 @@ class MenuMasBarbero extends StatelessWidget {
 
   static const List<ElementoMenuBarbero> elementos = [
     ElementoMenuBarbero(
-      titulo: 'Mis Reseñas',
+      titulo: 'Mis Reseas',
       subtitulo: 'Calificaciones y comentarios de tus clientes',
       icono: Icons.star_outline,
       ruta: '/mis-resenas',
     ),
     ElementoMenuBarbero(
       titulo: 'Ranking',
-      subtitulo: 'Tu posición, premios e insignias',
+      subtitulo: 'Tu posicin, premios e insignias',
       icono: Icons.emoji_events_outlined,
       ruta: '/mi-ranking',
     ),
     ElementoMenuBarbero(
       titulo: 'Mi Perfil',
-      subtitulo: 'Tu foto, descripción y especialidades',
+      subtitulo: 'Tu foto, descripcin y especialidades',
       icono: Icons.person_outline,
       ruta: '/mi-perfil',
     ),
@@ -72,7 +72,7 @@ class MenuMasBarbero extends StatelessWidget {
               Icon(Icons.grid_view_outlined, color: ColoresApp.primario),
               const SizedBox(width: 8),
               Text(
-                'Más opciones',
+                'Ms opciones',
                 style: TipografiaApp.headlineSm.copyWith(
                   color: colorScheme.onSurface,
                   fontWeight: FontWeight.bold,

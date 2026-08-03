@@ -5,7 +5,7 @@ import '../../../../nucleo/utilidades/formato_moneda.dart';
 
 /// Una fila del ranking de rendimiento (por servicio, barbero o cliente
 /// frecuente) -- unifica los 3 shapes distintos en uno solo para que
-/// `GraficoBarrasRendimiento` no necesite saber de cuál se trata.
+/// `GraficoBarrasRendimiento` no necesite saber de cul se trata.
 class ItemRendimiento {
   const ItemRendimiento({
     required this.id,

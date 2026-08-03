@@ -15,7 +15,7 @@ class PantallaMisResenas extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis Reseñas')),
+      appBar: AppBar(title: const Text('Mis Reseas')),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(controladorMisResenasProvider.future),
         child: resenasState.when(
@@ -58,8 +58,8 @@ class PantallaMisResenas extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           resenas.length == 1
-                              ? '1 reseña'
-                              : '${resenas.length} reseñas',
+                              ? '1 resea'
+                              : '${resenas.length} reseas',
                           style: TipografiaApp.bodySm.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -74,7 +74,7 @@ class PantallaMisResenas extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 48),
                     child: Center(
                       child: Text(
-                        'Todavía no tenés reseñas.',
+                        'Todava no tens reseas.',
                         style: TipografiaApp.bodyMd.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

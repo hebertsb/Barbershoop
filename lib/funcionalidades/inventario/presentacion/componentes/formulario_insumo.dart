@@ -64,7 +64,7 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
   /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
   /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
   /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
-  /// al crecer el viewport). Detectamos la transición y devolvemos el scroll
+  /// al crecer el viewport). Detectamos la transicin y devolvemos el scroll
   /// a 0 en el siguiente frame.
   void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
     final tecladoSeAcabaDeCerrar =
@@ -153,7 +153,7 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
               TextFormField(
                 controller: _categoriaCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Categoría',
+                  labelText: 'Categora',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -182,7 +182,7 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
                     child: TextFormField(
                       controller: _stockMinimoCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Stock mínimo *',
+                        labelText: 'Stock mnimo *',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,

@@ -40,10 +40,10 @@ class PantallaGestionRankingBarberos extends ConsumerWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Cerrar y premiar?'),
+        title: const Text('Cerrar y premiar?'),
         content: Text(
           'Se va a fijar el podio final de "${programa.titulo}" y se '
-          'otorgarán las insignias del top 3. Esta acción no se puede '
+          'otorgarn las insignias del top 3. Esta accin no se puede '
           'deshacer.',
         ),
         actions: [
@@ -98,7 +98,7 @@ class PantallaGestionRankingBarberos extends ConsumerWidget {
         data: (programas) {
           if (programas.isEmpty) {
             return const Center(
-              child: Text('Todavía no creaste ningún programa de ranking.'),
+              child: Text('Todava no creaste ningn programa de ranking.'),
             );
           }
           return ListView.builder(
@@ -140,7 +140,7 @@ class PantallaGestionRankingBarberos extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$sucursalNombre · ${formatoFechaCorta(p.fechaInicio)} a '
+                        '$sucursalNombre  ${formatoFechaCorta(p.fechaInicio)} a '
                         '${formatoFechaCorta(p.fechaFin)}',
                       ),
                       Text(
@@ -149,7 +149,7 @@ class PantallaGestionRankingBarberos extends ConsumerWidget {
                       if (p.estaCerrado) ...[
                         const SizedBox(height: 4),
                         Text(
-                          'Ganador: ${p.nombreGanador ?? "—"}',
+                          'Ganador: ${p.nombreGanador ?? ""}',
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -180,7 +180,7 @@ class PantallaGestionRankingBarberos extends ConsumerWidget {
                               child: const Text('Marcar entregado'),
                             ),
                           if (p.estaCerrado && p.premioEntregado)
-                            const Chip(label: Text('Premio entregado ✓')),
+                            const Chip(label: Text('Premio entregado ')),
                         ],
                       ),
                     ],

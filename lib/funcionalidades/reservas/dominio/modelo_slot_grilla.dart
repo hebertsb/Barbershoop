@@ -1,15 +1,18 @@
-/// Un slot fijo de la grilla de horarios de un barbero para un día: libre
-/// (reservable) o bloqueado (ya ocupado / fuera de su horario de trabajo).
 class ModeloSlotGrilla {
-  const ModeloSlotGrilla({required this.horaInicio, required this.libre});
+  const ModeloSlotGrilla({
+    required this.horaInicio,
+    required this.disponible,
+  });
 
   final DateTime horaInicio;
-  final bool libre;
+  final bool disponible;
+
+  bool get libre => disponible;
 
   factory ModeloSlotGrilla.desdeJson(Map<String, dynamic> json) {
     return ModeloSlotGrilla(
       horaInicio: DateTime.parse(json['hora_inicio'] as String),
-      libre: json['libre'] as bool,
+      disponible: json['disponible'] as bool? ?? true,
     );
   }
 }

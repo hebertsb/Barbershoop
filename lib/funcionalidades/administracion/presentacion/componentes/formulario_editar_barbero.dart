@@ -38,7 +38,7 @@ class _FormularioEditarBarberoState
   @override
   void initState() {
     super.initState();
-    _sucursalSeleccionadaId = widget.barbero.sucursalId;
+    _sucursalSeleccionadaId = widget.barbero.sucursalId ?? '';
     _especialidades = List<String>.from(widget.barbero.especialidades);
   }
 
@@ -54,11 +54,11 @@ class _FormularioEditarBarberoState
   }
 
   /// Reacciona de forma proactiva al foco de los campos de texto: apenas
-  /// alguno toma foco (teclado abriéndose) bloquea el dropdown YA, antes de
-  /// que el usuario llegue a tocarlo. Así el hit-test de un toque posterior
-  /// sobre el dropdown ve `absorbing == true` y su menú nunca se abre con el
-  /// layout todavía en posición "con teclado abierto". Al perder el foco del
-  /// todo, espera a que termine la animación de cierre del teclado (~300ms)
+  /// alguno toma foco (teclado abrindose) bloquea el dropdown YA, antes de
+  /// que el usuario llegue a tocarlo. As el hit-test de un toque posterior
+  /// sobre el dropdown ve `absorbing == true` y su men nunca se abre con el
+  /// layout todava en posicin "con teclado abierto". Al perder el foco del
+  /// todo, espera a que termine la animacin de cierre del teclado (~300ms)
   /// antes de reactivarlo.
   void _alCambiarFoco() {
     final tieneFoco = _focusScopeNode?.hasFocus ?? false;
@@ -82,7 +82,7 @@ class _FormularioEditarBarberoState
   /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
   /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
   /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
-  /// al crecer el viewport). Detectamos la transición y devolvemos el scroll
+  /// al crecer el viewport). Detectamos la transicin y devolvemos el scroll
   /// a 0 en el siguiente frame.
   void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
     final tecladoSeAcabaDeCerrar =
@@ -165,7 +165,7 @@ class _FormularioEditarBarberoState
                 child: DropdownButtonFormField<String>(
                   initialValue: _sucursalSeleccionadaId,
                   decoration: const InputDecoration(
-                    labelText: 'Sucursal de Asignación *',
+                    labelText: 'Sucursal de Asignacin *',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.storefront),
                   ),

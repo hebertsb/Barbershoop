@@ -9,7 +9,7 @@ import 'package:barber_app/funcionalidades/turnos/presentacion/controladores/con
 
 /// Bottom-sheet para crear un turno de mostrador (walk-in).
 /// Permite buscar un cliente registrado por email o crear uno walk-in
-/// con nombre + teléfono.
+/// con nombre + telfono.
 class DialogoNuevoTurno extends ConsumerStatefulWidget {
   const DialogoNuevoTurno({super.key, required this.sucursalId});
 
@@ -57,7 +57,7 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Título
+              // Ttulo
               Row(
                 children: [
                   Text(
@@ -98,7 +98,7 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
               ),
               const SizedBox(height: 16),
 
-              // Campos según tipo
+              // Campos segn tipo
               if (_esWalkin) ...[
                 TextFormField(
                   controller: _nombreCtrl,
@@ -115,7 +115,7 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
                 TextFormField(
                   controller: _telefonoCtrl,
                   decoration: const InputDecoration(
-                    labelText: 'Teléfono (opcional)',
+                    labelText: 'Telfono (opcional)',
                     prefixIcon: Icon(Icons.phone_outlined),
                     border: OutlineInputBorder(),
                   ),
@@ -137,7 +137,7 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
               ],
               const SizedBox(height: 12),
 
-              // Selección de servicio
+              // Seleccin de servicio
               DropdownButtonFormField<ModeloServicio>(
                 decoration: const InputDecoration(
                   labelText: 'Servicio *',
@@ -148,13 +148,13 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
                     .map(
                       (s) => DropdownMenuItem(
                         value: s,
-                        child: Text('${s.nombre} — ${formatoMoneda(s.precio)}'),
+                        child: Text('${s.nombre}  ${formatoMoneda(s.precio)}'),
                       ),
                     )
                     .toList(),
                 onChanged: (s) => setState(() => _servicioSeleccionado = s),
                 validator: (_) => _servicioSeleccionado == null
-                    ? 'Seleccioná un servicio'
+                    ? 'Seleccion un servicio'
                     : null,
               ),
               const SizedBox(height: 12),
@@ -175,7 +175,7 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
                 const SizedBox(height: 12),
               ],
 
-              // Botón confirmar
+              // Botn confirmar
               FilledButton.icon(
                 onPressed: _cargando ? null : _confirmar,
                 icon: _cargando
@@ -217,7 +217,7 @@ class _DialogoNuevoTurnoState extends ConsumerState<DialogoNuevoTurno> {
             await controlador.buscarClientePorEmail(_emailCtrl.text.trim());
         if (cliente == null) {
           setState(() {
-            _errorMensaje = 'No se encontró ningún cliente con ese email.';
+            _errorMensaje = 'No se encontr ningn cliente con ese email.';
             _cargando = false;
           });
           return;

@@ -12,12 +12,6 @@ const _etiquetasNivel = {
   'master': 'Master',
 };
 
-/// Selector del `nivel` del barbero (junior/senior/master), usado en las
-/// tarjetas de `PantallaGestionBarberos`.
-///
-/// [bloqueado]: cuando el buscador de la pantalla tiene texto, se
-/// deshabilita para evitar guardar sobre una lista que puede reordenarse
-/// mientras el admin todavía está escribiendo.
 class SelectorNivelBarbero extends ConsumerWidget {
   const SelectorNivelBarbero({
     super.key,
@@ -30,9 +24,16 @@ class SelectorNivelBarbero extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final nivelActual = barbero.nivel?.toLowerCase().trim();
+    final nivelValido = (nivelActual != null && _niveles.contains(nivelActual))
+        ? nivelActual
+        : null;
+
     return DropdownButton<String?>(
-      value: barbero.nivel,
-      hint: const Text('Sin nivel'),
+      value: nivelValido,
+      hint: Text(barbero.nivel != null && barbero.nivel!.isNotEmpty
+          ? barbero.nivel!
+          : 'Sin nivel'),
       isDense: true,
       underline: const SizedBox.shrink(),
       items: [
@@ -40,7 +41,7 @@ class SelectorNivelBarbero extends ConsumerWidget {
         ..._niveles.map(
           (n) => DropdownMenuItem<String?>(
             value: n,
-            child: Text(_etiquetasNivel[n]!),
+            child: Text(_etiquetasNivel[n] ?? n.toUpperCase()),
           ),
         ),
       ],

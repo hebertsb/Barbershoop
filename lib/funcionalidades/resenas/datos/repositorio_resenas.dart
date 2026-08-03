@@ -14,7 +14,7 @@ abstract class RepositorioResenas {
     String? comentario,
   });
 
-  /// `true` si la cita ya tiene una reseña del cliente autenticado.
+  /// `true` si la cita ya tiene una resea del cliente autenticado.
   Future<bool> citaYaTieneResena(String citaId);
 
   Future<List<ModeloResena>> obtenerMisResenas();

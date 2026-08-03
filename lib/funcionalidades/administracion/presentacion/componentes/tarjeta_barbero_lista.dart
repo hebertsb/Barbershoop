@@ -46,17 +46,31 @@ class TarjetaBarberoLista extends ConsumerWidget {
             shape: BoxShape.circle,
             border: Border.all(color: ColoresApp.primario),
           ),
-          child: CircleAvatar(
-            backgroundImage: barbero.urlFotoPerfil != null
-                ? CachedNetworkImageProvider(
-                    barbero.urlFotoPerfil!,
-                    maxWidth: 80,
-                    maxHeight: 80,
-                  )
-                : null,
-            child: barbero.urlFotoPerfil == null
-                ? const Icon(Icons.person)
-                : null,
+          child: ClipOval(
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: barbero.urlFotoPerfil != null &&
+                      barbero.urlFotoPerfil!.isNotEmpty
+                  ? Image.network(
+                      barbero.urlFotoPerfil!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => CircleAvatar(
+                        backgroundColor: colorScheme.surfaceContainerHigh,
+                        child: Icon(
+                          Icons.person,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  : CircleAvatar(
+                      backgroundColor: colorScheme.surfaceContainerHigh,
+                      child: Icon(
+                        Icons.person,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+            ),
           ),
         ),
         title: Text(
@@ -84,9 +98,9 @@ class TarjetaBarberoLista extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 [
-                  if (medallas.oro > 0) '🥇×${medallas.oro}',
-                  if (medallas.plata > 0) '🥈×${medallas.plata}',
-                  if (medallas.bronce > 0) '🥉×${medallas.bronce}',
+                  if (medallas.oro > 0) '${medallas.oro}',
+                  if (medallas.plata > 0) '${medallas.plata}',
+                  if (medallas.bronce > 0) '${medallas.bronce}',
                 ].join(' '),
                 style: const TextStyle(fontSize: 11),
               ),

@@ -22,18 +22,18 @@ class PantallaConfigurarHorarios extends ConsumerStatefulWidget {
 
 class _PantallaConfigurarHorariosState
     extends ConsumerState<PantallaConfigurarHorarios> {
-  // Lista de días de la semana (0: Domingo, 1: Lunes, ..., 6: Sábado)
+  // Lista de das de la semana (0: Domingo, 1: Lunes, ..., 6: Sbado)
   final List<String> _diasNombres = [
     'Domingo',
     'Lunes',
     'Martes',
-    'Miércoles',
+    'Mircoles',
     'Jueves',
     'Viernes',
-    'Sábado',
+    'Sbado',
   ];
 
-  // Estado local para los días activos y sus horarios
+  // Estado local para los das activos y sus horarios
   final Map<int, bool> _diasActivos = {};
   final Map<int, TimeOfDay> _horasInicio = {};
   final Map<int, TimeOfDay> _horasFin = {};
@@ -116,7 +116,7 @@ class _PantallaConfigurarHorariosState
 
           horariosNuevos.add(
             ModeloHorarioBarbero(
-              id: '', // Se generará en la base de datos o se recreará
+              id: '', // Se generar en la base de datos o se recrear
               barberoId: widget.barberoId,
               barberiaId: widget.barbero?.barberiaId ?? '',
               diaSemana: i,
@@ -178,7 +178,7 @@ class _PantallaConfigurarHorariosState
                         itemBuilder: (context, index) {
                           // En la app ordenamos Lunes a Domingo para comodidad
                           // pero el index sigue mapeado a Lunes=1, ..., Domingo=0.
-                          // Convertir: 0: Domingo, 1: Lunes, ..., 6: Sábado.
+                          // Convertir: 0: Domingo, 1: Lunes, ..., 6: Sbado.
                           // Haremos orden de Lunes a Domingo.
                           final diaSemana = (index + 1) % 7;
                           final activo = _diasActivos[diaSemana]!;
@@ -280,7 +280,7 @@ class _PantallaConfigurarHorariosState
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                         ),
-                        child: const Text('Guardar Configuración'),
+                        child: const Text('Guardar Configuracin'),
                       ),
                     ),
                   ],

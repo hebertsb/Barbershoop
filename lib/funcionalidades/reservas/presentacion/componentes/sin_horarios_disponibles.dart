@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 
-/// Estado vacío mostrado cuando no hay horarios libres para el día elegido.
+/// Estado vaco mostrado cuando no hay horarios libres para el da elegido.
 class SinHorariosDisponibles extends StatelessWidget {
   const SinHorariosDisponibles({super.key});
 
@@ -22,7 +22,7 @@ class SinHorariosDisponibles extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No hay horarios libres ese día. Prueba seleccionando otra fecha.',
+              'No hay horarios libres ese da. Prueba seleccionando otra fecha.',
               textAlign: TextAlign.center,
               style: TipografiaApp.bodyMd.copyWith(
                 color: colorScheme.onSurfaceVariant,

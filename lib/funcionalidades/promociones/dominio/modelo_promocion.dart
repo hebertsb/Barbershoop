@@ -1,107 +1,86 @@
 import 'enum_tipo_descuento.dart';
 
 class ModeloPromocion {
-  const ModeloPromocion({
+  ModeloPromocion({
     required this.id,
     required this.barberiaId,
-    required this.servicioId,
     required this.titulo,
-    required this.descripcion,
-    required this.imagen,
+    this.descripcion,
     required this.tipoDescuento,
-    required this.descuento,
-    required this.fechaInicio,
-    required this.fechaFin,
-    required this.activo,
-    this.nombreServicio,
-    this.limiteUsosPorCliente,
+    num? valorDescuento,
+    num? descuento,
+    this.sucursalId,
+    List<String>? serviciosIds,
+    String? servicioId,
+    String? nombreServicio,
+    List<String>? nombresServicios,
+    this.fechaInicio,
+    this.fechaFin,
+    String? fotoUrlParam,
+    String? fotoUrl,
+    String? imagen,
+    bool? activa,
+    bool? activo,
     this.capacidadMaxima,
-    this.serviciosIds,
-    this.nombresServiciosCombo,
-    this.clienteExclusivoId,
-  });
+    this.limiteUsosPorCliente,
+  })  : valorDescuento = (valorDescuento ?? descuento ?? 0).toDouble(),
+        serviciosIds = serviciosIds ?? (servicioId != null ? [servicioId] : const []),
+        fotoUrl = fotoUrlParam ?? fotoUrl ?? imagen,
+        activa = activa ?? activo ?? true,
+        nombresServiciosCache = nombresServicios ?? (nombreServicio != null ? [nombreServicio] : null);
 
   final String id;
   final String barberiaId;
-  final String? servicioId;
   final String titulo;
   final String? descripcion;
-  final String? imagen;
   final TipoDescuento tipoDescuento;
-  final double descuento;
+  final double valorDescuento;
+  final String? sucursalId;
+  final List<String> serviciosIds;
   final DateTime? fechaInicio;
   final DateTime? fechaFin;
-  final bool activo;
-
-  /// Viene de un embed de Supabase (`servicios.nombre`), solo presente
-  /// cuando el repositorio lo pide explícitamente.
-  final String? nombreServicio;
-
-  final int? limiteUsosPorCliente;
+  final String? fotoUrl;
+  final bool activa;
   final int? capacidadMaxima;
+  final int? limiteUsosPorCliente;
+  final List<String>? nombresServiciosCache;
 
-  /// Combo de 2+ servicios (jsonb) -- alternativa a [servicioId] cuando la
-  /// promo aplica a varios servicios juntos.
-  final List<String>? serviciosIds;
-  final List<String>? nombresServiciosCombo;
+  double get descuento => valorDescuento;
+  String? get imagen => fotoUrl;
+  String get etiquetaServicios => serviciosIds.isNotEmpty ? 'Válido para servicios seleccionados' : 'Válido para todos los servicios';
+  String? get servicioId => serviciosIds.isNotEmpty ? serviciosIds.first : null;
 
-  /// Premio de fidelidad: promoción reusada como cupón de un solo cliente.
-  final String? clienteExclusivoId;
+  /// Alias de [activa] para compatibilidad con la UI.
+  bool get activo => activa;
 
-  bool get esCombo => (serviciosIds?.length ?? 0) > 1;
+  /// Una promoción es un combo si aplica a más de un servicio.
+  bool get esCombo => serviciosIds.length > 1;
 
-  /// "Corte + Barba" para un combo, o el nombre embebido de
-  /// [servicioId] para una promo de un solo servicio -- vacío si no hay
-  /// ninguno de los dos disponibles.
-  String get etiquetaServicios {
-    if (esCombo) return (nombresServiciosCombo ?? const []).join(' + ');
-    return nombreServicio ?? '';
-  }
-
-  bool get estaVigente {
-    if (!activo) return false;
-    final hoy = DateTime.now();
-    if (fechaInicio != null && hoy.isBefore(fechaInicio!)) return false;
-    if (fechaFin != null && hoy.isAfter(fechaFin!)) return false;
-    return true;
-  }
-
-  double calcularDescuento(double precioBase) {
-    final monto = tipoDescuento == TipoDescuento.porcentaje
-        ? precioBase * (descuento / 100)
-        : descuento;
-    return monto > precioBase ? precioBase : monto;
-  }
-
-  double calcularPrecioFinal(double precioBase) {
-    return precioBase - calcularDescuento(precioBase);
-  }
+  /// Retorna si la promoción está vigente actualmente.
+  bool get estaVigente => activa && (fechaFin == null || fechaFin!.isAfter(DateTime.now()));
 
   factory ModeloPromocion.desdeJson(Map<String, dynamic> json) {
-    final serviciosJson = json['servicios'] as Map<String, dynamic>?;
+    final sId = json['servicio_id'] as String?;
+    final sIds = (json['servicios_ids'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList();
     return ModeloPromocion(
-      id: json['id'] as String,
-      barberiaId: json['barberia_id'] as String,
-      servicioId: json['servicio_id'] as String?,
-      nombreServicio: serviciosJson?['nombre'] as String?,
-      titulo: json['titulo'] as String,
+      id: json['id'] as String? ?? '',
+      barberiaId: json['barberia_id'] as String? ?? '',
+      titulo: json['titulo'] as String? ?? 'Promoción',
       descripcion: json['descripcion'] as String?,
-      imagen: json['imagen'] as String?,
-      tipoDescuento: TipoDescuento.desdeTexto(json['tipo_descuento'] as String),
-      descuento: (json['descuento'] as num).toDouble(),
-      fechaInicio: json['fecha_inicio'] != null
-          ? DateTime.parse(json['fecha_inicio'] as String)
-          : null,
-      fechaFin: json['fecha_fin'] != null
-          ? DateTime.parse(json['fecha_fin'] as String)
-          : null,
-      activo: json['activo'] as bool,
-      limiteUsosPorCliente: json['limite_usos_por_cliente'] as int?,
-      capacidadMaxima: json['capacidad_maxima'] as int?,
-      serviciosIds: (json['servicios_ids'] as List?)?.cast<String>(),
-      nombresServiciosCombo:
-          (json['nombres_servicios'] as List?)?.cast<String>(),
-      clienteExclusivoId: json['cliente_exclusivo_id'] as String?,
+      tipoDescuento: TipoDescuento.desdeTexto(json['tipo_descuento'] as String? ?? ''),
+      valorDescuento: (json['valor_descuento'] ?? json['descuento'] as num? ?? 0).toDouble(),
+      sucursalId: json['sucursal_id'] as String?,
+      serviciosIds: sIds ?? (sId != null ? [sId] : const []),
+      fechaInicio: json['fecha_inicio'] == null
+          ? null
+          : DateTime.parse(json['fecha_inicio'] as String),
+      fechaFin: json['fecha_fin'] == null
+          ? null
+          : DateTime.parse(json['fecha_fin'] as String),
+      fotoUrl: (json['foto_url'] ?? json['imagen']) as String?,
+      activa: json['activa'] as bool? ?? json['activo'] as bool? ?? true,
     );
   }
 
@@ -109,59 +88,52 @@ class ModeloPromocion {
     return {
       'id': id,
       'barberia_id': barberiaId,
-      'servicio_id': servicioId,
       'titulo': titulo,
       'descripcion': descripcion,
-      'imagen': imagen,
-      'tipo_descuento': tipoDescuento.aTexto(),
-      'descuento': descuento,
-      'fecha_inicio': fechaInicio?.toIso8601String().split('T').first,
-      'fecha_fin': fechaFin?.toIso8601String().split('T').first,
-      'activo': activo,
-      'limite_usos_por_cliente': limiteUsosPorCliente,
-      'capacidad_maxima': capacidadMaxima,
-      if (serviciosIds != null) 'servicios_ids': serviciosIds,
-      if (nombresServiciosCombo != null)
-        'nombres_servicios': nombresServiciosCombo,
-      if (clienteExclusivoId != null)
-        'cliente_exclusivo_id': clienteExclusivoId,
+      'tipo_descuento': tipoDescuento.name,
+      'valor_descuento': valorDescuento,
+      'sucursal_id': sucursalId,
+      'servicios_ids': serviciosIds,
+      'fecha_inicio': fechaInicio?.toIso8601String(),
+      'fecha_fin': fechaFin?.toIso8601String(),
+      'foto_url': fotoUrl,
+      'activa': activa,
     };
   }
 
   ModeloPromocion copyWith({
-    String? servicioId,
+    String? id,
+    String? barberiaId,
     String? titulo,
     String? descripcion,
-    String? imagen,
     TipoDescuento? tipoDescuento,
-    double? descuento,
+    double? valorDescuento,
+    String? sucursalId,
+    List<String>? serviciosIds,
     DateTime? fechaInicio,
     DateTime? fechaFin,
+    String? fotoUrl,
+    bool? activa,
     bool? activo,
-    int? limiteUsosPorCliente,
     int? capacidadMaxima,
-    List<String>? serviciosIds,
-    List<String>? nombresServiciosCombo,
+    int? limiteUsosPorCliente,
   }) {
     return ModeloPromocion(
-      id: id,
-      barberiaId: barberiaId,
-      servicioId: servicioId ?? this.servicioId,
-      nombreServicio: nombreServicio,
+      id: id ?? this.id,
+      barberiaId: barberiaId ?? this.barberiaId,
       titulo: titulo ?? this.titulo,
       descripcion: descripcion ?? this.descripcion,
-      imagen: imagen ?? this.imagen,
       tipoDescuento: tipoDescuento ?? this.tipoDescuento,
-      descuento: descuento ?? this.descuento,
+      valorDescuento: valorDescuento ?? this.valorDescuento,
+      sucursalId: sucursalId ?? this.sucursalId,
+      serviciosIds: serviciosIds ?? this.serviciosIds,
       fechaInicio: fechaInicio ?? this.fechaInicio,
       fechaFin: fechaFin ?? this.fechaFin,
-      activo: activo ?? this.activo,
-      limiteUsosPorCliente: limiteUsosPorCliente ?? this.limiteUsosPorCliente,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
+      activa: activa ?? activo ?? this.activa,
       capacidadMaxima: capacidadMaxima ?? this.capacidadMaxima,
-      serviciosIds: serviciosIds ?? this.serviciosIds,
-      nombresServiciosCombo:
-          nombresServiciosCombo ?? this.nombresServiciosCombo,
-      clienteExclusivoId: clienteExclusivoId,
+      limiteUsosPorCliente:
+          limiteUsosPorCliente ?? this.limiteUsosPorCliente,
     );
   }
 }

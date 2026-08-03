@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controladores/controlador_resena_de_cita.dart';
 import 'formulario_calificacion.dart';
 
-/// Botón "Calificar" pensado como pie de `TarjetaMiCita` para citas
-/// `completada`. Si la cita ya tiene reseña, no dibuja nada.
+/// Botn "Calificar" pensado como pie de `TarjetaMiCita` para citas
+/// `completada`. Si la cita ya tiene resea, no dibuja nada.
 class ResenaCita extends ConsumerWidget {
   const ResenaCita({super.key, required this.citaId});
 

@@ -8,11 +8,11 @@ import '../../../nucleo/errores/excepciones_app.dart';
 import '../dominio/modelo_pago.dart';
 
 abstract class RepositorioPagos {
-  /// El pago asociado a una cita (puede no existir si nunca se subió un
+  /// El pago asociado a una cita (puede no existir si nunca se subi un
   /// comprobante).
   Future<ModeloPago?> obtenerPagoDeCita(String citaId);
 
-  /// Todos los pagos `por_verificar` de la barbería del usuario actual, con
+  /// Todos los pagos `por_verificar` de la barbera del usuario actual, con
   /// el nombre del cliente y la fecha de la cita ya embebidos.
   Future<List<ModeloPago>> obtenerPagosPorVerificar();
 

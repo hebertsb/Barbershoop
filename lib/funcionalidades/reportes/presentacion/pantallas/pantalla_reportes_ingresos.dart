@@ -12,7 +12,7 @@ import '../controladores/controlador_reportes.dart';
 
 /// Mapea el filtro de Reportes al `p_periodo` que espera el RPC
 /// `obtener_tendencia_ingresos` ('semana' | 'mes' | 'anio'). 'hoy' no tiene
-/// una serie diaria con sentido (sería un solo punto) y 'personalizado' es
+/// una serie diaria con sentido (sera un solo punto) y 'personalizado' es
 /// un rango arbitrario que no calza con ninguna serie predefinida -- ambos
 /// devuelven null y la tarjeta de ingresos se ve sin sparkline.
 String? _mapearPeriodoATendencia(FiltroPeriodo filtro) {
@@ -88,9 +88,9 @@ class PantallaReportesIngresos extends ConsumerWidget {
     );
 
     // Sparkline real de ingresos: solo cuando el filtro actual mapea a un
-    // período soportado por `obtener_tendencia_ingresos` (ver comentario de
-    // `_mapearPeriodoATendencia`). El provider es family por período, así
-    // que solo se observa cuando hay un período válido.
+    // perodo soportado por `obtener_tendencia_ingresos` (ver comentario de
+    // `_mapearPeriodoATendencia`). El provider es family por perodo, as
+    // que solo se observa cuando hay un perodo vlido.
     final periodoTendencia = _mapearPeriodoATendencia(estado.filtro);
     final sparklineIngresos = periodoTendencia == null
         ? null
@@ -106,7 +106,7 @@ class PantallaReportesIngresos extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.analytics_outlined),
-            tooltip: 'Power BI / Integración',
+            tooltip: 'Power BI / Integracin',
             onPressed: () {
               showDialog(
                 context: context,
@@ -122,7 +122,7 @@ class PantallaReportesIngresos extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Filtro por Período
+            // Filtro por Perodo
             SelectorPeriodoReporte(
               filtroActual: estado.filtro,
               rangoFechas: (inicio, fin),
@@ -145,9 +145,9 @@ class PantallaReportesIngresos extends ConsumerWidget {
               // Grid de KPIs. Alto fijo (no `childAspectRatio`): con pocas
               // columnas en pantallas anchas, un aspect ratio fijo estira la
               // celda hacia arriba junto con el ancho, dejando una tarjeta
-              // enorme casi vacía (bug real reportado en tablet). El
+              // enorme casi vaca (bug real reportado en tablet). El
               // contenido de `TarjetaKpiReporte` ya se distribuye con
-              // `mainAxisAlignment.spaceBetween`, así que tolera un alto
+              // `mainAxisAlignment.spaceBetween`, as que tolera un alto
               // fijo sin desbordarse.
               GridView(
                 shrinkWrap: true,
@@ -189,7 +189,7 @@ class PantallaReportesIngresos extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
 
-              // Gráfico por Servicios
+              // Grfico por Servicios
               GraficoBarrasRendimiento(
                 titulo: 'Rendimiento por Servicio',
                 items: estado.servicios
@@ -205,7 +205,7 @@ class PantallaReportesIngresos extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Gráfico por Barberos
+              // Grfico por Barberos
               GraficoBarrasRendimiento(
                 titulo: 'Rendimiento por Barbero',
                 items: estado.barberos

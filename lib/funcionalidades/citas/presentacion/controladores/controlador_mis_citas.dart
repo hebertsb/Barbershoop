@@ -28,8 +28,8 @@ final controladorMisCitasProvider =
       ControladorMisCitas.new,
     );
 
-/// Cita futura `pendiente`/`confirmada` más cercana en el tiempo, o `null`
-/// si no hay ninguna que califique -- usada por la tarjeta "Próxima cita"
+/// Cita futura `pendiente`/`confirmada` ms cercana en el tiempo, o `null`
+/// si no hay ninguna que califique -- usada por la tarjeta "Prxima cita"
 /// del dashboard del cliente.
 final proximaCitaProvider = Provider<ModeloCita?>((ref) {
   final citas = ref.watch(controladorMisCitasProvider).value ?? [];

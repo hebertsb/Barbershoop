@@ -25,7 +25,7 @@ class ControladorBarberos extends AsyncNotifier<List<ModeloBarbero>> {
             sucursalId: sucursalId,
             especialidades: especialidades,
           );
-      // Recargar la lista completa de barberos para obtener la información de perfil
+      // Recargar la lista completa de barberos para obtener la informacin de perfil
       return ref.read(repositorioAdministracionProvider).obtenerBarberos();
     });
     if (state.hasError) throw state.error!;
@@ -92,12 +92,12 @@ class ControladorBarberos extends AsyncNotifier<List<ModeloBarbero>> {
     if (state.hasError) throw state.error!;
   }
 
-  // A diferencia de los métodos anteriores (que actualizan un barbero
-  // elegido por el admin), este actúa sobre el propio perfil de quien llama:
-  // no hay forma de saber de antemano cuál fila de la lista en memoria le
-  // corresponde (puede no estar cargada, o el barbero puede tener más de
-  // una fila por multi-sucursal), así que se recarga la lista completa
-  // después de guardar, en vez de intentar un update optimista.
+  // A diferencia de los mtodos anteriores (que actualizan un barbero
+  // elegido por el admin), este acta sobre el propio perfil de quien llama:
+  // no hay forma de saber de antemano cul fila de la lista en memoria le
+  // corresponde (puede no estar cargada, o el barbero puede tener ms de
+  // una fila por multi-sucursal), as que se recarga la lista completa
+  // despus de guardar, en vez de intentar un update optimista.
   Future<void> guardarMiPerfil({
     String? descripcion,
     required List<String> especialidades,
@@ -128,7 +128,7 @@ final controladorBarberosProvider =
 
 // Barberos con columnas acotadas, seguro para pantallas cliente-facing
 // (RPC `obtener_barberos_publicos`). Trae todos los barberos activos
-// del tenant y se filtra por sucursal client-side, mismo patrón que
+// del tenant y se filtra por sucursal client-side, mismo patrn que
 // `PantallaSeleccionBarbero` ya usa hoy con `controladorBarberosProvider`.
 final barberosPublicosProvider =
     FutureProvider.autoDispose<List<ModeloBarbero>>((ref) {

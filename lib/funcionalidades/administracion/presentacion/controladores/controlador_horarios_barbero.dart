@@ -11,10 +11,10 @@ const _diasNombres = [
   'Domingo',
   'Lunes',
   'Martes',
-  'Miércoles',
+  'Mircoles',
   'Jueves',
   'Viernes',
-  'Sábado',
+  'Sbado',
 ];
 
 int _minutosDelDia(String hora) {
@@ -38,7 +38,7 @@ class ControladorHorariosBarbero
         if (_minutosDelDia(horario.horaFin) <=
             _minutosDelDia(horario.horaInicio)) {
           throw ExcepcionDesconocida(
-            'La hora de cierre debe ser posterior a la de apertura para el día '
+            'La hora de cierre debe ser posterior a la de apertura para el da '
             '${_diasNombres[horario.diaSemana]}.',
           );
         }

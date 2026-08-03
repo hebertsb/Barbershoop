@@ -7,8 +7,8 @@ import 'grilla_botones_horario.dart';
 import 'leyenda_libre_bloqueado.dart';
 import 'sin_horarios_disponibles.dart';
 
-/// Cuerpo cuando hay un barbero específico elegido: libres + bloqueados
-/// tachados, agrupados en Mañana/Tarde, con leyenda.
+/// Cuerpo cuando hay un barbero especfico elegido: libres + bloqueados
+/// tachados, agrupados en Maana/Tarde, con leyenda.
 class CuerpoGrillaHorario extends StatelessWidget {
   const CuerpoGrillaHorario({super.key, required this.future});
 
@@ -42,7 +42,7 @@ class CuerpoGrillaHorario extends StatelessWidget {
             const LeyendaLibreBloqueado(),
             const SizedBox(height: 16),
             if (manana.isNotEmpty) ...[
-              const EncabezadoSeccionHorario(texto: 'MAÑANA'),
+              const EncabezadoSeccionHorario(texto: 'MAANA'),
               const SizedBox(height: 8),
               GrillaBotonesHorario(items: _aItems(manana)),
               const SizedBox(height: 20),

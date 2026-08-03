@@ -6,9 +6,9 @@ import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../dominio/enum_tipo_descuento.dart';
 import '../../dominio/modelo_promocion.dart';
 
-/// Tarjeta de promoción para el carrusel horizontal del panel cliente.
-/// Diseño idéntico al mockup: imagen oscura arriba, badge de descuento,
-/// título en negrita, descripción breve y botón de acción al fondo.
+/// Tarjeta de promocin para el carrusel horizontal del panel cliente.
+/// Diseo idntico al mockup: imagen oscura arriba, badge de descuento,
+/// ttulo en negrita, descripcin breve y botn de accin al fondo.
 class TarjetaPromocionCliente extends StatelessWidget {
   const TarjetaPromocionCliente({
     super.key,
@@ -40,10 +40,10 @@ class TarjetaPromocionCliente extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Imagen con badge de descuento y banner "VÁLIDO HASTA..."
+          // Imagen con badge de descuento y banner "VLIDO HASTA..."
           Stack(
             children: [
-              // Imagen de la promoción
+              // Imagen de la promocin
               SizedBox(
                 height: 110,
                 width: double.infinity,
@@ -79,7 +79,7 @@ class TarjetaPromocionCliente extends StatelessWidget {
                   ),
                 ),
               ),
-              // Badge "VÁLIDO HASTA ..."
+              // Badge "VLIDO HASTA ..."
               if (promocion.fechaFin != null)
                 Positioned(
                   top: 8,
@@ -96,7 +96,7 @@ class TarjetaPromocionCliente extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      'VÁLIDO HASTA ${_diaSemana(promocion.fechaFin!)}',
+                      'VLIDO HASTA ${_diaSemana(promocion.fechaFin!)}',
                       style: TipografiaApp.labelSm.copyWith(
                         color: ColoresApp.primario,
                         fontWeight: FontWeight.bold,
@@ -130,7 +130,7 @@ class TarjetaPromocionCliente extends StatelessWidget {
               ),
             ],
           ),
-          // Contenido: título, descripción y botón
+          // Contenido: ttulo, descripcin y botn
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
@@ -183,7 +183,7 @@ class TarjetaPromocionCliente extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 12),
-                // Botón "RECLAMAR OFERTA" al estilo mockup
+                // Botn "RECLAMAR OFERTA" al estilo mockup
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -214,9 +214,9 @@ class TarjetaPromocionCliente extends StatelessWidget {
     );
   }
 
-  /// Devuelve el nombre del día de la semana abreviado en español.
+  /// Devuelve el nombre del da de la semana abreviado en espaol.
   String _diaSemana(DateTime fecha) {
-    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const dias = ['Lun', 'Mar', 'Mi', 'Jue', 'Vie', 'Sb', 'Dom'];
     return dias[fecha.weekday - 1];
   }
 }

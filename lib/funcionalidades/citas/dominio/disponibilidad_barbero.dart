@@ -14,8 +14,8 @@ class HuecoLibre {
 }
 
 /// Disponibilidad de un barbero en un momento dado -- usada por la agenda
-/// (`TarjetaAgendaItem`) para saber a quién se le puede asignar un turno
-/// que llega, y por `AvisoDisponibilidadServicio` para saber quién tiene
+/// (`TarjetaAgendaItem`) para saber a quin se le puede asignar un turno
+/// que llega, y por `AvisoDisponibilidadServicio` para saber quin tiene
 /// hueco libre AHORA para un servicio puntual.
 class EstadoDisponibilidadBarbero {
   const EstadoDisponibilidadBarbero({
@@ -28,8 +28,8 @@ class EstadoDisponibilidadBarbero {
   final ModeloBarbero barbero;
   final bool ocupado;
 
-  /// Hora estimada en que termina su cita/turno actual -- `null` si está
-  /// ocupado pero no se pudo calcular una estimación.
+  /// Hora estimada en que termina su cita/turno actual -- `null` si est
+  /// ocupado pero no se pudo calcular una estimacin.
   final DateTime? libreDesde;
 
   /// Huecos libres dentro de su horario de trabajo de hoy, ya descontando
@@ -40,7 +40,7 @@ class EstadoDisponibilidadBarbero {
 /// Calcula, para cada barbero de [barberos], sus huecos libres HOY dentro
 /// de su horario de trabajo (de [horarios]), descontando sus citas
 /// (`pendiente`/`confirmada`) y turnos (`esperando`/`enAtencion`) activos.
-/// Puramente informativo -- una estimación con la duración de [servicios]
+/// Puramente informativo -- una estimacin con la duracin de [servicios]
 /// conocida al momento de reservar, no una fuente de verdad transaccional
 /// (eso lo valida `reservar_cita` del lado servidor).
 List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
@@ -85,10 +85,11 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
       for (final t in turnos)
         if (t.barberoId == barbero.id &&
             (t.estado == EstadoTurno.esperando ||
-                t.estado == EstadoTurno.enAtencion))
+                t.estado == EstadoTurno.enAtencion) &&
+            (t.horaLlegada != null || t.creadoEn != null))
           (
-            t.horaLlegada,
-            t.horaLlegada.add(Duration(minutes: duracionDe(t.servicioId))),
+            t.horaLlegada ?? t.creadoEn!,
+            (t.horaLlegada ?? t.creadoEn!).add(Duration(minutes: duracionDe(t.servicioId ?? ''))),
           ),
     ]..sort((a, b) => a.$1.compareTo(b.$1));
 
@@ -115,7 +116,7 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
       }
     }
 
-    // Solo huecos que todavía no terminaron.
+    // Solo huecos que todava no terminaron.
     final huecosFuturos = huecos
         .where((h) => h.fin.isAfter(ahora))
         .map(

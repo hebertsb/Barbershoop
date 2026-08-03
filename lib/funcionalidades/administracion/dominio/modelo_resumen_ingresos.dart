@@ -1,28 +1,31 @@
 class ModeloResumenIngresos {
   const ModeloResumenIngresos({
-    required this.ingresosHoy,
-    required this.ingresosMes,
-    required this.ingresosAnio,
-    required this.citasHoy,
-    this.ingresosAyer,
-    this.citasAyer,
+    this.totalIngresos = 0,
+    this.totalCitas = 0,
+    this.promedioPorCita = 0,
+    this.ingresosHoy = 0,
+    this.ingresosAyer = 0,
+    this.citasHoy = 0,
+    this.citasAyer = 0,
   });
 
+  final double totalIngresos;
+  final int totalCitas;
+  final double promedioPorCita;
   final double ingresosHoy;
-  final double ingresosMes;
-  final double ingresosAnio;
+  final double ingresosAyer;
   final int citasHoy;
-  final double? ingresosAyer;
-  final int? citasAyer;
+  final int citasAyer;
 
   factory ModeloResumenIngresos.desdeJson(Map<String, dynamic> json) {
     return ModeloResumenIngresos(
-      ingresosHoy: (json['ingresos_hoy'] as num).toDouble(),
-      ingresosMes: (json['ingresos_mes'] as num).toDouble(),
-      ingresosAnio: (json['ingresos_anio'] as num).toDouble(),
-      citasHoy: json['citas_hoy'] as int,
-      ingresosAyer: (json['ingresos_ayer'] as num?)?.toDouble(),
-      citasAyer: json['citas_ayer'] as int?,
+      totalIngresos: (json['total_ingresos'] as num? ?? 0).toDouble(),
+      totalCitas: json['total_citas'] as int? ?? 0,
+      promedioPorCita: (json['promedio_por_cita'] as num? ?? 0).toDouble(),
+      ingresosHoy: (json['ingresos_hoy'] as num? ?? 0).toDouble(),
+      ingresosAyer: (json['ingresos_ayer'] as num? ?? 0).toDouble(),
+      citasHoy: json['citas_hoy'] as int? ?? 0,
+      citasAyer: json['citas_ayer'] as int? ?? 0,
     );
   }
 }

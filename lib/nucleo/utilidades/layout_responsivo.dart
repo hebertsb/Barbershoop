@@ -1,20 +1,18 @@
-/// Ancho (px) a partir del cual se considera "pantalla ancha" (tablet en
-/// horizontal / laptop) y se activa el layout de sidebar + grillas
-/// multi-columna en vez del layout de una sola columna del celular.
-const double anchoUmbralPantallaAncha = 840;
+import 'package:flutter/material.dart';
 
-bool esPantallaAncha(double ancho) => ancho >= anchoUmbralPantallaAncha;
+const double anchoUmbralPantallaAncha = 600.0;
 
-/// Calcula cuántas columnas entran en [ancho] a [anchoTarjeta] px cada una,
-/// acotado entre [minimo] y [maximo].
-int calcularColumnas(
-  double ancho, {
-  double anchoTarjeta = 200,
-  int minimo = 2,
-  int maximo = 4,
-}) {
-  final columnas = (ancho / anchoTarjeta).floor();
-  if (columnas < minimo) return minimo;
-  if (columnas > maximo) return maximo;
-  return columnas;
+bool esPantallaAncha(dynamic arg) {
+  if (arg is BuildContext) {
+    return MediaQuery.of(arg).size.width >= anchoUmbralPantallaAncha;
+  } else if (arg is num) {
+    return arg >= anchoUmbralPantallaAncha;
+  }
+  return false;
+}
+
+int calcularColumnas(BuildContext context, {double anchoMinimoTarjeta = 300.0}) {
+  final anchoDisponible = MediaQuery.of(context).size.width;
+  final columnas = (anchoDisponible / anchoMinimoTarjeta).floor();
+  return columnas.clamp(1, 4);
 }

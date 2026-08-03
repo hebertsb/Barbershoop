@@ -18,8 +18,8 @@ import '../componentes/tarjeta_mi_cita.dart';
 import '../controladores/controlador_mis_citas.dart';
 
 /// Pantalla de solo lectura con las citas del cliente autenticado
-/// (pasadas y futuras). Se convertirá en la pestaña "Agenda" del
-/// shell de navegación del rol cliente.
+/// (pasadas y futuras). Se convertir en la pestaa "Agenda" del
+/// shell de navegacin del rol cliente.
 class PantallaMisCitas extends ConsumerStatefulWidget {
   const PantallaMisCitas({super.key});
 
@@ -49,7 +49,7 @@ class _PantallaMisCitasState extends ConsumerState<PantallaMisCitas> {
   // pago por cita (`controladorPagoDeCitaProvider`, family autoDispose que
   // `EstadoPagoCita` consulta de forma independiente) son providers
   // separados: invalidar solo el primero no alcanza para que un pago
-  // rechazado/confirmado desde el otro lado se refleje acá. Se invalida el
+  // rechazado/confirmado desde el otro lado se refleje ac. Se invalida el
   // family completo (sin argumento) para refrescar todas las tarjetas
   // visibles a la vez.
   void _refrescar() {
@@ -87,7 +87,7 @@ class _PantallaMisCitasState extends ConsumerState<PantallaMisCitas> {
                     ),
                     child: Center(
                       child: Text(
-                        'Todavía no tenés citas reservadas.',
+                        'Todava no tens citas reservadas.',
                         style: TipografiaApp.bodyMd.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -111,10 +111,10 @@ class _PantallaMisCitasState extends ConsumerState<PantallaMisCitas> {
                 final cita = citas[index];
 
                 // `citas.servicio_id` solo guarda el primer servicio de un
-                // combo (diseño intencional) -- si la cita viene de una
-                // promoción combo, `nombresServiciosCombo` trae la lista
+                // combo (diseo intencional) -- si la cita viene de una
+                // promocin combo, `nombresServiciosCombo` trae la lista
                 // completa (ej. "Corte + Barba"); si no, se busca el
-                // servicio individual en el catálogo como antes.
+                // servicio individual en el catlogo como antes.
                 String nombreServicio;
                 if (cita.nombresServiciosCombo.isNotEmpty) {
                   nombreServicio = cita.nombresServiciosCombo.join(' + ');
@@ -151,7 +151,7 @@ class _PantallaMisCitasState extends ConsumerState<PantallaMisCitas> {
 
                 // `cita.precioCobrado` ya viene calculado por `reservar_cita`
                 // desde que se crea la cita -- combo + descuento de promo ya
-                // aplicados, no hace falta recalcular desde el catálogo.
+                // aplicados, no hace falta recalcular desde el catlogo.
                 final montoPago = config?.calcularMontoAPagar(
                   cita.precioCobrado,
                 );

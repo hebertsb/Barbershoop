@@ -10,7 +10,7 @@ import '../../dominio/modelo_resultado_ranking_barbero.dart';
 
 /// Estado combinado del ranking visto por el barbero: el programa elegido
 /// para mostrar (ver [elegirProgramaRankingParaMostrar]), el podio de ese
-/// programa y su vitrina histórica de insignias ganadas.
+/// programa y su vitrina histrica de insignias ganadas.
 class EstadoRankingBarbero {
   const EstadoRankingBarbero({
     required this.programa,

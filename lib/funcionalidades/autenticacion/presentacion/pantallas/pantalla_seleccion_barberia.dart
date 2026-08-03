@@ -24,7 +24,7 @@ class PantallaSeleccionBarberia extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Elige tu barbería')),
+      appBar: AppBar(title: const Text('Elige tu barbera')),
       body: barberias.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
@@ -32,7 +32,7 @@ class PantallaSeleccionBarberia extends ConsumerWidget {
           if (lista.isEmpty) {
             return Center(
               child: Text(
-                'No hay barberías disponibles todavía.',
+                'No hay barberas disponibles todava.',
                 style: TipografiaApp.bodyMd.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

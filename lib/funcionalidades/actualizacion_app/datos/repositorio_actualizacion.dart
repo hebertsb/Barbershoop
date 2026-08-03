@@ -13,7 +13,7 @@ abstract class RepositorioActualizacion {
 
 class RepositorioActualizacionSupabase implements RepositorioActualizacion {
   RepositorioActualizacionSupabase({SupabaseClient? cliente})
-    : _cliente = cliente ?? ClienteSupabase.instancia;
+      : _cliente = cliente ?? ClienteSupabase.instancia;
 
   final SupabaseClient _cliente;
 
@@ -32,12 +32,12 @@ class RepositorioActualizacionSupabase implements RepositorioActualizacion {
       throw const ExcepcionRed();
     } on PostgrestException {
       throw const ExcepcionDesconocida();
+    } catch (e) {
+      throw ExcepcionDesconocida(e.toString());
     }
   }
 }
 
-final repositorioActualizacionProvider = Provider<RepositorioActualizacion>((
-  ref,
-) {
+final repositorioActualizacionProvider = Provider<RepositorioActualizacion>((ref) {
   return RepositorioActualizacionSupabase();
 });

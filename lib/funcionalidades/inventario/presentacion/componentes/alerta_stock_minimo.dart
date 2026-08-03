@@ -4,7 +4,7 @@ import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../dominio/modelo_insumo.dart';
 
-/// Banner compacto con los insumos bajo el mínimo. `null`/lista vacía no
+/// Banner compacto con los insumos bajo el mnimo. `null`/lista vaca no
 /// dibuja nada (el llamador decide si mostrarlo).
 class AlertaStockMinimo extends StatelessWidget {
   const AlertaStockMinimo({super.key, required this.insumos});
@@ -38,7 +38,7 @@ class AlertaStockMinimo extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '${insumos.length} insumo${insumos.length == 1 ? '' : 's'} bajo el mínimo',
+                '${insumos.length} insumo${insumos.length == 1 ? '' : 's'} bajo el mnimo',
                 style: TipografiaApp.labelMd.copyWith(
                   color: ColoresApp.estadoCancelada,
                 ),
@@ -47,7 +47,7 @@ class AlertaStockMinimo extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            insumos.map((i) => '${i.nombre} (${i.stock})').join(' · '),
+            insumos.map((i) => '${i.nombre} (${i.stock})').join('  '),
             style: TipografiaApp.bodySm.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),

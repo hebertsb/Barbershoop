@@ -18,10 +18,10 @@ class PantallaVerificacionPagos extends ConsumerStatefulWidget {
 
 class _PantallaVerificacionPagosState
     extends ConsumerState<PantallaVerificacionPagos> {
-  // Última lista conocida. El controlador pasa por `AsyncLoading()` (sin
+  // ltima lista conocida. El controlador pasa por `AsyncLoading()` (sin
   // valor previo) en cada confirmar/rechazar y termina en `AsyncError` si
-  // falla, así que leer directo del `AsyncValue` haría desaparecer toda la
-  // bandeja por el error de un solo ítem. Cachear acá el último dato bueno
+  // falla, as que leer directo del `AsyncValue` hara desaparecer toda la
+  // bandeja por el error de un solo tem. Cachear ac el ltimo dato bueno
   // evita eso: la lista se sigue mostrando y el error solo se avisa aparte.
   List<ModeloPago>? _ultimosPagosConocidos;
   String? _procesandoPagoId;
@@ -54,8 +54,8 @@ class _PantallaVerificacionPagosState
     );
   }
 
-  /// Todavía no hay ningún dato bueno cacheado: o está cargando por primera
-  /// vez, o esa primera carga falló.
+  /// Todava no hay ningn dato bueno cacheado: o est cargando por primera
+  /// vez, o esa primera carga fall.
   Widget _cuerpoCargaInicial(
     AsyncValue<List<ModeloPago>> pagosState,
     ColorScheme colorScheme,
@@ -79,7 +79,7 @@ class _PantallaVerificacionPagosState
     if (pagos.isEmpty && !pagosState.isLoading) {
       return Center(
         child: Text(
-          'No hay pagos pendientes de verificación.',
+          'No hay pagos pendientes de verificacin.',
           style: TipografiaApp.bodyMd.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -112,7 +112,7 @@ class _PantallaVerificacionPagosState
 
   void _confirmar(String pagoId) {
     // Guarda de reentrancia: el controlador solo tiene un `state` global (sin
-    // tracking por-ítem), así que solo puede haber UNA operación en vuelo a
+    // tracking por-tem), as que solo puede haber UNA operacin en vuelo a
     // la vez en toda la pantalla. Si ya hay una (de esta tarjeta o de otra),
     // no arrancar una nueva: evita que dos llamadas pisen el mismo `state`.
     if (_procesandoPagoId != null) return;
@@ -120,10 +120,10 @@ class _PantallaVerificacionPagosState
     ref
         .read(controladorPagosPorVerificarProvider.notifier)
         .confirmarPago(pagoId)
-        // El controlador relanza el error a propósito para que el caller
-        // pueda reaccionar; acá el feedback ya se muestra vía `ref.listen`
-        // arriba, así que no hace falta reaccionar en este callback. El
-        // catchError vacío es necesario solo para que Flutter no marque este
+        // El controlador relanza el error a propsito para que el caller
+        // pueda reaccionar; ac el feedback ya se muestra va `ref.listen`
+        // arriba, as que no hace falta reaccionar en este callback. El
+        // catchError vaco es necesario solo para que Flutter no marque este
         // Future (disparado sin await) como "unhandled error" en la consola.
         .catchError((_) {});
   }
@@ -150,8 +150,8 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
   final ModeloPago pago;
   final bool procesando;
   // Hay OTRA tarjeta procesando (el controlador es global: solo admite una
-  // operación en vuelo por vez en toda la pantalla). Deshabilita los botones
-  // sin mostrar spinner, para no sugerir que esta tarjeta está trabajando.
+  // operacin en vuelo por vez en toda la pantalla). Deshabilita los botones
+  // sin mostrar spinner, para no sugerir que esta tarjeta est trabajando.
   final bool bloqueadaPorOtraOperacion;
   final VoidCallback onConfirmar;
   final VoidCallback onRechazar;

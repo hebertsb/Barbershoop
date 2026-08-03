@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Estilos de texto centralizados de BarberApp, mapeados 1:1 a los nombres del
-/// DESIGN.md (VISTA/modern_grooming_authority/DESIGN.md).
-///
-/// Los nombres en inglés (`headlineXl`, `bodyMd`, `labelSm`, etc.) son
-/// intencionales: replican el vocabulario del propio DESIGN.md y el de
-/// `TextTheme` de Material 3 (`headlineLarge`, `bodyMedium`, `labelSmall`),
-/// la misma excepción documentada en `ColoresApp` para sus campos `on*`.
 class TipografiaApp {
   TipografiaApp._();
 

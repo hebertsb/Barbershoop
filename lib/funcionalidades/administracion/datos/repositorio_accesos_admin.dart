@@ -8,11 +8,11 @@ import '../../../nucleo/errores/excepciones_app.dart';
 
 abstract class RepositorioAccesosAdmin {
   /// Registra un acceso a [ruta] para el admin autenticado. Fire-and-forget
-  /// desde la UI: un fallo acá no debe bloquear la navegación, así que no
+  /// desde la UI: un fallo ac no debe bloquear la navegacin, as que no
   /// lanza excepciones propias -- si falla, se ignora silenciosamente.
   Future<void> registrarAcceso(String ruta);
 
-  /// Rutas más usadas por el admin en los últimos 30 días, ordenadas de
+  /// Rutas ms usadas por el admin en los ltimos 30 das, ordenadas de
   /// mayor a menor uso.
   Future<List<String>> obtenerRutasTopAccesos({int limite = 4});
 }
@@ -33,8 +33,8 @@ class RepositorioAccesosAdminSupabase implements RepositorioAccesosAdmin {
         'ruta': ruta,
       });
     } catch (_) {
-      // Silencioso a propósito: no es información crítica, no debe romper
-      // la navegación del admin si Supabase no responde.
+      // Silencioso a propsito: no es informacin crtica, no debe romper
+      // la navegacin del admin si Supabase no responde.
     }
   }
 

@@ -11,12 +11,12 @@ import 'etiqueta_estado.dart';
 /// Tarjeta de solo lectura con el resumen de una cita del cliente.
 ///
 /// Recibe los nombres de servicio y barbero ya resueltos por quien la
-/// invoca: este widget es puramente presentacional, sin lógica de
-/// búsqueda ni acceso a providers. [pieDePago] y [acciones] siguen el mismo
-/// criterio: si no son null, se dibujan tal cual al final de la tarjeta —
-/// quien arma la lista decide cuándo corresponde (cita `pendiente`) y con
-/// qué contenido (esas decisiones sí necesitan leer providers, por eso viven
-/// en componentes aparte en vez de acá).
+/// invoca: este widget es puramente presentacional, sin lgica de
+/// bsqueda ni acceso a providers. [pieDePago] y [acciones] siguen el mismo
+/// criterio: si no son null, se dibujan tal cual al final de la tarjeta 
+/// quien arma la lista decide cundo corresponde (cita `pendiente`) y con
+/// qu contenido (esas decisiones s necesitan leer providers, por eso viven
+/// en componentes aparte en vez de ac).
 class TarjetaMiCita extends StatelessWidget {
   const TarjetaMiCita({
     super.key,
@@ -35,17 +35,17 @@ class TarjetaMiCita extends StatelessWidget {
   final String nombreBarbero;
   final Widget? pieDePago;
 
-  /// Botones de acción (ej. "Cancelar"/"Reprogramar"), dibujados debajo de
+  /// Botones de accin (ej. "Cancelar"/"Reprogramar"), dibujados debajo de
   /// [pieDePago] cuando no es null.
   final Widget? acciones;
 
-  /// Botón "Calificar" (o nada, si ya tiene reseña), dibujado al final de
+  /// Botn "Calificar" (o nada, si ya tiene resea), dibujado al final de
   /// la tarjeta cuando no es null -- mismo criterio que `pieDePago`/`acciones`.
   final Widget? resena;
 
   /// Ya normalizados (ver `normalizarTelefonoWhatsapp`) -- `null` = ese
-  /// botón de contacto no se muestra (el barbero/la sucursal no tienen
-  /// teléfono cargado, o el dato cargado no es un teléfono válido).
+  /// botn de contacto no se muestra (el barbero/la sucursal no tienen
+  /// telfono cargado, o el dato cargado no es un telfono vlido).
   final String? telefonoBarberoWhatsapp;
   final String? telefonoSucursalWhatsapp;
 
@@ -141,7 +141,7 @@ class TarjetaMiCita extends StatelessWidget {
                     Expanded(
                       child: BotonContactoWhatsapp(
                         telefono: telefonoSucursalWhatsapp!,
-                        etiqueta: 'Contactar a la barbería',
+                        etiqueta: 'Contactar a la barbera',
                         icono: Icons.storefront,
                         chipsMensaje: const ['Tengo una consulta'],
                       ),

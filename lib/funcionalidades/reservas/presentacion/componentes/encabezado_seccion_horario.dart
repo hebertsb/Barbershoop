@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 
+/// Encabezado de sección (ej. "MAÑANA" / "TARDE") dentro de la grilla de
+/// horarios disponibles.
 class EncabezadoSeccionHorario extends StatelessWidget {
   const EncabezadoSeccionHorario({super.key, required this.texto});
 
@@ -9,12 +12,12 @@ class EncabezadoSeccionHorario extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Text(
       texto,
       style: TipografiaApp.labelMd.copyWith(
-        color: colorScheme.onSurfaceVariant,
-        letterSpacing: 0.5,
+        color: ColoresApp.primario,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
       ),
     );
   }

@@ -1,22 +1,28 @@
 class ModeloInsumoBarbero {
   const ModeloInsumoBarbero({
+    required this.id,
+    required this.barberoId,
     required this.insumoId,
-    required this.nombreInsumo,
     required this.cantidadAsignada,
+    this.nombreInsumoCache,
   });
 
+  final String id;
+  final String barberoId;
   final String insumoId;
-  final String nombreInsumo;
-  final int cantidadAsignada;
+  final double cantidadAsignada;
+  final String? nombreInsumoCache;
+
+  /// Nombre del insumo asignado.
+  String get nombreInsumo => nombreInsumoCache ?? 'Insumo';
 
   factory ModeloInsumoBarbero.desdeJson(Map<String, dynamic> json) {
-    final insumoMap = json['insumos'] as Map<String, dynamic>?;
     return ModeloInsumoBarbero(
+      id: json['id'] as String,
+      barberoId: json['barbero_id'] as String,
       insumoId: json['insumo_id'] as String,
-      nombreInsumo:
-          (insumoMap?['nombre'] ?? json['nombre_insumo'] ?? 'Insumo')
-              as String,
-      cantidadAsignada: json['cantidad_asignada'] as int,
+      cantidadAsignada: (json['cantidad_asignada'] as num? ?? 0).toDouble(),
+      nombreInsumoCache: (json['nombre_insumo'] ?? json['insumo_nombre']) as String?,
     );
   }
 }

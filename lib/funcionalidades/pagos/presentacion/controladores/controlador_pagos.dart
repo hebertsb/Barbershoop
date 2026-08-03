@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../datos/repositorio_pagos.dart';
 import '../../dominio/modelo_pago.dart';
 
-/// Pago de una cita puntual (o null si todavía no se subió comprobante).
+/// Pago de una cita puntual (o null si todava no se subi comprobante).
 /// Family por `citaId`, usado por `PantallaPagoQr`/`TarjetaMiCita`.
 class ControladorPagoDeCita
     extends AutoDisposeFamilyAsyncNotifier<ModeloPago?, String> {

@@ -8,25 +8,25 @@ import '../../../pagos/dominio/enum_estado_pago.dart';
 import '../../../pagos/presentacion/controladores/controlador_pagos.dart';
 import 'etiqueta_estado.dart';
 
-/// Indicador de estado de pago + botón para ir a `PantallaPagoQr`, pensado
+/// Indicador de estado de pago + botn para ir a `PantallaPagoQr`, pensado
 /// como pie de [TarjetaMiCita] para citas `pendiente`.
 ///
-/// Consulta el pago de la cita vía `controladorPagoDeCitaProvider` (family
-/// por `citaId`, ya usado por `PantallaPagoQr`) para decidir qué mostrar:
-/// - Sin pago todavía: aviso "Pago pendiente" solo si el modo configurado
-///   efectivamente lo exige (obligatorio/seña); en modo opcional se ofrece
-///   el botón igual, pero sin aviso de alerta.
-/// - `por_verificar`/`rechazado`: aviso correspondiente y botón para ver el
+/// Consulta el pago de la cita va `controladorPagoDeCitaProvider` (family
+/// por `citaId`, ya usado por `PantallaPagoQr`) para decidir qu mostrar:
+/// - Sin pago todava: aviso "Pago pendiente" solo si el modo configurado
+///   efectivamente lo exige (obligatorio/sea); en modo opcional se ofrece
+///   el botn igual, pero sin aviso de alerta.
+/// - `por_verificar`/`rechazado`: aviso correspondiente y botn para ver el
 ///   estado o reintentar la subida del comprobante.
-/// - `confirmado` (o todavía cargando): no hay nada que el cliente deba
-///   hacer, así que no se muestra nada.
+/// - `confirmado` (o todava cargando): no hay nada que el cliente deba
+///   hacer, as que no se muestra nada.
 ///
-/// [monto] llega ya resuelto por quien invoca (vía
+/// [monto] llega ya resuelto por quien invoca (va
 /// `ModeloConfiguracionPagos.calcularMontoAPagar`) y puede ser `null` si
-/// todavía no se puede calcular un monto válido (ej. el servicio no
-/// terminó de cargar). En ese caso el botón de pago se oculta — nunca se
-/// navega a `PantallaPagoQr` con un monto de $0 — y aparece solo, sin
-/// bloquear nada, en el próximo rebuild cuando [monto] deje de ser `null`.
+/// todava no se puede calcular un monto vlido (ej. el servicio no
+/// termin de cargar). En ese caso el botn de pago se oculta  nunca se
+/// navega a `PantallaPagoQr` con un monto de $0  y aparece solo, sin
+/// bloquear nada, en el prximo rebuild cuando [monto] deje de ser `null`.
 class EstadoPagoCita extends ConsumerWidget {
   const EstadoPagoCita({
     super.key,
@@ -46,12 +46,12 @@ class EstadoPagoCita extends ConsumerWidget {
     final pagoState = ref.watch(controladorPagoDeCitaProvider(citaId));
     final pago = pagoState.valueOrNull;
 
-    // Carga inicial sin dato previo: nada que mostrar todavía, evita un
-    // parpadeo del indicador/botón mientras resuelve.
+    // Carga inicial sin dato previo: nada que mostrar todava, evita un
+    // parpadeo del indicador/botn mientras resuelve.
     if (pagoState.isLoading && !pagoState.hasValue) {
       return const SizedBox.shrink();
     }
-    // Pago ya confirmado: no hay acción pendiente para el cliente.
+    // Pago ya confirmado: no hay accin pendiente para el cliente.
     if (pago != null && pago.estado == EstadoPago.confirmado) {
       return const SizedBox.shrink();
     }
@@ -66,7 +66,7 @@ class EstadoPagoCita extends ConsumerWidget {
       colorIndicador = colores.cancelada;
       textoBoton = 'Reintentar pago';
     } else if (pago != null && pago.estado == EstadoPago.porVerificar) {
-      textoIndicador = 'Pago en verificación';
+      textoIndicador = 'Pago en verificacin';
       colorIndicador = colores.pendiente;
       textoBoton = 'Ver estado del pago';
     } else if (modoPago == ModoPago.obligatorio || modoPago == ModoPago.sena) {
@@ -74,7 +74,7 @@ class EstadoPagoCita extends ConsumerWidget {
       colorIndicador = colores.pendiente;
     }
 
-    // Sin un monto válido no hay a dónde navegar: se oculta el botón en vez
+    // Sin un monto vlido no hay a dnde navegar: se oculta el botn en vez
     // de ofrecer un pago de $0 (mismo criterio que `PantallaConfirmacionReserva`).
     if (textoIndicador == null && monto == null) {
       return const SizedBox.shrink();

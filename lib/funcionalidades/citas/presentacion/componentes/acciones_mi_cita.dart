@@ -10,13 +10,13 @@ import '../controladores/controlador_mis_citas.dart';
 
 /// Botones "Cancelar"/"Reprogramar" pensados como pie de [TarjetaMiCita]
 /// (mismo criterio que [EstadoPagoCita]: componente aparte porque necesita
-/// leer providers, cosa que la tarjeta en sí no hace) — quien arma la lista
+/// leer providers, cosa que la tarjeta en s no hace)  quien arma la lista
 /// (`PantallaMisCitas`) decide mostrarlo solo para citas `pendiente`.
 ///
-/// "Cancelar" pide confirmación con un `AlertDialog`; si el pago de la cita
-/// ya está `confirmado` (vía `controladorPagoDeCitaProvider`), el diálogo
-/// suma el aviso de que no hay reembolso automático antes de dejar
-/// confirmar. "Reprogramar" avisa que la cita actual se cancela recién
+/// "Cancelar" pide confirmacin con un `AlertDialog`; si el pago de la cita
+/// ya est `confirmado` (va `controladorPagoDeCitaProvider`), el dilogo
+/// suma el aviso de que no hay reembolso automtico antes de dejar
+/// confirmar. "Reprogramar" avisa que la cita actual se cancela recin
 /// cuando la nueva se confirme, y manda al wizard de reserva ya precargado
 /// (`ControladorReserva.iniciarReprogramacion`) directo a elegir barbero.
 class AccionesMiCita extends ConsumerWidget {
@@ -35,10 +35,10 @@ class AccionesMiCita extends ConsumerWidget {
         title: const Text('Cancelar cita'),
         content: Text(
           pagoConfirmado
-              ? '¿Seguro que querés cancelar esta cita?\n\n'
-                    'Tu pago no se reembolsa automáticamente. Si ya pagaste, '
-                    'contactá al local.'
-              : '¿Seguro que querés cancelar esta cita?',
+              ? 'Seguro que quers cancelar esta cita?\n\n'
+                    'Tu pago no se reembolsa automticamente. Si ya pagaste, '
+                    'contact al local.'
+              : 'Seguro que quers cancelar esta cita?',
         ),
         actions: [
           TextButton(
@@ -76,8 +76,8 @@ class AccionesMiCita extends ConsumerWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Reprogramar cita'),
         content: const Text(
-          'Vas a elegir un nuevo horario. Tu cita actual se cancelará '
-          'automáticamente al confirmar la nueva.',
+          'Vas a elegir un nuevo horario. Tu cita actual se cancelar '
+          'automticamente al confirmar la nueva.',
         ),
         actions: [
           TextButton(
@@ -96,7 +96,7 @@ class AccionesMiCita extends ConsumerWidget {
     ref
         .read(controladorReservaProvider.notifier)
         .iniciarReprogramacion(
-          sucursalId: cita.sucursalId,
+          sucursalId: cita.sucursalId ?? '',
           servicioId: cita.servicioId,
           citaIdAReemplazar: cita.id,
         );
@@ -105,10 +105,10 @@ class AccionesMiCita extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Se observa acá (no solo `read` dentro de los diálogos) para que el
-    // valor esté resuelto de antemano en el caso normal: `EstadoPagoCita`
+    // Se observa ac (no solo `read` dentro de los dilogos) para que el
+    // valor est resuelto de antemano en el caso normal: `EstadoPagoCita`
     // (pie de la misma tarjeta) ya mantiene vivo este mismo provider por
-    // `citaId` mientras la cita esté en pantalla.
+    // `citaId` mientras la cita est en pantalla.
     final pago = ref.watch(controladorPagoDeCitaProvider(cita.id)).valueOrNull;
     final pagoConfirmado = pago != null && pago.estado == EstadoPago.confirmado;
 

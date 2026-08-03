@@ -83,7 +83,7 @@ class _FormularioSecretariaState extends State<FormularioSecretaria> {
                 border: OutlineInputBorder(),
               ),
               validator: (v) => (v == null || !v.contains('@'))
-                  ? 'Ingresa un email válido'
+                  ? 'Ingresa un email vlido'
                   : null,
             ),
             const SizedBox(height: 16),

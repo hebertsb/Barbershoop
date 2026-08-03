@@ -1,39 +1,33 @@
 enum EstadoCita {
   pendiente,
   confirmada,
+  enProceso,
   completada,
   cancelada,
   noAsistio;
 
-  static EstadoCita desdeTexto(String texto) {
-    switch (texto) {
-      case 'pendiente':
-        return EstadoCita.pendiente;
-      case 'confirmada':
-        return EstadoCita.confirmada;
-      case 'completada':
-        return EstadoCita.completada;
-      case 'cancelada':
-        return EstadoCita.cancelada;
-      case 'no_asistio':
-        return EstadoCita.noAsistio;
-      default:
-        return EstadoCita.pendiente;
-    }
-  }
-
+  /// Texto legible en español del estado.
   String aTexto() {
     switch (this) {
       case EstadoCita.pendiente:
-        return 'pendiente';
+        return 'Pendiente';
       case EstadoCita.confirmada:
-        return 'confirmada';
+        return 'Confirmada';
+      case EstadoCita.enProceso:
+        return 'En Proceso';
       case EstadoCita.completada:
-        return 'completada';
+        return 'Completada';
       case EstadoCita.cancelada:
-        return 'cancelada';
+        return 'Cancelada';
       case EstadoCita.noAsistio:
-        return 'no_asistio';
+        return 'No asistió';
     }
+  }
+
+  static EstadoCita desdeTexto(String texto) {
+    return EstadoCita.values.firstWhere(
+      (v) => v.name == texto,
+      orElse: () => EstadoCita.pendiente,
+    );
   }
 }

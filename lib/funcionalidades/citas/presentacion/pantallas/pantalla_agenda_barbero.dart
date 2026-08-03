@@ -15,10 +15,10 @@ import '../controladores/controlador_citas.dart';
 import '../utilidades/completar_turno_con_cobro.dart';
 
 /// Agenda propia del rol barbero: mezcla sus citas pendientes con sus turnos
-/// (check-in) del día, en un timeline hora + punto de color + tarjeta.
+/// (check-in) del da, en un timeline hora + punto de color + tarjeta.
 /// `citas_select` (RLS) ya limita `obtenerCitasDelDia` a las citas del
 /// barbero autenticado; los turnos se filtran client-side por `barberoId`
-/// porque `turnos_select` no está acotado por barbero.
+/// porque `turnos_select` no est acotado por barbero.
 class PantallaAgendaBarbero extends ConsumerStatefulWidget {
   const PantallaAgendaBarbero({super.key});
 
@@ -56,7 +56,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
     // La sucursal se resuelve desde la propia fila del barbero en
     // `barberos` (llenada al invitarlo), no desde `perfiles.sucursal_id`
     // -- esa columna nunca se llena para el rol barbero, solo aplica a
-    // secretaria. Un barbero con más de una fila (multi-sucursal) usa la
+    // secretaria. Un barbero con ms de una fila (multi-sucursal) usa la
     // primera, mismo criterio que ya se usaba para `miBarberoId`.
     final barberosState = ref.watch(controladorBarberosProvider);
     final barberosCoincidentes = (barberosState.value ?? [])
@@ -73,7 +73,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
       return const Scaffold(
-        body: Center(child: Text('No tenés una sucursal asignada.')),
+        body: Center(child: Text('No tens una sucursal asignada.')),
       );
     }
     _sucursalIdVisible = sucursalId;
@@ -99,7 +99,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Agenda del Día')),
+      appBar: AppBar(title: const Text('Agenda del Da')),
       body: citasState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
@@ -131,7 +131,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
                   if (items.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 48),
-                      child: Center(child: Text('No tenés citas para hoy.')),
+                      child: Center(child: Text('No tens citas para hoy.')),
                     )
                   else
                     for (final item in items)

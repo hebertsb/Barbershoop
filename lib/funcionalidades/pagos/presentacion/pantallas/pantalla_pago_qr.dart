@@ -29,14 +29,14 @@ class PantallaPagoQr extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pagoState = ref.watch(controladorPagoDeCitaProvider(citaId));
-    // El pago conocido más reciente. A diferencia de `pagoState.when(...)`,
-    // esto se mantiene disponible aunque el último intento haya fallado, así
+    // El pago conocido ms reciente. A diferencia de `pagoState.when(...)`,
+    // esto se mantiene disponible aunque el ltimo intento haya fallado, as
     // el error no tapa el resto de la UI (selector incluido).
     final pago = pagoState.valueOrNull;
     final colorScheme = Theme.of(context).colorScheme;
-    // Carga inicial: todavía no hay ni dato ni error previos. Se distingue
+    // Carga inicial: todava no hay ni dato ni error previos. Se distingue
     // de un reintento (tras error) o de un refresco (con dato previo), que
-    // sí deben seguir mostrando `_contenidoPago` con su banner correspondiente.
+    // s deben seguir mostrando `_contenidoPago` con su banner correspondiente.
     final esCargaInicial =
         pagoState.isLoading && !pagoState.hasValue && !pagoState.hasError;
 
@@ -119,7 +119,7 @@ class PantallaPagoQr extends ConsumerWidget {
               Center(child: _BotonDescargarQr(urlQrBanco: urlQrBanco!)),
             ] else
               Text(
-                'La barbería todavía no cargó su QR de pago.',
+                'La barbera todava no carg su QR de pago.',
                 style: TipografiaApp.bodyMd.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -149,8 +149,8 @@ class PantallaPagoQr extends ConsumerWidget {
     );
   }
 
-  /// Selector de comprobante o el estado actual del pago, según corresponda.
-  /// Se basa en el último [ModeloPago] conocido (no en el `AsyncValue`
+  /// Selector de comprobante o el estado actual del pago, segn corresponda.
+  /// Se basa en el ltimo [ModeloPago] conocido (no en el `AsyncValue`
   /// completo) para que un error de subida no oculte el selector.
   Widget _contenidoPago(
     BuildContext context,
@@ -163,7 +163,7 @@ class PantallaPagoQr extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Comprobante subido, esperando verificación del local.',
+            'Comprobante subido, esperando verificacin del local.',
             style: TipografiaApp.bodyMd.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -178,7 +178,7 @@ class PantallaPagoQr extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '¡Pago confirmado!',
+            'Pago confirmado!',
             style: TipografiaApp.bodyMd.copyWith(
               color: colorScheme.primary,
               fontWeight: FontWeight.w600,
@@ -196,12 +196,12 @@ class PantallaPagoQr extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'Tu comprobante anterior fue rechazado. Subí uno nuevo.',
+              'Tu comprobante anterior fue rechazado. Sub uno nuevo.',
               style: TextStyle(color: colorScheme.error),
             ),
           ),
         Text(
-          'Subí la captura de tu comprobante de pago',
+          'Sub la captura de tu comprobante de pago',
           style: TipografiaApp.bodyMd.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -214,12 +214,12 @@ class PantallaPagoQr extends ConsumerWidget {
             ref
                 .read(controladorPagoDeCitaProvider(citaId).notifier)
                 .subirComprobante(monto: monto, urlComprobante: url)
-                // El controlador relanza el error a propósito para que el
-                // caller pueda reaccionar; acá el feedback se muestra de
-                // forma reactiva vía `pagoState.hasError` arriba, así que
+                // El controlador relanza el error a propsito para que el
+                // caller pueda reaccionar; ac el feedback se muestra de
+                // forma reactiva va `pagoState.hasError` arriba, as que
                 // no hace falta reaccionar en este callback. El catchError
-                // vacío es necesario solo para que Flutter no marque este
-                // Future (disparado sin await desde un callback síncrono)
+                // vaco es necesario solo para que Flutter no marque este
+                // Future (disparado sin await desde un callback sncrono)
                 // como "unhandled error" en la consola.
                 .catchError((_) {});
           },
@@ -229,7 +229,7 @@ class PantallaPagoQr extends ConsumerWidget {
   }
 }
 
-/// Botón para guardar el QR del banco en la galería del cliente, así puede
+/// Botn para guardar el QR del banco en la galera del cliente, as puede
 /// pagarlo desde la app de su banco en el mismo celular sin salir de
 /// BarberApp. Usa el archivo ya cacheado por [CachedNetworkImage] (mismo
 /// `flutter_cache_manager`) en vez de descargarlo de nuevo.
@@ -258,7 +258,7 @@ class _BotonDescargarQrState extends State<_BotonDescargarQr> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('QR guardado en tu galería')),
+        const SnackBar(content: Text('QR guardado en tu galera')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -286,7 +286,7 @@ class _BotonDescargarQrState extends State<_BotonDescargarQr> {
   }
 }
 
-/// Salida explícita hacia `/mis-citas` para los estados de pago en los que
+/// Salida explcita hacia `/mis-citas` para los estados de pago en los que
 /// ya no queda nada por hacer en esta pantalla (comprobante subido o pago
 /// confirmado). Complementa la flecha de "volver" del AppBar y el gesto de
 /// back del sistema (disponibles porque esta pantalla se abre con

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../nucleo/componentes/selector_imagen.dart';
+import '../../../../nucleo/configuracion/constantes.dart';
 import '../../dominio/modelo_sucursal.dart';
+import 'selector_ubicacion_mapa.dart';
 
 class FormularioSucursal extends StatefulWidget {
   const FormularioSucursal({super.key, this.sucursal, required this.alGuardar});
@@ -14,14 +17,19 @@ class FormularioSucursal extends StatefulWidget {
 
 class _FormularioSucursalState extends State<FormularioSucursal> {
   final _formularioKey = GlobalKey<FormState>();
+  final _mapaKey = GlobalKey<SelectorUbicacionMapaState>();
   late final TextEditingController _nombreCtrl;
   late final TextEditingController _direccionCtrl;
   late final TextEditingController _telefonoCtrl;
   late final TextEditingController _aperturaCtrl;
   late final TextEditingController _cierreCtrl;
+  late final TextEditingController _managerCtrl;
+  final _scrollCtrl = ScrollController();
   late bool _activo;
   bool _cargando = false;
   String? _errorMensaje;
+  String? _urlImagen;
+  double _insetInferiorAnterior = 0;
 
   @override
   void initState() {
@@ -30,14 +38,20 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
     _direccionCtrl = TextEditingController(
       text: widget.sucursal?.direccion ?? '',
     );
-    _telefonoCtrl = TextEditingController(text: widget.sucursal?.telefono ?? '');
+    _telefonoCtrl = TextEditingController(
+      text: widget.sucursal?.telefono ?? '',
+    );
     _aperturaCtrl = TextEditingController(
       text: widget.sucursal?.horarioApertura ?? '09:00',
     );
     _cierreCtrl = TextEditingController(
       text: widget.sucursal?.horarioCierre ?? '20:00',
     );
+    _managerCtrl = TextEditingController(
+      text: widget.sucursal?.managerNombre ?? '',
+    );
     _activo = widget.sucursal?.activo ?? true;
+    _urlImagen = widget.sucursal?.urlImagen;
   }
 
   @override
@@ -47,7 +61,29 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
     _telefonoCtrl.dispose();
     _aperturaCtrl.dispose();
     _cierreCtrl.dispose();
+    _managerCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
+  /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
+  /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
+  /// al crecer el viewport). Detectamos la transición y devolvemos el scroll
+  /// a 0 en el siguiente frame.
+  void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
+    final tecladoSeAcabaDeCerrar =
+        _insetInferiorAnterior > 0 && insetInferiorActual == 0;
+    _insetInferiorAnterior = insetInferiorActual;
+    if (!tecladoSeAcabaDeCerrar) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollCtrl.hasClients) return;
+      _scrollCtrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   Future<void> _seleccionarHora(
@@ -74,21 +110,28 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
       _errorMensaje = null;
     });
     try {
+      final centroMapa = _mapaKey.currentState?.obtenerCentro();
       final sucursal = ModeloSucursal(
-        id: widget.sucursal?.id ?? '', // Upsert resolverá el ID vacío en Supabase
+        id:
+            widget.sucursal?.id ??
+            '', // Upsert resolverá el ID vacío en Supabase
         barberiaId: widget.sucursal?.barberiaId ?? '',
         nombre: _nombreCtrl.text.trim(),
-        direccion:
-            _direccionCtrl.text.trim().isEmpty
-                ? null
-                : _direccionCtrl.text.trim(),
-        telefono:
-            _telefonoCtrl.text.trim().isEmpty
-                ? null
-                : _telefonoCtrl.text.trim(),
+        direccion: _direccionCtrl.text.trim().isEmpty
+            ? null
+            : _direccionCtrl.text.trim(),
+        telefono: _telefonoCtrl.text.trim().isEmpty
+            ? null
+            : _telefonoCtrl.text.trim(),
         horarioApertura: '${_aperturaCtrl.text.trim()}:00',
         horarioCierre: '${_cierreCtrl.text.trim()}:00',
         activo: _activo,
+        urlImagen: _urlImagen,
+        managerNombre: _managerCtrl.text.trim().isEmpty
+            ? null
+            : _managerCtrl.text.trim(),
+        latitud: centroMapa?.latitude,
+        longitud: centroMapa?.longitude,
       );
 
       await widget.alGuardar(sucursal);
@@ -102,9 +145,11 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
 
   @override
   Widget build(BuildContext context) {
+    final insetInferior = MediaQuery.of(context).viewInsets.bottom;
+    _reajustarScrollSiSeCerroElTeclado(insetInferior);
     return Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+        bottom: insetInferior,
         left: 16,
         right: 16,
         top: 16,
@@ -112,6 +157,7 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
       child: Form(
         key: _formularioKey,
         child: SingleChildScrollView(
+          controller: _scrollCtrl,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -124,17 +170,22 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
                 ),
               ),
               const SizedBox(height: 16),
+              SelectorImagen(
+                bucket: Constantes.bucketImagenesApp,
+                carpeta: 'sucursales',
+                urlActual: _urlImagen,
+                alSubir: (url) => setState(() => _urlImagen = url),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _nombreCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Nombre *',
                   border: OutlineInputBorder(),
                 ),
-                validator:
-                    (v) =>
-                        v == null || v.trim().isEmpty
-                            ? 'El nombre es requerido'
-                            : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'El nombre es requerido'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -152,6 +203,14 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _managerCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Manager (opcional)',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 16),
               Row(
@@ -189,12 +248,20 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
                 value: _activo,
                 onChanged: (val) => setState(() => _activo = val),
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Ubicación en el mapa',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 8),
+              SelectorUbicacionMapa(
+                key: _mapaKey,
+                latitudInicial: widget.sucursal?.latitud,
+                longitudInicial: widget.sucursal?.longitud,
+              ),
               if (_errorMensaje != null) ...[
                 const SizedBox(height: 16),
-                Text(
-                  _errorMensaje!,
-                  style: const TextStyle(color: Colors.red),
-                ),
+                Text(_errorMensaje!, style: const TextStyle(color: Colors.red)),
               ],
               const SizedBox(height: 24),
               ElevatedButton(
@@ -202,10 +269,9 @@ class _FormularioSucursalState extends State<FormularioSucursal> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child:
-                    _cargando
-                        ? const CircularProgressIndicator()
-                        : const Text('Guardar'),
+                child: _cargando
+                    ? const CircularProgressIndicator()
+                    : const Text('Guardar'),
               ),
               const SizedBox(height: 16),
             ],
