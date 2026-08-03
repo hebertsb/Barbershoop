@@ -49,8 +49,7 @@ class ModeloSucursal {
   }
 
   Map<String, dynamic> aJson() {
-    return {
-      'id': id,
+    final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
       'direccion': direccion,
@@ -63,5 +62,11 @@ class ModeloSucursal {
       'manager_nombre': managerNombre,
       'foto_url': urlImagen,
     };
+
+    if (id.trim().isNotEmpty) {
+      mapa['id'] = id;
+    }
+
+    return mapa;
   }
 }

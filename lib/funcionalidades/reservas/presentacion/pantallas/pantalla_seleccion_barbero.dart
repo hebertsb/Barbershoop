@@ -43,7 +43,7 @@ class PantallaSeleccionBarbero extends ConsumerWidget {
                   ref
                       .read(controladorReservaProvider.notifier)
                       .seleccionarCualquierBarbero();
-                  context.push('/reservas/horario');
+                  context.push('/reservar/horario');
                 },
               ),
               const SizedBox(height: 16),
@@ -67,7 +67,7 @@ class PantallaSeleccionBarbero extends ConsumerWidget {
                       ref
                           .read(controladorReservaProvider.notifier)
                           .seleccionarBarbero(barbero.id);
-                      context.push('/reservas/horario');
+                      context.push('/reservar/horario');
                     },
                   ),
                 ),

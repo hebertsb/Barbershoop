@@ -7,11 +7,8 @@ import '../../../../nucleo/utilidades/contacto_whatsapp.dart';
 import '../../../autenticacion/presentacion/controladores/controlador_autenticacion.dart';
 import '../controladores/controlador_barberos.dart';
 
-/// Pantalla donde el barbero edita su propio perfil pblico: foto,
-/// descripcin y especialidades. `controladorBarberosProvider` trae todos
-/// los barberos del tenant (RLS de `barberos` solo exige mismo
-/// `barberia_id`, no rol admin) y ac se filtra a la propia fila por
-/// `perfilId`.
+/// Pantalla donde el barbero edita su propio perfil público: foto,
+/// descripción, celular de WhatsApp y especialidades.
 class PantallaMiPerfilBarbero extends ConsumerStatefulWidget {
   const PantallaMiPerfilBarbero({super.key});
 
@@ -50,12 +47,21 @@ class _PantallaMiPerfilBarberoState
   }
 
   Future<void> _guardar() async {
-    final telefonoTexto = _telefonoCtrl.text.trim();
+    var telefonoTexto = _telefonoCtrl.text.trim();
+    if (telefonoTexto.isNotEmpty && !telefonoTexto.startsWith('+')) {
+      // Asumir prefijo de Bolivia (+591) si el usuario ingresó solo dígitos locales
+      final soloDigitos = telefonoTexto.replaceAll(RegExp(r'\D'), '');
+      if (soloDigitos.isNotEmpty) {
+        telefonoTexto = '+591$soloDigitos';
+      }
+    }
+
     final telefonoNormalizado = telefonoTexto.isEmpty
         ? null
         : normalizarTelefonoWhatsapp(telefonoTexto);
+
     if (telefonoTexto.isNotEmpty && telefonoNormalizado == null) {
-      setState(() => _errorMensaje = 'El nmero de celular no es vlido.');
+      setState(() => _errorMensaje = 'El número de celular no es válido.');
       return;
     }
 
@@ -74,10 +80,17 @@ class _PantallaMiPerfilBarberoState
             urlFoto: _urlFoto,
             telefono: telefonoNormalizado,
           );
+
+      // Refrescar estado global para reflejar el teléfono en memoria
+      ref.invalidate(controladorAutenticacionProvider);
+      ref.invalidate(controladorBarberosProvider);
+
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Perfil actualizado.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil y número de celular guardados con éxito.'),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) setState(() => _errorMensaje = e.toString());
@@ -93,17 +106,17 @@ class _PantallaMiPerfilBarberoState
         .where((b) => b.perfilId == perfil?.id)
         .toList();
 
-    // Precarga una sola vez, cuando los datos del propio barbero llegan por
-    // primera vez -- si se hiciera en cada build, pisara lo que el usuario
-    // ya escribi cada vez que el provider se refresca de fondo.
     if (!_inicializado && miBarbero.isNotEmpty) {
       _inicializado = true;
       _descripcionCtrl.text = miBarbero.first.descripcion ?? '';
-      _telefonoCtrl.text = miBarbero.first.telefonoPerfil ?? '';
-      // Se fusionan las especialidades de TODAS las filas (una por sucursal)
-      // en vez de tomar solo la primera: "Guardar" sobreescribe todas las
-      // filas a la vez, as que quedarse con .first perdera en silencio
-      // las especialidades cargadas en otra sucursal.
+      
+      final telGuardado = miBarbero.first.numTelefonoWhatsapp ?? '';
+      if (telGuardado.startsWith('+591')) {
+        _telefonoCtrl.text = telGuardado.substring(4).trim();
+      } else {
+        _telefonoCtrl.text = telGuardado;
+      }
+
       final especialidadesUnicas = <String>{};
       for (final b in miBarbero) {
         especialidadesUnicas.addAll(b.especialidades);
@@ -129,8 +142,8 @@ class _PantallaMiPerfilBarberoState
             TextFormField(
               controller: _descripcionCtrl,
               decoration: const InputDecoration(
-                labelText: 'Descripcin',
-                hintText: 'Ej. Especialista en fades y diseo de barba',
+                labelText: 'Descripción',
+                hintText: 'Ej. Especialista en fades y diseño de barba',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -141,10 +154,14 @@ class _PantallaMiPerfilBarberoState
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
                 labelText: 'Celular (WhatsApp)',
-                hintText: 'Ej. +591 71234567',
+                hintText: '71234567',
+                prefixText: '(+591) ',
+                prefixStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
                 helperText:
-                    'Opcional. Si lo cargs, tus clientes van a poder '
-                    'contactarte por WhatsApp desde su cita.',
+                    'Tus clientes podrán contactarte por WhatsApp directamente.',
                 border: OutlineInputBorder(),
               ),
             ),
