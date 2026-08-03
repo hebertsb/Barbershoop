@@ -12,9 +12,10 @@ enum TipoDescuento {
   }
 
   static TipoDescuento desdeTexto(String texto) {
-    return TipoDescuento.values.firstWhere(
-      (v) => v.name == texto,
-      orElse: () => TipoDescuento.porcentaje,
-    );
+    final t = texto.toLowerCase().trim();
+    if (t.contains('monto') || t.contains('fijo') || t == 'montofijo') {
+      return TipoDescuento.montoFijo;
+    }
+    return TipoDescuento.porcentaje;
   }
 }
