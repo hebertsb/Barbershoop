@@ -50,19 +50,27 @@ class ModeloBarbero {
   int get calificacionCantidad => 0;
 
   factory ModeloBarbero.desdeJson(Map<String, dynamic> json) {
+    String? pNombre;
+    String? pEmail;
+    String? pFoto;
+    final perfilData = json['perfiles'];
+    if (perfilData is Map<String, dynamic>) {
+      pNombre = perfilData['nombre'] as String?;
+      pEmail = perfilData['email'] as String?;
+      pFoto = (perfilData['url_foto'] ?? perfilData['foto_url']) as String?;
+    }
+
     return ModeloBarbero(
       id: json['id'] as String? ?? '',
       barberiaId: json['barberia_id'] as String? ?? '',
-      nombre: json['nombre'] as String? ?? 'Barbero',
-      email: json['email'] as String?,
+      nombre: (json['nombre'] ?? json['nombre_perfil'] ?? pNombre) as String? ?? 'Barbero',
+      email: (json['email'] ?? pEmail) as String?,
       telefono: json['telefono'] as String?,
-      telefonoPerfil:
-          (json['telefono_perfil'] ?? json['telefono']) as String?,
-      fotoUrl: json['foto_url'] as String?,
+      telefonoPerfil: (json['telefono_perfil'] ?? json['telefono']) as String?,
+      fotoUrl: (json['foto_url'] ?? json['url_foto'] ?? pFoto) as String?,
       nivel: json['nivel'] as String?,
       sucursalId: json['sucursal_id'] as String?,
-      especialidades:
-          (json['especialidades'] as List<dynamic>?)
+      especialidades: (json['especialidades'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
