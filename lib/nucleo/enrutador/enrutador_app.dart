@@ -501,8 +501,8 @@ class _EsqueletoAdministracion extends ConsumerWidget {
 
     final etiquetas = etiquetasNavAdministracion(perfil?.rol);
 
-    if (etiquetas.length <= 1) {
-      // Secretaria: un solo destino (Agenda). Sin navbar.
+    if (perfil?.rol == RolUsuario.barbero || etiquetas.length <= 1) {
+      // Barbero y Secretaria: usan sus propios esqueletos sin navbar duplicada.
       return navigationShell;
     }
 
