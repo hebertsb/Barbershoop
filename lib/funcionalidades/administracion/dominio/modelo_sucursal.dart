@@ -44,7 +44,7 @@ class ModeloSucursal {
       horarioApertura: (json['horario_apertura'] ?? json['hora_apertura']) as String?,
       horarioCierre: (json['horario_cierre'] ?? json['hora_cierre']) as String?,
       managerNombre: (json['manager_nombre'] ?? json['encargado_nombre']) as String?,
-      fotoUrl: (json['foto_url'] ?? json['url_imagen']) as String?,
+      fotoUrl: (json['url_imagen'] ?? json['foto_url']) as String?,
     );
   }
 
@@ -60,7 +60,7 @@ class ModeloSucursal {
       'horario_apertura': horarioApertura,
       'horario_cierre': horarioCierre,
       'manager_nombre': managerNombre,
-      'foto_url': urlImagen,
+      'url_imagen': urlImagen,
     };
 
     if (id.trim().isNotEmpty) {

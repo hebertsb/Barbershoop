@@ -85,20 +85,28 @@ class ModeloPromocion {
   }
 
   Map<String, dynamic> aJson() {
-    return {
-      'id': id,
+    final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'titulo': titulo,
       'descripcion': descripcion,
-      'tipo_descuento': tipoDescuento.name,
+      'tipo_descuento': tipoDescuento == TipoDescuento.porcentaje ? 'porcentaje' : 'monto_fijo',
+      'descuento': valorDescuento,
       'valor_descuento': valorDescuento,
       'sucursal_id': sucursalId,
-      'servicios_ids': serviciosIds,
-      'fecha_inicio': fechaInicio?.toIso8601String(),
-      'fecha_fin': fechaFin?.toIso8601String(),
+      'servicio_id': servicioId,
+      'fecha_inicio': fechaInicio?.toIso8601String().substring(0, 10),
+      'fecha_fin': fechaFin?.toIso8601String().substring(0, 10),
       'foto_url': fotoUrl,
+      'imagen': fotoUrl,
       'activa': activa,
+      'activo': activa,
     };
+
+    if (id.trim().isNotEmpty) {
+      mapa['id'] = id;
+    }
+
+    return mapa;
   }
 
   ModeloPromocion copyWith({

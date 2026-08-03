@@ -226,7 +226,7 @@ class RepositorioAdministracionSupabase implements RepositorioAdministracion {
     try {
       final filas = await _cliente
           .from('barberos')
-          .select('*, perfiles:perfil_id(nombre, url_foto, email)')
+          .select('*, perfiles:perfil_id(nombre, url_foto, email, telefono)')
           .order('activo', ascending: false);
       return filas.map(ModeloBarbero.desdeJson).toList();
     } on SocketException {
