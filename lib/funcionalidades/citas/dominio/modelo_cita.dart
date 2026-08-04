@@ -1,3 +1,4 @@
+import '../../../../nucleo/utilidades/parsear_fecha_utc.dart';
 import 'enum_estado_cita.dart';
 
 class ModeloCita {
@@ -78,9 +79,7 @@ class ModeloCita {
       clienteId: json['cliente_id'] as String? ?? '',
       barberoId: json['barbero_id'] as String? ?? '',
       servicioId: json['servicio_id'] as String? ?? '',
-      fecha: fechaRaw == null
-          ? DateTime.now()
-          : (DateTime.tryParse(fechaRaw as String) ?? DateTime.now()),
+      fecha: parsearFechaUtc(fechaRaw as String?),
       estado: EstadoCita.desdeTexto(json['estado'] as String? ?? ''),
       sucursalId: json['sucursal_id'] as String?,
       precioTotal: (json['precio_total'] as num? ?? 0).toDouble(),

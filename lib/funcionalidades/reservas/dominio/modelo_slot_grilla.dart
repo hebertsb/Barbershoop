@@ -1,3 +1,5 @@
+import '../../../../nucleo/utilidades/parsear_fecha_utc.dart';
+
 class ModeloSlotGrilla {
   const ModeloSlotGrilla({
     required this.horaInicio,
@@ -11,7 +13,7 @@ class ModeloSlotGrilla {
 
   factory ModeloSlotGrilla.desdeJson(Map<String, dynamic> json) {
     return ModeloSlotGrilla(
-      horaInicio: DateTime.parse(json['hora_inicio'] as String),
+      horaInicio: parsearFechaUtc(json['hora_inicio'] as String?),
       disponible: json['disponible'] as bool? ?? true,
     );
   }

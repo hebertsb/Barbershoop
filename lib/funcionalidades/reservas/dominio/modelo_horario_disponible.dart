@@ -1,3 +1,5 @@
+import '../../../../nucleo/utilidades/parsear_fecha_utc.dart';
+
 class ModeloHorarioDisponible {
   const ModeloHorarioDisponible({
     required this.hora,
@@ -11,7 +13,7 @@ class ModeloHorarioDisponible {
 
   factory ModeloHorarioDisponible.desdeJson(Map<String, dynamic> json) {
     return ModeloHorarioDisponible(
-      hora: DateTime.parse(json['hora'] as String),
+      hora: parsearFechaUtc(json['hora'] as String?),
       disponible: json['disponible'] as bool? ?? true,
     );
   }

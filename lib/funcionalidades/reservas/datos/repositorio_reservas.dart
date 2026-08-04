@@ -16,6 +16,7 @@ abstract class RepositorioReservas {
     required DateTime fecha,
     String? barberoId,
     String? promocionId,
+    String? citaExcluir,
   });
 
   Future<List<ModeloSlotGrilla>> obtenerGrillaHorarios({
@@ -24,6 +25,7 @@ abstract class RepositorioReservas {
     required DateTime fecha,
     required String barberoId,
     String? promocionId,
+    String? citaExcluir,
   });
 
   Future<ModeloCita> reservarCita({
@@ -50,6 +52,7 @@ class RepositorioReservasSupabase implements RepositorioReservas {
     required DateTime fecha,
     String? barberoId,
     String? promocionId,
+    String? citaExcluir,
   }) async {
     try {
       try {
@@ -65,6 +68,8 @@ class RepositorioReservasSupabase implements RepositorioReservas {
                   'p_fecha': fecha.toIso8601String().split('T').first,
                   'p_barbero_id': barberoId,
                   'p_promocion_id': promocionId,
+                  if (citaExcluir != null && citaExcluir.isNotEmpty)
+                    'p_cita_excluir': citaExcluir,
                 },
               )
               as List;
@@ -89,6 +94,7 @@ class RepositorioReservasSupabase implements RepositorioReservas {
     required DateTime fecha,
     required String barberoId,
     String? promocionId,
+    String? citaExcluir,
   }) async {
     try {
       try {
@@ -104,6 +110,8 @@ class RepositorioReservasSupabase implements RepositorioReservas {
                   'p_fecha': fecha.toIso8601String().split('T').first,
                   'p_barbero_id': barberoId,
                   'p_promocion_id': promocionId,
+                  if (citaExcluir != null && citaExcluir.isNotEmpty)
+                    'p_cita_excluir': citaExcluir,
                 },
               )
               as List;

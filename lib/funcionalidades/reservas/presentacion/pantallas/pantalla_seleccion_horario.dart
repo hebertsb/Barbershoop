@@ -64,6 +64,8 @@ class _PantallaSeleccionHorarioState
     if (estado.sucursalId == null || estado.servicioId == null) return;
 
     final repo = ref.read(repositorioReservasProvider);
+    // Al reprogramar, excluir la cita actual para que su slot aparezca libre.
+    final citaExcluir = estado.citaIdAReemplazar;
 
     if (!estado.cualquieraSeleccionado && estado.barberoId != null) {
       setState(() {
@@ -74,6 +76,7 @@ class _PantallaSeleccionHorarioState
           fecha: _fechaSeleccionada,
           barberoId: estado.barberoId!,
           promocionId: estado.promocion?.id,
+          citaExcluir: citaExcluir,
         );
       });
     } else {
@@ -85,6 +88,7 @@ class _PantallaSeleccionHorarioState
           fecha: _fechaSeleccionada,
           barberoId: null,
           promocionId: estado.promocion?.id,
+          citaExcluir: citaExcluir,
         );
       });
     }
