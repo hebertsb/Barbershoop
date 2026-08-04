@@ -1,3 +1,5 @@
+import '../../../../nucleo/utilidades/parsear_fecha_utc.dart';
+
 class ModeloCitaAtendidaDia {
   const ModeloCitaAtendidaDia({
     required this.citaId,
@@ -18,7 +20,7 @@ class ModeloCitaAtendidaDia {
   factory ModeloCitaAtendidaDia.desdeJson(Map<String, dynamic> json) {
     return ModeloCitaAtendidaDia(
       citaId: json['cita_id'] as String,
-      hora: DateTime.parse(json['hora'] as String),
+      hora: parsearFechaUtc(json['hora'] as String?),
       clienteNombre: json['cliente_nombre'] as String? ?? 'Cliente',
       servicioNombre: json['servicio_nombre'] as String? ?? '',
       barberoNombre: json['barbero_nombre'] as String? ?? 'Barbero',

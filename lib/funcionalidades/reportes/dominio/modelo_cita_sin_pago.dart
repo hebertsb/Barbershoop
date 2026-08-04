@@ -1,3 +1,5 @@
+import '../../../../nucleo/utilidades/parsear_fecha_utc.dart';
+
 class ModeloCitaSinPago {
   const ModeloCitaSinPago({
     required this.citaId,
@@ -20,7 +22,7 @@ class ModeloCitaSinPago {
   factory ModeloCitaSinPago.desdeJson(Map<String, dynamic> json) {
     return ModeloCitaSinPago(
       citaId: json['cita_id'] as String,
-      fechaHora: DateTime.parse(json['fecha_hora'] as String).toLocal(),
+      fechaHora: parsearFechaUtc(json['fecha_hora'] as String?),
       clienteNombre: json['cliente_nombre'] as String? ?? 'Cliente',
       barberoNombre: json['barbero_nombre'] as String? ?? 'Barbero',
       precioCobrado: (json['precio_cobrado'] as num? ?? 0).toDouble(),

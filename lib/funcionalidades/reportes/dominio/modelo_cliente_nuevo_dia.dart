@@ -1,3 +1,5 @@
+import '../../../../nucleo/utilidades/parsear_fecha_utc.dart';
+
 class ModeloClienteNuevoDia {
   const ModeloClienteNuevoDia({
     required this.clienteId,
@@ -16,7 +18,7 @@ class ModeloClienteNuevoDia {
       clienteId: json['cliente_id'] as String,
       nombre: json['nombre'] as String? ?? 'Cliente',
       telefono: json['telefono'] as String?,
-      horaRegistro: DateTime.parse(json['hora_registro'] as String),
+      horaRegistro: parsearFechaUtc(json['hora_registro'] as String?),
     );
   }
 }
