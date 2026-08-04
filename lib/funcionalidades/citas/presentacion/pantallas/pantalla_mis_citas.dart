@@ -33,7 +33,7 @@ class _PantallaMisCitasState extends ConsumerState<PantallaMisCitas> {
   @override
   void initState() {
     super.initState();
-    _timerRefresco = Timer.periodic(const Duration(seconds: 60), (_) {
+    _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted) return;
       _refrescar();
     });

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +20,24 @@ class PantallaVerificacionPagos extends ConsumerStatefulWidget {
 
 class _PantallaVerificacionPagosState
     extends ConsumerState<PantallaVerificacionPagos> {
-  // ltima lista conocida. El controlador pasa por `AsyncLoading()` (sin
-  // valor previo) en cada confirmar/rechazar y termina en `AsyncError` si
-  // falla, as que leer directo del `AsyncValue` hara desaparecer toda la
-  // bandeja por el error de un solo tem. Cachear ac el ltimo dato bueno
-  // evita eso: la lista se sigue mostrando y el error solo se avisa aparte.
   List<ModeloPago>? _ultimosPagosConocidos;
   String? _procesandoPagoId;
+  Timer? _timerRefresco;
+
+  @override
+  void initState() {
+    super.initState();
+    _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      ref.invalidate(controladorPagosPorVerificarProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerRefresco?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +61,14 @@ class _PantallaVerificacionPagosState
 
     return Scaffold(
       appBar: AppBar(title: const Text('Verificar pagos')),
-      body: pagos == null
-          ? _cuerpoCargaInicial(pagosState, colorScheme)
-          : _cuerpoLista(pagos, pagosState, colorScheme),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(controladorPagosPorVerificarProvider);
+        },
+        child: pagos == null
+            ? _cuerpoCargaInicial(pagosState, colorScheme)
+            : _cuerpoLista(pagos, pagosState, colorScheme),
+      ),
     );
   }
 
@@ -78,13 +95,21 @@ class _PantallaVerificacionPagosState
     ColorScheme colorScheme,
   ) {
     if (pagos.isEmpty && !pagosState.isLoading) {
-      return Center(
-        child: Text(
-          'No hay pagos pendientes de verificacin.',
-          style: TipografiaApp.bodyMd.copyWith(
-            color: colorScheme.onSurfaceVariant,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 64),
+            child: Center(
+              child: Text(
+                'No hay pagos pendientes de verificación.',
+                style: TipografiaApp.bodyMd.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
     return Column(
@@ -92,6 +117,7 @@ class _PantallaVerificacionPagosState
         if (pagosState.isLoading) const LinearProgressIndicator(),
         Expanded(
           child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             itemCount: pagos.length,
             itemBuilder: (context, index) {

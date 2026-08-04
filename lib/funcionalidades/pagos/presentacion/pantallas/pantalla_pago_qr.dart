@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -14,7 +15,7 @@ import '../../dominio/enum_estado_pago.dart';
 import '../../dominio/modelo_pago.dart';
 import '../controladores/controlador_pagos.dart';
 
-class PantallaPagoQr extends ConsumerWidget {
+class PantallaPagoQr extends ConsumerStatefulWidget {
   const PantallaPagoQr({
     super.key,
     required this.citaId,
@@ -27,123 +28,154 @@ class PantallaPagoQr extends ConsumerWidget {
   final String? urlQrBanco;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pagoState = ref.watch(controladorPagoDeCitaProvider(citaId));
-    // El pago conocido ms reciente. A diferencia de `pagoState.when(...)`,
-    // esto se mantiene disponible aunque el ltimo intento haya fallado, as
-    // el error no tapa el resto de la UI (selector incluido).
+  ConsumerState<PantallaPagoQr> createState() => _PantallaPagoQrState();
+}
+
+class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
+  Timer? _timerRefresco;
+
+  @override
+  void initState() {
+    super.initState();
+    _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      ref.invalidate(controladorPagoDeCitaProvider(widget.citaId));
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerRefresco?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pagoState = ref.watch(controladorPagoDeCitaProvider(widget.citaId));
     final pago = pagoState.valueOrNull;
     final colorScheme = Theme.of(context).colorScheme;
-    // Carga inicial: todava no hay ni dato ni error previos. Se distingue
-    // de un reintento (tras error) o de un refresco (con dato previo), que
-    // s deben seguir mostrando `_contenidoPago` con su banner correspondiente.
     final esCargaInicial =
         pagoState.isLoading && !pagoState.hasValue && !pagoState.hasError;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pagar por QR')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Monto a pagar: ${formatoMoneda(monto)}',
-              style: TipografiaApp.headlineSm.copyWith(
-                color: colorScheme.onSurface,
+      appBar: AppBar(
+        title: const Text('Pagar por QR'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            tooltip: 'Volver al Inicio',
+            onPressed: () => context.go('/'),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(controladorPagoDeCitaProvider(widget.citaId));
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Monto a pagar: ${formatoMoneda(widget.monto)}',
+                style: TipografiaApp.headlineSm.copyWith(
+                  color: colorScheme.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            if (urlQrBanco != null) ...[
-              Center(
-                child: GestureDetector(
-                  onTap: () =>
-                      mostrarImagenPantallaCompleta(context, urlQrBanco!),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: colorScheme.primary, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.primary.withValues(alpha: 0.2),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: SizedBox(
-                      width: 250,
-                      height: 250,
-                      child: CachedNetworkImage(
-                        imageUrl: urlQrBanco!,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => const Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                        errorWidget: (context, url, error) => Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.broken_image_outlined,
-                                color: colorScheme.error,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'No se pudo cargar el QR',
-                                style: TipografiaApp.bodyMd.copyWith(
+              const SizedBox(height: 16),
+              if (widget.urlQrBanco != null) ...[
+                Center(
+                  child: GestureDetector(
+                    onTap: () =>
+                        mostrarImagenPantallaCompleta(context, widget.urlQrBanco!),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: colorScheme.primary, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withValues(alpha: 0.2),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: SizedBox(
+                        width: 250,
+                        height: 250,
+                        child: CachedNetworkImage(
+                          imageUrl: widget.urlQrBanco!,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => const Padding(
+                            padding: EdgeInsets.all(24),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.broken_image_outlined,
                                   color: colorScheme.error,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                Text(
+                                  'No se pudo cargar el QR',
+                                  style: TipografiaApp.bodyMd.copyWith(
+                                    color: colorScheme.error,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Toca el QR para ampliarlo',
-                textAlign: TextAlign.center,
-                style: TipografiaApp.bodyMd.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Center(child: _BotonDescargarQr(urlQrBanco: urlQrBanco!)),
-            ] else
-              Text(
-                'La barbera todava no carg su QR de pago.',
-                style: TipografiaApp.bodyMd.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            const SizedBox(height: 24),
-            if (esCargaInicial)
-              const Center(child: CircularProgressIndicator())
-            else ...[
-              if (pagoState.isLoading)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              if (pagoState.hasError)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    pagoState.error.toString(),
-                    style: TextStyle(color: colorScheme.error),
+                const SizedBox(height: 8),
+                Text(
+                  'Toca el QR para ampliarlo',
+                  textAlign: TextAlign.center,
+                  style: TipografiaApp.bodyMd.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-              _contenidoPago(context, ref, colorScheme, pago),
+                const SizedBox(height: 12),
+                Center(child: _BotonDescargarQr(urlQrBanco: widget.urlQrBanco!)),
+              ] else
+                Text(
+                  'La barbería todavía no cargó su QR de pago.',
+                  style: TipografiaApp.bodyMd.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              const SizedBox(height: 24),
+              if (esCargaInicial)
+                const Center(child: CircularProgressIndicator())
+              else ...[
+                if (pagoState.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (pagoState.hasError)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      pagoState.error.toString(),
+                      style: TextStyle(color: colorScheme.error),
+                    ),
+                  ),
+                _contenidoPago(context, ref, colorScheme, pago),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -212,8 +244,8 @@ class PantallaPagoQr extends ConsumerWidget {
           carpeta: 'comprobantes',
           alSubir: (url) {
             ref
-                .read(controladorPagoDeCitaProvider(citaId).notifier)
-                .subirComprobante(monto: monto, urlComprobante: url)
+                .read(controladorPagoDeCitaProvider(widget.citaId).notifier)
+                .subirComprobante(monto: widget.monto, urlComprobante: url)
                 // El controlador relanza el error a propsito para que el
                 // caller pueda reaccionar; ac el feedback se muestra de
                 // forma reactiva va `pagoState.hasError` arriba, as que

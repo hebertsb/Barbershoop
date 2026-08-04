@@ -1,17 +1,20 @@
 String formatoFechaCorta(DateTime dt) {
-  final d = dt.day.toString().padLeft(2, '0');
-  final m = dt.month.toString().padLeft(2, '0');
-  final y = dt.year.toString();
+  final local = dt.toLocal();
+  final d = local.day.toString().padLeft(2, '0');
+  final m = local.month.toString().padLeft(2, '0');
+  final y = local.year.toString();
   return '$d/$m/$y';
 }
 
 String formatoHora(DateTime dt) {
-  final h = dt.hour.toString().padLeft(2, '0');
-  final m = dt.minute.toString().padLeft(2, '0');
+  final local = dt.toLocal();
+  final h = local.hour.toString().padLeft(2, '0');
+  final m = local.minute.toString().padLeft(2, '0');
   return '$h:$m';
 }
 
-/// Devuelve fecha y hora combinadas: "02/08/2026 · 14:30"
+/// Devuelve fecha y hora combinadas en hora local: "02/08/2026 · 14:30"
 String formatoFechaHora(DateTime dt) {
-  return '${formatoFechaCorta(dt)} · ${formatoHora(dt)}';
+  final local = dt.toLocal();
+  return '${formatoFechaCorta(local)} · ${formatoHora(local)}';
 }
