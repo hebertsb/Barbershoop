@@ -50,15 +50,17 @@ class _PantallaSeleccionSucursalState
 
   /// Selecciona la sucursal y avanza al siguiente paso del flujo de reserva.
   ///
-  /// Si ya hay una promoción activa en [EstadoReserva] con su servicio
-  /// (o combo) ya cargado -- caso de reservar desde una oferta con 2+
-  /// sucursales activas -- se salta la pantalla de selección de servicio
-  /// y se va directo a elegir barbero.
+  /// - Si ya hay una **promoción** activa con servicioId → salta a barbero.
+  /// - Si ya hay un **servicioId** preseleccionado (ej. desde Servicio Popular
+  ///   en el dashboard) → también salta a barbero (no repide el paso).
+  /// - Si no hay servicio ni promoción → va a elegir servicio.
   void _irAlSiguientePaso(String sucursalId) {
     final controlador = ref.read(controladorReservaProvider.notifier);
     controlador.seleccionarSucursal(sucursalId);
-    final promocion = ref.read(controladorReservaProvider).promocion;
-    if (promocion != null && promocion.servicioId != null) {
+    final estado = ref.read(controladorReservaProvider);
+    final yaTieneServicio =
+        estado.servicioId != null && estado.servicioId!.isNotEmpty;
+    if (yaTieneServicio) {
       context.push('/reservar/barbero');
     } else {
       context.push('/reservar/servicio');
