@@ -64,8 +64,11 @@ class _PantallaSeleccionHorarioState
     if (estado.sucursalId == null || estado.servicioId == null) return;
 
     final repo = ref.read(repositorioReservasProvider);
-    // Al reprogramar, excluir la cita actual para que su slot aparezca libre.
-    final citaExcluir = estado.citaIdAReemplazar;
+    // NOTA: al reprogramar NO se excluye la cita actual del cálculo de
+    // disponibilidad. El slot viejo debe seguir apareciendo tachado (ocupado)
+    // hasta que el cliente confirme el nuevo horario — recién ahí la cita
+    // anterior se cancela y el slot queda libre. El cliente debe elegir
+    // un horario DIFERENTE al que ya tiene reservado.
 
     if (!estado.cualquieraSeleccionado && estado.barberoId != null) {
       setState(() {
@@ -76,7 +79,6 @@ class _PantallaSeleccionHorarioState
           fecha: _fechaSeleccionada,
           barberoId: estado.barberoId!,
           promocionId: estado.promocion?.id,
-          citaExcluir: citaExcluir,
         );
       });
     } else {
@@ -88,7 +90,6 @@ class _PantallaSeleccionHorarioState
           fecha: _fechaSeleccionada,
           barberoId: null,
           promocionId: estado.promocion?.id,
-          citaExcluir: citaExcluir,
         );
       });
     }
