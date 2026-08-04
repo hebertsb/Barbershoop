@@ -58,7 +58,7 @@ class RepositorioPagosSupabase implements RepositorioPagos {
             '*, citas:cita_id(fecha_hora, perfiles:cliente_id(nombre, telefono))',
           )
           .eq('estado', 'por_verificar')
-          .order('fecha');
+          .order('creado_en', ascending: false);
       return filas.map(ModeloPago.desdeJson).toList();
     } on SocketException {
       throw const ExcepcionRed();

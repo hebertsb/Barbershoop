@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../nucleo/componentes/visor_imagen_pantalla_completa.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../../../nucleo/utilidades/formato_moneda.dart';
@@ -218,9 +219,40 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
             ),
             if (pago.urlComprobante != null) ...[
               const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: _construirImagenComprobante(pago.urlComprobante!, colorScheme),
+              GestureDetector(
+                onTap: () => mostrarImagenPantallaCompleta(context, pago.urlComprobante!),
+                child: Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colorScheme.outlineVariant),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _construirImagenComprobante(pago.urlComprobante!, colorScheme),
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.fullscreen_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
             const SizedBox(height: 12),
@@ -261,13 +293,13 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
     if (urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')) {
       return CachedNetworkImage(
         imageUrl: urlLimpia,
-        placeholder: (context, u) => const Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: CircularProgressIndicator()),
+        fit: BoxFit.contain,
+        placeholder: (context, u) => const Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
         errorWidget: (context, u, error) => Image.network(
           urlLimpia,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
         ),
       );
@@ -279,7 +311,7 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
         final bytes = base64Decode(base64Content.replaceAll(RegExp(r'\s+'), ''));
         return Image.memory(
           bytes,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
         );
       } catch (_) {

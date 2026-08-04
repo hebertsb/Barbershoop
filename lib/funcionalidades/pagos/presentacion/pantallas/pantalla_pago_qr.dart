@@ -191,6 +191,40 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
     );
   }
 
+  Widget _construirImagenVisual(String url, ColorScheme colorScheme) {
+    final urlLimpia = url.trim();
+    if (urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')) {
+      return CachedNetworkImage(
+        imageUrl: urlLimpia,
+        fit: BoxFit.contain,
+        placeholder: (context, u) => const Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        errorWidget: (context, u, error) => const Center(
+          child: Icon(Icons.broken_image_outlined, size: 40),
+        ),
+      );
+    } else {
+      try {
+        final String base64Content = urlLimpia.contains(',')
+            ? urlLimpia.split(',').last
+            : urlLimpia;
+        final bytes = base64Decode(base64Content.replaceAll(RegExp(r'\s+'), ''));
+        return Image.memory(
+          bytes,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Center(
+            child: Icon(Icons.broken_image_outlined, size: 40),
+          ),
+        );
+      } catch (_) {
+        return const Center(
+          child: Icon(Icons.broken_image_outlined, size: 40),
+        );
+      }
+    }
+  }
+
   /// Vista previa de imagen en tarjeta centrada (220x220), estilo idéntico al QR.
   Widget _tarjetaVistaPreviaComprobante({
     required BuildContext context,
@@ -221,13 +255,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  url,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Center(
-                    child: Icon(Icons.broken_image_outlined, size: 40),
-                  ),
-                ),
+                child: _construirImagenVisual(url, colorScheme),
               ),
               Positioned(
                 bottom: 6,
