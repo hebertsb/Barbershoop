@@ -14,6 +14,12 @@ class ControladorPagoDeCita
     return ref.read(repositorioPagosProvider).obtenerPagoDeCita(arg);
   }
 
+  /// Refresca silenciosamente en segundo plano sin poner el estado en `AsyncLoading`.
+  Future<void> refrescarSilencioso() async {
+    final pago = await ref.read(repositorioPagosProvider).obtenerPagoDeCita(arg);
+    state = AsyncData(pago);
+  }
+
   Future<void> subirComprobante({
     required double monto,
     required String urlComprobante,

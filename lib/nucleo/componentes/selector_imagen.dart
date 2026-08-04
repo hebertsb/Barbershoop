@@ -22,6 +22,7 @@ class SelectorImagen extends StatefulWidget {
     required this.alSubir,
     this.altura = 160,
     this.ancho,
+    this.fit = BoxFit.cover,
   });
 
   /// Nombre del bucket de Supabase Storage donde se subirá la imagen.
@@ -41,6 +42,9 @@ class SelectorImagen extends StatefulWidget {
 
   /// Ancho del selector. Si es null, ocupa todo el ancho disponible.
   final double? ancho;
+
+  /// Ajuste visual de la imagen (BoxFit.cover por defecto, BoxFit.contain para comprobantes).
+  final BoxFit fit;
 
   @override
   State<SelectorImagen> createState() => _SelectorImagenState();
@@ -160,7 +164,7 @@ class _SelectorImagenState extends State<SelectorImagen> {
           final bytes = base64Decode(base64Data);
           return Image.memory(
             bytes,
-            fit: BoxFit.cover,
+            fit: widget.fit,
             errorBuilder: (_, __, ___) => _placeholder(colorScheme),
           );
         }
@@ -170,7 +174,7 @@ class _SelectorImagenState extends State<SelectorImagen> {
           final bytes = base64Decode(url);
           return Image.memory(
             bytes,
-            fit: BoxFit.cover,
+            fit: widget.fit,
             errorBuilder: (_, __, ___) => _placeholder(colorScheme),
           );
         } catch (_) {
@@ -184,7 +188,7 @@ class _SelectorImagenState extends State<SelectorImagen> {
     // URL HTTP/HTTPS normal
     return Image.network(
       url,
-      fit: BoxFit.cover,
+      fit: widget.fit,
       errorBuilder: (_, __, ___) => _placeholder(colorScheme),
     );
   }

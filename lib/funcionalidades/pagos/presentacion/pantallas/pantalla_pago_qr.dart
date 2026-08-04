@@ -37,21 +37,25 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
   @override
   void initState() {
     super.initState();
-    // Refresca el estado del pago cada 5s para detectar cuando el admin
-    // confirma el pago. Se cancela solo cuando el estado ya es terminal
-    // (porVerificar o confirmado) para no seguir parpadeando innecesariamente.
-    _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
+    _iniciarTimerSilencioso();
+  }
+
+  void _iniciarTimerSilencioso() {
+    _timerRefresco?.cancel();
+    _timerRefresco = Timer.periodic(const Duration(seconds: 4), (_) async {
       if (!mounted) return;
-      final estadoActual =
+      final pago =
           ref.read(controladorPagoDeCitaProvider(widget.citaId)).valueOrNull;
-      final esTerminal = estadoActual != null &&
-          (estadoActual.estado == EstadoPago.porVerificar ||
-           estadoActual.estado == EstadoPago.confirmado);
-      if (esTerminal) {
+
+      // Solo hacer polling si el comprobante ya se subió y está 'por_verificar'
+      if (pago != null && pago.estado == EstadoPago.porVerificar) {
+        await ref
+            .read(controladorPagoDeCitaProvider(widget.citaId).notifier)
+            .refrescarSilencioso();
+      } else if (pago != null && pago.estado == EstadoPago.confirmado) {
+        // En cuanto pasa a confirmado, detener el timer de polling
         _timerRefresco?.cancel();
-        return;
       }
-      ref.invalidate(controladorPagoDeCitaProvider(widget.citaId));
     });
   }
 
@@ -66,8 +70,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
     final pagoState = ref.watch(controladorPagoDeCitaProvider(widget.citaId));
     final pago = pagoState.valueOrNull;
     final colorScheme = Theme.of(context).colorScheme;
-    final esCargaInicial =
-        pagoState.isLoading && !pagoState.hasValue && !pagoState.hasError;
+    final esCargaInicial = pagoState.isLoading && !pagoState.hasValue;
 
     return Scaffold(
       appBar: AppBar(
@@ -117,8 +120,8 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
                         ],
                       ),
                       child: SizedBox(
-                        width: 250,
-                        height: 250,
+                        width: 220,
+                        height: 220,
                         child: CachedNetworkImage(
                           imageUrl: widget.urlQrBanco!,
                           fit: BoxFit.contain,
@@ -171,11 +174,6 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
               if (esCargaInicial)
                 const Center(child: CircularProgressIndicator())
               else ...[
-                if (pagoState.isLoading)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 12),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
                 if (pagoState.hasError)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -193,83 +191,251 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
     );
   }
 
-  /// Selector de comprobante o el estado actual del pago, segn corresponda.
-  /// Se basa en el ltimo [ModeloPago] conocido (no en el `AsyncValue`
-  /// completo) para que un error de subida no oculte el selector.
+  /// Vista previa de imagen en tarjeta centrada (220x220), estilo idéntico al QR.
+  Widget _tarjetaVistaPreviaComprobante({
+    required BuildContext context,
+    required String url,
+    required ColorScheme colorScheme,
+  }) {
+    return GestureDetector(
+      onTap: () => mostrarImagenPantallaCompleta(context, url),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colorScheme.outlineVariant, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: SizedBox(
+          width: 220,
+          height: 220,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Icon(Icons.broken_image_outlined, size: 40),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 6,
+                right: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.fullscreen_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Selector de comprobante o el estado actual del pago.
   Widget _contenidoPago(
     BuildContext context,
     WidgetRef ref,
     ColorScheme colorScheme,
     ModeloPago? pago,
   ) {
+    if (pago != null && pago.estado == EstadoPago.confirmado) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.green.shade400, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.green.shade700,
+                  size: 56,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '¡PAGO CONFIRMADO!',
+                  style: TipografiaApp.headlineSm.copyWith(
+                    color: Colors.green.shade900,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tu pago fue verificado exitosamente por la barbería. Tu cita ya está asegurada.',
+                  style: TipografiaApp.bodyMd.copyWith(
+                    color: Colors.green.shade800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          if (pago.urlComprobante != null) ...[
+            const SizedBox(height: 20),
+            Center(
+              child: _tarjetaVistaPreviaComprobante(
+                context: context,
+                url: pago.urlComprobante!,
+                colorScheme: colorScheme,
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/mis-citas'),
+            icon: const Icon(Icons.calendar_month),
+            label: const Text('VER MIS CITAS'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/'),
+            icon: const Icon(Icons.home_outlined),
+            label: const Text('Volver al Inicio'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     if (pago != null && pago.estado == EstadoPago.porVerificar) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: colorScheme.primary.withValues(alpha: 0.4),
+                color: colorScheme.primary.withValues(alpha: 0.5),
+                width: 1.5,
               ),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.check_circle_outline,
+                  Icons.watch_later_outlined,
                   color: colorScheme.primary,
-                  size: 24,
+                  size: 28,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    'Comprobante subido. Esperando verificación del local.',
-                    style: TipografiaApp.bodyMd.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Comprobante en Verificación',
+                        style: TipografiaApp.titleMd.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tu comprobante fue subido. La barbería lo revisará a la brevedad.',
+                        style: TipografiaApp.bodySm.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
           if (pago.urlComprobante != null) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                height: 160,
-                child: Image.network(
-                  pago.urlComprobante!,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                ),
+            const SizedBox(height: 20),
+            Text(
+              'Comprobante enviado (toca para ampliar):',
+              textAlign: TextAlign.center,
+              style: TipografiaApp.labelMd.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: _tarjetaVistaPreviaComprobante(
+                context: context,
+                url: pago.urlComprobante!,
+                colorScheme: colorScheme,
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          const _BotonIrAMisCitas(),
-        ],
-      );
-    }
-    if (pago != null && pago.estado == EstadoPago.confirmado) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Pago confirmado!',
-            style: TipografiaApp.bodyMd.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/mis-citas'),
+            icon: const Icon(Icons.calendar_month_outlined),
+            label: const Text('Ir a Mis Citas'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          const _BotonIrAMisCitas(),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/'),
+            icon: const Icon(Icons.home_outlined),
+            label: const Text('Volver al Inicio'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
         ],
       );
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -277,33 +443,32 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'Tu comprobante anterior fue rechazado. Sub uno nuevo.',
+              'Tu comprobante anterior fue rechazado. Subí uno nuevo.',
               style: TextStyle(color: colorScheme.error),
             ),
           ),
         Text(
-          'Sub la captura de tu comprobante de pago',
+          'Subí la captura de tu comprobante de pago:',
           style: TipografiaApp.bodyMd.copyWith(
             color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
-        SelectorImagen(
-          bucket: Constantes.bucketImagenesApp,
-          carpeta: 'comprobantes',
-          alSubir: (url) {
-            ref
-                .read(controladorPagoDeCitaProvider(widget.citaId).notifier)
-                .subirComprobante(monto: widget.monto, urlComprobante: url)
-                // El controlador relanza el error a propsito para que el
-                // caller pueda reaccionar; ac el feedback se muestra de
-                // forma reactiva va `pagoState.hasError` arriba, as que
-                // no hace falta reaccionar en este callback. El catchError
-                // vaco es necesario solo para que Flutter no marque este
-                // Future (disparado sin await desde un callback sncrono)
-                // como "unhandled error" en la consola.
-                .catchError((_) {});
-          },
+        const SizedBox(height: 12),
+        Center(
+          child: SelectorImagen(
+            bucket: Constantes.bucketImagenesApp,
+            carpeta: 'comprobantes',
+            ancho: 220,
+            altura: 220,
+            fit: BoxFit.contain,
+            alSubir: (url) {
+              ref
+                  .read(controladorPagoDeCitaProvider(widget.citaId).notifier)
+                  .subirComprobante(monto: widget.monto, urlComprobante: url)
+                  .catchError((_) {});
+            },
+          ),
         ),
       ],
     );
