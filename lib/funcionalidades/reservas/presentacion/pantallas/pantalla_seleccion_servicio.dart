@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../../../nucleo/utilidades/formato_moneda.dart';
 import '../../../administracion/presentacion/controladores/controlador_servicios.dart';
@@ -51,7 +52,13 @@ class _PantallaSeleccionServicioState
             itemBuilder: (context, index) {
               final servicio = activos[index];
               return Card(
-                margin: const EdgeInsets.only(bottom: 16),
+                margin: const EdgeInsets.only(bottom: 20),
+                elevation: 3,
+                shadowColor: Colors.black.withValues(alpha: 0.15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                ),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () {
@@ -66,19 +73,19 @@ class _PantallaSeleccionServicioState
                       if (servicio.urlImagen != null)
                         CachedNetworkImage(
                           imageUrl: servicio.urlImagen!,
-                          height: 130,
+                          height: 170,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorWidget: (context, url, error) => Container(
-                            height: 80,
+                            height: 100,
                             color: colorScheme.surfaceContainerHigh,
                             child: const Center(
-                              child: Icon(Icons.content_cut_outlined, size: 36),
+                              child: Icon(Icons.content_cut_outlined, size: 40),
                             ),
                           ),
                         ),
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -95,52 +102,54 @@ class _PantallaSeleccionServicioState
                                 ),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
+                                    horizontal: 12,
+                                    vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(6),
+                                    color: ColoresApp.primario,
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
                                     formatoMoneda(servicio.precio),
                                     style: TipografiaApp.labelMd.copyWith(
-                                      color: colorScheme.onPrimaryContainer,
+                                      color: ColoresApp.onPrimario,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Row(
                               children: [
                                 Icon(
-                                  Icons.schedule,
-                                  size: 14,
-                                  color: colorScheme.onSurfaceVariant,
+                                  Icons.access_time_filled_rounded,
+                                  size: 16,
+                                  color: colorScheme.primary,
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 6),
                                 Text(
-                                  '${servicio.duracionMin} min',
+                                  'Duración: ${servicio.duracionMin} min',
                                   style: TipografiaApp.labelSm.copyWith(
                                     color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                            if (servicio.descripcion != null) ...[
-                              const SizedBox(height: 8),
+                            if (servicio.descripcion != null &&
+                                servicio.descripcion!.trim().isNotEmpty) ...[
+                              const SizedBox(height: 10),
                               Text(
                                 servicio.descripcion!,
                                 style: TipografiaApp.bodySm.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
-                                maxLines: 2,
+                                maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 16),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
@@ -157,7 +166,10 @@ class _PantallaSeleccionServicioState
                                   foregroundColor:
                                       colorScheme.onPrimaryContainer,
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
                               ),

@@ -162,9 +162,18 @@ class _TarjetaBarberoGrande extends StatelessWidget {
     final tieneCalificacion =
         barbero.calificacionCantidad != null &&
         barbero.calificacionCantidad! > 0;
+    final ratingTexto = tieneCalificacion
+        ? '${barbero.calificacionPromedio!.toStringAsFixed(1)} ★ (${barbero.calificacionCantidad})'
+        : '5.0 ★ (Nuevo)';
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: 3,
+      shadowColor: Colors.black.withValues(alpha: 0.15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+      ),
       margin: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -202,39 +211,39 @@ class _TarjetaBarberoGrande extends StatelessWidget {
                         ),
                       ),
               ),
-              if (tieneCalificacion)
-                Positioned(
-                  left: 12,
-                  bottom: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          size: 14,
-                          color: ColoresApp.primario,
+              Positioned(
+                left: 12,
+                bottom: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: ColoresApp.primario, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        ratingTexto,
+                        style: TipografiaApp.labelSm.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          barbero.calificacionPromedio!.toStringAsFixed(1),
-                          style: TipografiaApp.labelSm.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
             ],
           ),
           Padding(
