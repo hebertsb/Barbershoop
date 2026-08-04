@@ -8,6 +8,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Selector y visualizador de imagen que permite subir a Supabase Storage.
 /// Muestra la imagen actual (si existe) o un placeholder, y permite al
 /// usuario elegir una foto desde la galería o cámara para subirla.
+///
+/// Soporta tres tipos de URL al mostrar la imagen:
+/// - HTTP/HTTPS: carga con [Image.network].
+/// - Data URL Base64 (data:image/...;base64,...): decodifica y usa [Image.memory].
+/// - Base64 puro: decodifica y usa [Image.memory].
 class SelectorImagen extends StatefulWidget {
   const SelectorImagen({
     super.key,
@@ -59,7 +64,8 @@ class _SelectorImagenState extends State<SelectorImagen> {
     try {
       final bytes = await File(imagen.path).readAsBytes();
       final ext = imagen.path.split('.').last.toLowerCase();
-      final nombre = '${widget.carpeta}/${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final nombre =
+          '${widget.carpeta}/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       final supabase = Supabase.instance.client;
       try {
@@ -117,11 +123,7 @@ class _SelectorImagenState extends State<SelectorImagen> {
                 ? Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        urlMostrar,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholder(colorScheme),
-                      ),
+                      _construirImagen(urlMostrar, colorScheme),
                       Positioned(
                         bottom: 8,
                         right: 8,
@@ -142,6 +144,48 @@ class _SelectorImagenState extends State<SelectorImagen> {
                   )
                 : _placeholder(colorScheme),
       ),
+    );
+  }
+
+  /// Construye el widget de imagen correcto según el tipo de URL:
+  /// - Data URL Base64 o Base64 puro → [Image.memory]
+  /// - HTTP/HTTPS → [Image.network]
+  Widget _construirImagen(String url, ColorScheme colorScheme) {
+    try {
+      if (url.startsWith('data:image/')) {
+        // Data URL: data:image/jpeg;base64,/9j/4AAQ...
+        final commaIndex = url.indexOf(',');
+        if (commaIndex != -1) {
+          final base64Data = url.substring(commaIndex + 1);
+          final bytes = base64Decode(base64Data);
+          return Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _placeholder(colorScheme),
+          );
+        }
+      } else if (!url.startsWith('http')) {
+        // Base64 puro sin prefijo data:
+        try {
+          final bytes = base64Decode(url);
+          return Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _placeholder(colorScheme),
+          );
+        } catch (_) {
+          // No es Base64 válido, tratar como red
+        }
+      }
+    } catch (_) {
+      // En caso de error de decodificación, usar Image.network
+    }
+
+    // URL HTTP/HTTPS normal
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _placeholder(colorScheme),
     );
   }
 
