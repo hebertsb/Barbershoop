@@ -1,8 +1,7 @@
 import '../../turnos/dominio/modelo_turno.dart';
-import 'enum_estado_cita.dart';
 import 'modelo_cita.dart';
 
-/// Un tem de la agenda del da: o una cita reservada, o un turno walk-in.
+/// Un ítem de la agenda del día: o una cita reservada, o un turno walk-in.
 sealed class ItemAgenda {
   const ItemAgenda();
 
@@ -32,24 +31,13 @@ String idDeItemAgenda(ItemAgenda item) => switch (item) {
   ItemAgendaTurno(:final turno) => turno.id,
 };
 
-/// Combina citas y turnos del da en una sola lista ordenada por hora --
-/// solo citas `pendiente`/`confirmada`/`completada` (excluye
-/// `cancelada`/`no_asistio`, que no ocupan un lugar real en la agenda del
-/// da). Empate exacto de hora se desempata por id (determinstico entre
-/// llamadas).
+/// Combina todas las citas y turnos del día en una sola lista ordenada por hora.
 List<ItemAgenda> combinarAgendaDelDia({
   required List<ModeloCita> citas,
   required List<ModeloTurno> turnos,
 }) {
-  final citasVisibles = citas.where(
-    (c) =>
-        c.estado == EstadoCita.pendiente ||
-        c.estado == EstadoCita.confirmada ||
-        c.estado == EstadoCita.completada,
-  );
-
   final items = <ItemAgenda>[
-    ...citasVisibles.map(ItemAgendaCita.new),
+    ...citas.map(ItemAgendaCita.new),
     ...turnos.map(ItemAgendaTurno.new),
   ];
 

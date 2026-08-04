@@ -36,7 +36,7 @@ class _PantallaAgendaState extends ConsumerState<PantallaAgenda> {
   @override
   void initState() {
     super.initState();
-    _timerRefresco = Timer.periodic(const Duration(seconds: 60), (_) {
+    _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted) return;
       final sucursalId = _sucursalIdVisible;
       if (sucursalId == null) return;
@@ -167,9 +167,34 @@ class _PantallaAgendaState extends ConsumerState<PantallaAgenda> {
           error: (error, _) => Center(child: Text(error.toString())),
           data: (turnos) {
             final items = combinarAgendaDelDia(citas: citas, turnos: turnos);
+            Future<void> refrescar() async {
+              ref.invalidate(controladorCitasProvider(sucursalId));
+              ref.invalidate(controladorTurnosProvider(sucursalId));
+              ref.invalidate(horariosDeSucursalProvider(sucursalId));
+            }
+
             if (items.isEmpty) {
-              return const Center(
-                child: Text('No hay citas ni turnos para hoy.'),
+              return RefreshIndicator(
+                onRefresh: refrescar,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 64,
+                      ),
+                      child: Center(
+                        child: Text(
+                          'No hay citas ni turnos para hoy.',
+                          style: TipografiaApp.bodyMd.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
             final barberosDeLaSucursal = (barberosState.value ?? [])
@@ -227,12 +252,6 @@ class _PantallaAgendaState extends ConsumerState<PantallaAgenda> {
                       .catchError((_) {});
                 },
               );
-            }
-
-            Future<void> refrescar() async {
-              ref.invalidate(controladorCitasProvider(sucursalId));
-              ref.invalidate(controladorTurnosProvider(sucursalId));
-              ref.invalidate(horariosDeSucursalProvider(sucursalId));
             }
 
             return LayoutBuilder(

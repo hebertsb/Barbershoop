@@ -199,89 +199,83 @@ class _PantallaGestionBarberosState
 
               // Lista o Grilla de Barberos
               Expanded(
-                child: Listener(
-                  // El buscador vive fuera de este bloque; los selectores de
-                  // nivel de cada tarjeta viven acá adentro. Si el buscador
-                  // tiene foco y el admin toca un selector, este toque debe
-                  // sacarle el foco al buscador YA (antes de que el propio
-                  // `PopupMenuButton` intente abrir su menú), porque mientras
-                  // `_bloqueandoSelectores` sea true el `AbsorbPointer` de
-                  // `SelectorNivelBarbero` absorbe el toque y su lógica
-                  // interna (que de otro modo dispararía el unfocus solita al
-                  // empujar su propia ruta) nunca llega a ejecutarse.
-                  onPointerDown: (_) {
-                    if (_focusScopeNode?.hasFocus ?? false) {
-                      FocusScope.of(context).unfocus();
-                    }
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(controladorBarberosProvider);
+                    ref.invalidate(controladorSucursalesProvider);
                   },
-                  child: filtrados.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No hay barberos para mostrar.',
-                            style: TipografiaApp.bodyMd.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                  child: Listener(
+                    onPointerDown: (_) {
+                      if (_focusScopeNode?.hasFocus ?? false) {
+                        FocusScope.of(context).unfocus();
+                      }
+                    },
+                    child: filtrados.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(64),
+                                child: Center(
+                                  child: Text(
+                                    'No hay barberos para mostrar.',
+                                    style: TipografiaApp.bodyMd.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : _modoGrilla
+                        ? GridView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 200,
+                                  mainAxisSpacing: 16,
+                                  crossAxisSpacing: 16,
+                                  mainAxisExtent: 300,
+                                ),
+                            itemCount: filtrados.length,
+                            itemBuilder: (context, index) {
+                              final barbero = filtrados[index];
+                              return TarjetaBarberoCuadro(
+                                barbero: barbero,
+                                sucursalNombre: _obtenerNombreSucursal(
+                                  barbero.sucursalId,
+                                  sucursales,
+                                ),
+                                sucursales: sucursales,
+                                bloqueadoSelector: _bloqueandoSelectores,
+                              );
+                            },
+                          )
+                        : ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            itemCount: filtrados.length,
+                            itemBuilder: (context, index) {
+                              final barbero = filtrados[index];
+                              return TarjetaBarberoLista(
+                                barbero: barbero,
+                                sucursalNombre: _obtenerNombreSucursal(
+                                  barbero.sucursalId,
+                                  sucursales,
+                                ),
+                                sucursales: sucursales,
+                                bloqueadoSelector: _bloqueandoSelectores,
+                              );
+                            },
                           ),
-                        )
-                      : _modoGrilla
-                      ? GridView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            // Alto fijo (no `childAspectRatio`): contenido real de
-                            // TarjetaBarberoCuadro ≈ padding 12*2 + avatar 72 + spacing
-                            // 10 + nombre (~24) + spacing 2 + sucursal (~20) + spacing 6
-                            // + selector de nivel (~24) + fila opcional de medallas
-                            // (~19, solo si ganó alguna) + fila de acciones (~40) ≈
-                            // 241px con medallas -- 300 deja margen real con texto
-                            // escalado (260 se quedaba corto y desbordaba en tablet,
-                            // bug real reportado). Un `childAspectRatio` fijo se probó
-                            // antes y era incorrecto en pantallas anchas: con pocas
-                            // columnas la celda se ensancha mucho y esa misma
-                            // proporción estira la altura también, dejando una franja
-                            // vacía enorme debajo del texto. `maxCrossAxisExtent` fija
-                            // el ancho ideal por tarjeta y Flutter decide solo cuántas
-                            // columnas entran, sin ese problema.
-                            maxCrossAxisExtent: 200,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            mainAxisExtent: 300,
-                          ),
-                          itemCount: filtrados.length,
-                          itemBuilder: (context, index) {
-                            final barbero = filtrados[index];
-                            return TarjetaBarberoCuadro(
-                              barbero: barbero,
-                              sucursalNombre: _obtenerNombreSucursal(
-                                barbero.sucursalId,
-                                sucursales,
-                              ),
-                              sucursales: sucursales,
-                              bloqueadoSelector: _bloqueandoSelectores,
-                            );
-                          },
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          itemCount: filtrados.length,
-                          itemBuilder: (context, index) {
-                            final barbero = filtrados[index];
-                            return TarjetaBarberoLista(
-                              barbero: barbero,
-                              sucursalNombre: _obtenerNombreSucursal(
-                                barbero.sucursalId,
-                                sucursales,
-                              ),
-                              sucursales: sucursales,
-                              bloqueadoSelector: _bloqueandoSelectores,
-                            );
-                          },
-                        ),
+                  ),
                 ),
               ),
             ],

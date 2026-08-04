@@ -34,7 +34,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
   @override
   void initState() {
     super.initState();
-    _timerRefresco = Timer.periodic(const Duration(seconds: 60), (_) {
+    _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted) return;
       final sucursalId = _sucursalIdVisible;
       if (sucursalId == null) return;
@@ -119,6 +119,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
                 ref.invalidate(controladorTurnosProvider(sucursalId));
               },
               child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 children: [
                   Text(

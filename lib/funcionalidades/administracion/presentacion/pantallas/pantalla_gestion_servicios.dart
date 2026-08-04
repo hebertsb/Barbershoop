@@ -140,59 +140,67 @@ class _PantallaGestionServiciosState
 
               // Contenido principal (Grilla o Lista)
               Expanded(
-                child: filtrados.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No hay servicios para mostrar.',
-                          style: TipografiaApp.bodyMd.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    : _modoGrilla
-                    ? GridView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        // Alto fijo (no `childAspectRatio`): un aspect ratio
-                        // fijo estira la altura de la celda cuando hay pocas
-                        // columnas y la celda se ensancha (pantallas anchas),
-                        // dejando una franja vaca enorme debajo del texto
-                        // (bug real reportado en tablet horizontal).
-                        // `maxCrossAxisExtent` fija el ancho ideal por tarjeta
-                        // y Flutter decide solo cuntas columnas entran.
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 200,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              mainAxisExtent: 220,
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(controladorServiciosProvider);
+                  },
+                  child: filtrados.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(64),
+                              child: Center(
+                                child: Text(
+                                  'No hay servicios para mostrar.',
+                                  style: TipografiaApp.bodyMd.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
                             ),
-                        itemCount: filtrados.length,
-                        itemBuilder: (context, index) {
-                          final servicio = filtrados[index];
-                          return TarjetaServicio(
-                            servicio: servicio,
-                            compacto: true,
-                            onTap: () => _abrirFormulario(servicio),
-                          );
-                        },
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                          ],
+                        )
+                      : _modoGrilla
+                      ? GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 200,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                mainAxisExtent: 220,
+                              ),
+                          itemCount: filtrados.length,
+                          itemBuilder: (context, index) {
+                            final servicio = filtrados[index];
+                            return TarjetaServicio(
+                              servicio: servicio,
+                              compacto: true,
+                              onTap: () => _abrirFormulario(servicio),
+                            );
+                          },
+                        )
+                      : ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          itemCount: filtrados.length,
+                          itemBuilder: (context, index) {
+                            final servicio = filtrados[index];
+                            return TarjetaServicio(
+                              servicio: servicio,
+                              onTap: () => _abrirFormulario(servicio),
+                            );
+                          },
                         ),
-                        itemCount: filtrados.length,
-                        itemBuilder: (context, index) {
-                          final servicio = filtrados[index];
-                          return TarjetaServicio(
-                            servicio: servicio,
-                            onTap: () => _abrirFormulario(servicio),
-                          );
-                        },
-                      ),
+                ),
               ),
             ],
           );
