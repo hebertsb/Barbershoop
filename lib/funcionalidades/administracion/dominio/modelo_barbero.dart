@@ -13,6 +13,8 @@ class ModeloBarbero {
     this.activo = true,
     this.descripcion,
     this.perfilId,
+    this.calificacionPromedioReal,
+    this.calificacionCantidadReal,
   });
 
   final String id;
@@ -35,6 +37,12 @@ class ModeloBarbero {
   /// ID del perfil de autenticación del barbero (tabla `perfiles`).
   final String? perfilId;
 
+  /// Calificación promedio real (viene del RPC obtener_barberos_publicos).
+  final double? calificacionPromedioReal;
+
+  /// Cantidad de reseñas reales (viene del RPC obtener_barberos_publicos).
+  final int? calificacionCantidadReal;
+
   String? get nombrePerfil => nombre;
 
   /// Alias de [fotoUrl] — URL de la foto de perfil del barbero.
@@ -49,11 +57,11 @@ class ModeloBarbero {
           ? telefonoPerfil
           : (telefono != null && telefono!.isNotEmpty ? telefono : null);
 
-  /// Calificación promedio del barbero.
-  double get calificacionPromedio => 5.0;
+  /// Calificación promedio del barbero (null si no tiene reseñas aún).
+  double? get calificacionPromedio => calificacionPromedioReal;
 
-  /// Cantidad de reseñas/calificaciones recibidas.
-  int get calificacionCantidad => 0;
+  /// Cantidad de reseñas/calificaciones recibidas (null o 0 si no tiene).
+  int? get calificacionCantidad => calificacionCantidadReal;
 
   factory ModeloBarbero.desdeJson(Map<String, dynamic> json) {
     String? pNombre;
@@ -97,6 +105,8 @@ class ModeloBarbero {
       activo: json['activo'] as bool? ?? true,
       descripcion: json['descripcion'] as String?,
       perfilId: json['perfil_id'] as String?,
+      calificacionPromedioReal: (json['calificacion_promedio'] as num?)?.toDouble(),
+      calificacionCantidadReal: json['calificacion_cantidad'] as int?,
     );
   }
 
@@ -115,6 +125,8 @@ class ModeloBarbero {
     bool? activo,
     String? descripcion,
     String? perfilId,
+    double? calificacionPromedioReal,
+    int? calificacionCantidadReal,
   }) {
     return ModeloBarbero(
       id: id ?? this.id,
@@ -130,6 +142,8 @@ class ModeloBarbero {
       activo: activo ?? this.activo,
       descripcion: descripcion ?? this.descripcion,
       perfilId: perfilId ?? this.perfilId,
+      calificacionPromedioReal: calificacionPromedioReal ?? this.calificacionPromedioReal,
+      calificacionCantidadReal: calificacionCantidadReal ?? this.calificacionCantidadReal,
     );
   }
 }
