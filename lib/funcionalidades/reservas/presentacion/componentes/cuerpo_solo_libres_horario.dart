@@ -46,7 +46,7 @@ class CuerpoSoloLibresHorario extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           children: [
             if (manana.isNotEmpty) ...[
-              const EncabezadoSeccionHorario(texto: 'MAANA'),
+              const EncabezadoSeccionHorario(texto: 'MAÑANA'),
               const SizedBox(height: 8),
               GrillaBotonesHorario(items: _aItems(manana)),
               const SizedBox(height: 20),

@@ -52,6 +52,15 @@ class RepositorioCitasSupabase implements RepositorioCitas {
       if (uid == null) {
         throw const ExcepcionPermiso('Sesión no iniciada.');
       }
+
+      final ahoraUtc = DateTime.now().toUtc().toIso8601String();
+      await _cliente
+          .from('citas')
+          .update({'estado': 'cancelada'})
+          .eq('cliente_id', uid)
+          .eq('estado', 'pendiente')
+          .lt('fecha_hora', ahoraUtc);
+
       final filas = await _cliente
           .from('citas')
           .select('*, promociones(*)')

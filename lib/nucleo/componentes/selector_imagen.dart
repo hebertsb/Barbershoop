@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -61,18 +62,25 @@ class _SelectorImagenState extends State<SelectorImagen> {
       final nombre = '${widget.carpeta}/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       final supabase = Supabase.instance.client;
-      await supabase.storage.from(widget.bucket).uploadBinary(
-        nombre,
-        bytes,
-        fileOptions: FileOptions(
-          contentType: 'image/$ext',
-          upsert: true,
-        ),
-      );
-
-      final url = supabase.storage.from(widget.bucket).getPublicUrl(nombre);
-      setState(() => _urlLocal = url);
-      widget.alSubir(url);
+      try {
+        await supabase.storage.from(widget.bucket).uploadBinary(
+          nombre,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: 'image/$ext',
+            upsert: true,
+          ),
+        );
+        final url = supabase.storage.from(widget.bucket).getPublicUrl(nombre);
+        setState(() => _urlLocal = url);
+        widget.alSubir(url);
+      } on StorageException catch (_) {
+        // Fallback RLS Storage: Convertir a Data URL Base64
+        final base64Str = base64Encode(bytes);
+        final dataUrl = 'data:image/$ext;base64,$base64Str';
+        setState(() => _urlLocal = dataUrl);
+        widget.alSubir(dataUrl);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

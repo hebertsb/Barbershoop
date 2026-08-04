@@ -191,7 +191,7 @@ class _PantallaConfirmacionReservaState
             const SizedBox(height: 16),
             Text(
               modoPago == ModoPago.obligatorio || modoPago == ModoPago.sena
-                  ? 'Vas a pagar por QR despus de confirmar.'
+                  ? 'Vas a pagar por QR después de confirmar.'
                   : 'Se paga en el local al momento del servicio.',
               style: TipografiaApp.bodySm.copyWith(color: colorScheme.onSurfaceVariant),
             ),

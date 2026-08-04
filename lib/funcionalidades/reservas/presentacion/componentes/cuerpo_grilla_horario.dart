@@ -42,7 +42,7 @@ class CuerpoGrillaHorario extends StatelessWidget {
             const LeyendaLibreBloqueado(),
             const SizedBox(height: 16),
             if (manana.isNotEmpty) ...[
-              const EncabezadoSeccionHorario(texto: 'MAANA'),
+              const EncabezadoSeccionHorario(texto: 'MAÑANA'),
               const SizedBox(height: 8),
               GrillaBotonesHorario(items: _aItems(manana)),
               const SizedBox(height: 20),

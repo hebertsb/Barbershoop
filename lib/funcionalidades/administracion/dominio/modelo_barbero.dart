@@ -83,6 +83,7 @@ class ModeloBarbero {
       telefonoPerfil: telExt,
       fotoUrl: (json['foto_url'] ??
               json['url_foto'] ??
+              json['url_foto_perfil'] ??
               json['url_imagen'] ??
               json['imagen'] ??
               json['avatar_url'] ??

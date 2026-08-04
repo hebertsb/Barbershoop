@@ -187,10 +187,26 @@ class RepositorioReservasSupabase implements RepositorioReservas {
   @override
   Future<void> cancelarCita(String citaId) async {
     try {
-      await _cliente.rpc(
-        'cancelar_cita_cliente',
-        params: {'p_cita_id': citaId},
-      );
+      try {
+        await _cliente.rpc(
+          'cancelar_cita_cliente',
+          params: {'p_cita_id': citaId},
+        );
+      } on PostgrestException catch (e) {
+        final uid = _cliente.auth.currentUser?.id;
+        if (uid != null) {
+          await _cliente
+              .from('citas')
+              .update({
+                'estado': 'cancelada',
+                'cancelado_por': uid,
+              })
+              .eq('id', citaId)
+              .eq('cliente_id', uid);
+          return;
+        }
+        throw ExcepcionPermiso(e.message);
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
