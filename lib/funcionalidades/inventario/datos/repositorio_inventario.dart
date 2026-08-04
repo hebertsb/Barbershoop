@@ -187,21 +187,34 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
     String? urlFoto,
   }) async {
     try {
-      await _cliente.rpc(
-        'reportar_insumo',
-        params: {
-          'p_insumo_id': insumoId,
-          'p_tipo': tipo.aTexto(),
-          'p_cantidad': cantidad,
-          'p_descripcion': descripcion,
-          'p_url_foto': urlFoto,
-        },
-      );
+      try {
+        await _cliente.rpc(
+          'reportar_insumo',
+          params: {
+            'p_insumo_id': insumoId,
+            'p_tipo': tipo.aTexto(),
+            'p_cantidad': cantidad,
+            'p_descripcion': descripcion,
+            'p_url_foto': urlFoto,
+          },
+        );
+      } on PostgrestException catch (_) {
+        final barberoId = await _obtenerBarberoIdActual();
+        await _cliente.from('reportes_insumo').insert({
+          'insumo_id': insumoId,
+          'barbero_id': barberoId,
+          'tipo': tipo.aTexto(),
+          'cantidad': cantidad,
+          if (descripcion != null && descripcion.isNotEmpty) 'descripcion': descripcion,
+          if (urlFoto != null && urlFoto.isNotEmpty) 'url_foto': urlFoto,
+          'estado': 'pendiente',
+        });
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
       if (e.code == 'P0001') throw ExcepcionPermiso(e.message);
-      throw const ExcepcionDesconocida();
+      throw ExcepcionDesconocida(e.message.isNotEmpty ? e.message : 'Error al reportar insumo.');
     }
   }
 
@@ -221,8 +234,8 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
           .toList();
     } on SocketException {
       throw const ExcepcionRed();
-    } on PostgrestException {
-      throw const ExcepcionDesconocida();
+    } on PostgrestException catch (e) {
+      throw ExcepcionDesconocida(e.message);
     }
   }
 
@@ -232,15 +245,23 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
     required bool aprobar,
   }) async {
     try {
-      await _cliente.rpc(
-        'revisar_reporte_insumo',
-        params: {'p_reporte_id': reporteId, 'p_aprobar': aprobar},
-      );
+      try {
+        await _cliente.rpc(
+          'revisar_reporte_insumo',
+          params: {'p_reporte_id': reporteId, 'p_aprobar': aprobar},
+        );
+      } on PostgrestException catch (_) {
+        final estadoNuevo = aprobar ? 'aprobado' : 'rechazado';
+        await _cliente
+            .from('reportes_insumo')
+            .update({'estado': estadoNuevo})
+            .eq('id', reporteId);
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
       if (e.code == 'P0001') throw ExcepcionPermiso(e.message);
-      throw const ExcepcionDesconocida();
+      throw ExcepcionDesconocida(e.message.isNotEmpty ? e.message : 'Error al revisar reporte.');
     }
   }
 
@@ -250,13 +271,15 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
       final filas = await _cliente
           .from('insumos')
           .select('id, stock, stock_minimo');
-      return (filas as List)
-          .where((f) => (f['stock'] as int) <= (f['stock_minimo'] as int))
-          .length;
+      return (filas as List).where((f) {
+        final stock = (f['stock'] as num?)?.toInt() ?? 0;
+        final min = (f['stock_minimo'] as num?)?.toInt() ?? 0;
+        return stock <= min;
+      }).length;
     } on SocketException {
       throw const ExcepcionRed();
-    } on PostgrestException {
-      throw const ExcepcionDesconocida();
+    } on PostgrestException catch (e) {
+      throw ExcepcionDesconocida(e.message);
     }
   }
 }

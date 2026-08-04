@@ -304,22 +304,64 @@ class RepositorioReportesSupabase implements RepositorioReportes {
     required DateTime fechaFin,
   }) async {
     try {
-      final res =
-          await _cliente.rpc(
-                'obtener_tasa_ausentismo_por_barbero',
-                params: {
-                  'p_fecha_inicio': fechaInicio.toUtc().toIso8601String(),
-                  'p_fecha_fin': fechaFin.toUtc().toIso8601String(),
-                },
-              )
-              as List;
-      return res
-          .map(
-            (f) => ModeloTasaAusentismoBarbero.desdeJson(
-              f as Map<String, dynamic>,
-            ),
-          )
-          .toList();
+      try {
+        final res =
+            await _cliente.rpc(
+                  'obtener_tasa_ausentismo_por_barbero',
+                  params: {
+                    'p_fecha_inicio': fechaInicio.toUtc().toIso8601String(),
+                    'p_fecha_fin': fechaFin.toUtc().toIso8601String(),
+                  },
+                )
+                as List;
+        return res
+            .map(
+              (f) => ModeloTasaAusentismoBarbero.desdeJson(
+                f as Map<String, dynamic>,
+              ),
+            )
+            .toList();
+      } on PostgrestException catch (_) {
+        final citas = await _cliente
+            .from('citas')
+            .select('barbero_id, estado, barberos:barbero_id(perfiles:perfil_id(nombre))')
+            .gte('fecha_hora', fechaInicio.toUtc().toIso8601String())
+            .lte('fecha_hora', fechaFin.toUtc().toIso8601String());
+
+        final mapaBarberos = <String, Map<String, dynamic>>{};
+        for (final c in (citas as List)) {
+          final bId = c['barbero_id'] as String?;
+          if (bId == null) continue;
+          final nombre = c['barberos']?['perfiles']?['nombre'] as String? ?? 'Barbero';
+          final est = c['estado'] as String? ?? '';
+
+          if (!mapaBarberos.containsKey(bId)) {
+            mapaBarberos[bId] = {
+              'barbero_id': bId,
+              'nombre_barbero': nombre,
+              'total_citas': 0,
+              'ausentes': 0,
+            };
+          }
+          mapaBarberos[bId]!['total_citas'] = (mapaBarberos[bId]!['total_citas'] as int) + 1;
+          if (est == 'cancelada' || est == 'no_asistio') {
+            mapaBarberos[bId]!['ausentes'] = (mapaBarberos[bId]!['ausentes'] as int) + 1;
+          }
+        }
+
+        return mapaBarberos.values.map((m) {
+          final total = m['total_citas'] as int;
+          final aus = m['ausentes'] as int;
+          final tasa = total > 0 ? (aus / total) * 100 : 0.0;
+          return ModeloTasaAusentismoBarbero.desdeJson({
+            'barbero_id': m['barbero_id'],
+            'nombre_barbero': m['nombre_barbero'],
+            'total_citas': total,
+            'citas_ausentes': aus,
+            'tasa_ausentismo': tasa,
+          });
+        }).toList();
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {

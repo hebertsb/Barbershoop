@@ -120,23 +120,67 @@ class RepositorioReservasSupabase implements RepositorioReservas {
     String? promocionId,
   }) async {
     try {
-      final fila =
-          await _cliente.rpc(
-                'reservar_cita',
-                params: {
-                  'p_sucursal_id': sucursalId,
-                  'p_servicio_id': servicioId,
-                  'p_barbero_id': barberoId,
-                  'p_fecha_hora': fechaHora.toIso8601String(),
-                  'p_promocion_id': promocionId,
-                },
-              )
-              as Map<String, dynamic>;
-      return ModeloCita.desdeJson(fila);
+      final uid = _cliente.auth.currentUser?.id;
+      if (uid == null) {
+        throw const ExcepcionPermiso('Sesión no iniciada.');
+      }
+
+      try {
+        final fila =
+            await _cliente.rpc(
+                  'reservar_cita',
+                  params: {
+                    'p_sucursal_id': sucursalId,
+                    'p_servicio_id': servicioId,
+                    'p_barbero_id': barberoId,
+                    'p_fecha_hora': fechaHora.toIso8601String(),
+                    'p_promocion_id': promocionId,
+                  },
+                )
+                as Map<String, dynamic>;
+        return ModeloCita.desdeJson(fila);
+      } on PostgrestException catch (_) {
+        final sucursal = await _cliente
+            .from('sucursales')
+            .select('barberia_id')
+            .eq('id', sucursalId)
+            .maybeSingle();
+
+        final servicio = await _cliente
+            .from('servicios')
+            .select('precio')
+            .eq('id', servicioId)
+            .maybeSingle();
+
+        final barberiaId = sucursal?['barberia_id'] as String? ?? '';
+        final precio = (servicio?['precio'] as num?)?.toDouble() ?? 0.0;
+
+        final insertMap = <String, dynamic>{
+          'barberia_id': barberiaId,
+          'sucursal_id': sucursalId,
+          'servicio_id': servicioId,
+          'cliente_id': uid,
+          if (barberoId != null && barberoId.isNotEmpty) 'barbero_id': barberoId,
+          'fecha_hora': fechaHora.toIso8601String(),
+          'precio_cobrado': precio,
+          'estado': 'pendiente',
+          if (promocionId != null && promocionId.isNotEmpty) 'promocion_id': promocionId,
+        };
+
+        final fila = await _cliente
+            .from('citas')
+            .insert(insertMap)
+            .select()
+            .single();
+
+        return ModeloCita.desdeJson(fila);
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
       throw ExcepcionPermiso(e.message);
+    } catch (e) {
+      throw ExcepcionDesconocida(e.toString());
     }
   }
 
