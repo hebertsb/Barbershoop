@@ -372,7 +372,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
                     children: [
                       Text(
                         'Comprobante en Verificación',
-                        style: TipografiaApp.titleMd.copyWith(
+                        style: TipografiaApp.headlineSm.copyWith(
                           color: colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),

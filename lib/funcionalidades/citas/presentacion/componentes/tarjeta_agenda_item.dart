@@ -48,9 +48,7 @@ class TarjetaAgendaItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${cita.fechaHora.toLocal().hour.toString().padLeft(2, '0')}:'
-                          '${cita.fechaHora.toLocal().minute.toString().padLeft(2, '0')} '
-                          '${cita.nombreCliente ?? 'Cita reservada'}',
+                          '${formatoHora(cita.fechaHora)} ${cita.nombreCliente ?? 'Cita reservada'}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         if (cita.telefonoCliente != null)
