@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../nucleo/configuracion/colores_estado_app.dart';
+import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../../turnos/dominio/enum_estado_turno.dart';
 import '../../dominio/disponibilidad_barbero.dart';
 import '../../dominio/enum_estado_cita.dart';
