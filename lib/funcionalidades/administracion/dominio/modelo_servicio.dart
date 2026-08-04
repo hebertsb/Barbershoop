@@ -43,8 +43,7 @@ class ModeloServicio {
   }
 
   Map<String, dynamic> aJson() {
-    return {
-      'id': id,
+    final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
       'descripcion': descripcion,
@@ -52,7 +51,14 @@ class ModeloServicio {
       'duracion_minutos': duracionMinutos,
       'sucursal_id': sucursalId,
       'foto_url': urlImagen,
+      'url_imagen': urlImagen,
       'activo': activo,
     };
+
+    if (id.trim().isNotEmpty) {
+      mapa['id'] = id;
+    }
+
+    return mapa;
   }
 }

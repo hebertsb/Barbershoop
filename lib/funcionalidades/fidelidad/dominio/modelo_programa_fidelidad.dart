@@ -48,8 +48,8 @@ class ModeloProgramaFidelidad {
         ?.map((e) => e.toString())
         .toList();
     return ModeloProgramaFidelidad(
-      id: json['id'] as String,
-      barberiaId: json['barberia_id'] as String,
+      id: json['id'] as String? ?? '',
+      barberiaId: json['barberia_id'] as String? ?? '',
       nombre: (json['nombre'] ?? json['titulo']) as String? ?? 'Programa Fidelidad',
       sellosRequeridos: (json['sellos_requeridos'] ?? json['meta_citas']) as int? ?? 10,
       recompensa: json['recompensa'] as String? ?? 'Corte gratis',
@@ -67,17 +67,22 @@ class ModeloProgramaFidelidad {
   }
 
   Map<String, dynamic> aJson() {
-    return {
-      'id': id,
+    final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
       'sellos_requeridos': sellosRequeridos,
       'recompensa': recompensa,
       'activo': activo,
-      if (fechaInicio != null) 'fecha_inicio': fechaInicio!.toIso8601String(),
-      if (fechaFin != null) 'fecha_fin': fechaFin!.toIso8601String(),
+      if (fechaInicio != null) 'fecha_inicio': fechaInicio!.toIso8601String().substring(0, 10),
+      if (fechaFin != null) 'fecha_fin': fechaFin!.toIso8601String().substring(0, 10),
       if (descripcion != null) 'descripcion': descripcion,
       if (servicioId != null) 'servicio_id': servicioId,
     };
+
+    if (id.trim().isNotEmpty) {
+      mapa['id'] = id;
+    }
+
+    return mapa;
   }
 }

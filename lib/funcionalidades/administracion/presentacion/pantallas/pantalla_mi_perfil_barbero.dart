@@ -106,23 +106,25 @@ class _PantallaMiPerfilBarberoState
         .where((b) => b.perfilId == perfil?.id)
         .toList();
 
-    if (!_inicializado && miBarbero.isNotEmpty) {
-      _inicializado = true;
-      _descripcionCtrl.text = miBarbero.first.descripcion ?? '';
-      
-      final telGuardado = miBarbero.first.numTelefonoWhatsapp ?? '';
-      if (telGuardado.startsWith('+591')) {
-        _telefonoCtrl.text = telGuardado.substring(4).trim();
-      } else {
-        _telefonoCtrl.text = telGuardado;
-      }
+    if (!_inicializado) {
+      final telGuardado = (miBarbero.isNotEmpty ? miBarbero.first.numTelefonoWhatsapp : null) ?? perfil?.telefono ?? '';
+      if (telGuardado.isNotEmpty || miBarbero.isNotEmpty) {
+        _inicializado = true;
+        _descripcionCtrl.text = miBarbero.isNotEmpty ? (miBarbero.first.descripcion ?? '') : '';
+        
+        if (telGuardado.startsWith('+591')) {
+          _telefonoCtrl.text = telGuardado.substring(4).trim();
+        } else {
+          _telefonoCtrl.text = telGuardado.trim();
+        }
 
-      final especialidadesUnicas = <String>{};
-      for (final b in miBarbero) {
-        especialidadesUnicas.addAll(b.especialidades);
+        final especialidadesUnicas = <String>{};
+        for (final b in miBarbero) {
+          especialidadesUnicas.addAll(b.especialidades);
+        }
+        _especialidades.addAll(especialidadesUnicas);
+        _urlFoto = perfil?.urlFoto;
       }
-      _especialidades.addAll(especialidadesUnicas);
-      _urlFoto = perfil?.urlFoto;
     }
 
     return Scaffold(

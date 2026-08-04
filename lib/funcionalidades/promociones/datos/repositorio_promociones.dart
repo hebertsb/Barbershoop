@@ -96,25 +96,40 @@ class RepositorioPromocionesSupabase implements RepositorioPromociones {
       final barberiaId = await _obtenerBarberiaId();
       final mapa = promocion.aJson();
       mapa['barberia_id'] = barberiaId;
-      if (mapa['id'] == '') {
+      if (mapa['id'] == '' || mapa['id'] == null) {
         mapa.remove('id');
       }
 
-      final fila = await _cliente
-          .from('promociones')
-          .upsert(mapa)
-          .select('*, servicios:servicio_id(nombre)')
-          .single();
-      return ModeloPromocion.desdeJson(fila);
+      try {
+        final fila = await _cliente
+            .from('promociones')
+            .upsert(mapa)
+            .select('*, servicios:servicio_id(nombre)')
+            .single();
+        return ModeloPromocion.desdeJson(fila);
+      } on PostgrestException catch (e) {
+        if (e.message.contains("column") && e.message.contains("not find")) {
+          if (e.message.contains("activo")) mapa.remove('activo');
+          if (e.message.contains("activa")) mapa.remove('activa');
+          if (e.message.contains("foto_url")) mapa.remove('foto_url');
+          if (e.message.contains("imagen")) mapa.remove('imagen');
+          if (e.message.contains("descuento")) mapa.remove('descuento');
+          final fila = await _cliente
+              .from('promociones')
+              .upsert(mapa)
+              .select('*, servicios:servicio_id(nombre)')
+              .single();
+          return ModeloPromocion.desdeJson(fila);
+        }
+        rethrow;
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
-      if (e.code == 'P0001') {
-        throw ExcepcionPermiso(e.message);
-      }
-      throw ExcepcionDesconocida(
-        e.message.isNotEmpty ? e.message : 'Error al guardar la promoción.',
-      );
+      if (e.code == 'P0001') throw ExcepcionPermiso(e.message);
+      throw ExcepcionDesconocida(e.message);
+    } catch (e) {
+      throw ExcepcionDesconocida(e.toString());
     }
   }
 
@@ -125,15 +140,31 @@ class RepositorioPromocionesSupabase implements RepositorioPromociones {
   }) async {
     try {
       final barberiaId = await _obtenerBarberiaId();
-      await _cliente
-          .from('promociones')
-          .update({'activo': activo})
-          .eq('id', promocionId)
-          .eq('barberia_id', barberiaId);
+      try {
+        await _cliente
+            .from('promociones')
+            .update({'activo': activo, 'activa': activo})
+            .eq('id', promocionId)
+            .eq('barberia_id', barberiaId);
+      } on PostgrestException catch (e) {
+        if (e.message.contains('activo')) {
+          await _cliente
+              .from('promociones')
+              .update({'activa': activo})
+              .eq('id', promocionId)
+              .eq('barberia_id', barberiaId);
+        } else {
+          await _cliente
+              .from('promociones')
+              .update({'activo': activo})
+              .eq('id', promocionId)
+              .eq('barberia_id', barberiaId);
+        }
+      }
     } on SocketException {
       throw const ExcepcionRed();
-    } on PostgrestException {
-      throw const ExcepcionDesconocida();
+    } on PostgrestException catch (e) {
+      throw ExcepcionDesconocida(e.message);
     }
   }
 

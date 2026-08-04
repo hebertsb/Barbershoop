@@ -22,6 +22,7 @@ class PantallaActividadDiaria extends ConsumerWidget {
       initialDate: estado.fecha,
       firstDate: DateTime(2025),
       lastDate: DateTime.now(),
+      locale: const Locale('es', 'ES'),
     );
 
     if (elegida != null) {

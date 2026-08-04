@@ -61,9 +61,9 @@ class ModeloProgramaRankingBarberos {
 
   factory ModeloProgramaRankingBarberos.desdeJson(Map<String, dynamic> json) {
     return ModeloProgramaRankingBarberos(
-      id: json['id'] as String,
-      barberiaId: json['barberia_id'] as String,
-      nombre: json['nombre'] as String? ?? 'Programa Ranking',
+      id: json['id'] as String? ?? '',
+      barberiaId: json['barberia_id'] as String? ?? '',
+      nombre: (json['nombre'] ?? json['titulo']) as String? ?? 'Programa Ranking',
       pesoIngresos:
           ((json['peso_ingresos'] as num?)?.toInt()) ?? 20,
       pesoCitas: ((json['peso_citas'] as num?)?.toInt()) ?? 20,
@@ -92,8 +92,7 @@ class ModeloProgramaRankingBarberos {
   }
 
   Map<String, dynamic> aJson() {
-    return {
-      'id': id,
+    final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
       'peso_ingresos': pesoIngresos,
@@ -102,8 +101,8 @@ class ModeloProgramaRankingBarberos {
       'peso_puntualidad': pesoPuntualidad,
       'peso_clientes': pesoClientes,
       'estado': estado,
-      'fecha_inicio': fechaInicio.toIso8601String(),
-      'fecha_fin': fechaFin.toIso8601String(),
+      'fecha_inicio': fechaInicio.toIso8601String().substring(0, 10),
+      'fecha_fin': fechaFin.toIso8601String().substring(0, 10),
       'activo': activo,
       if (sucursalId != null) 'sucursal_id': sucursalId,
       'tipo_premio': tipoPremio.aTexto,
@@ -111,5 +110,11 @@ class ModeloProgramaRankingBarberos {
       'premio_entregado': premioEntregado,
       if (nombreGanador != null) 'nombre_ganador': nombreGanador,
     };
+
+    if (id.trim().isNotEmpty) {
+      mapa['id'] = id;
+    }
+
+    return mapa;
   }
 }

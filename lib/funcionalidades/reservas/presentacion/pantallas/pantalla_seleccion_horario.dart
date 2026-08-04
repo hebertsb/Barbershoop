@@ -101,6 +101,7 @@ class _PantallaSeleccionHorarioState
         hoy.month,
         hoy.day,
       ).add(const Duration(days: 60)),
+      locale: const Locale('es', 'ES'),
     );
     if (elegida == null) return;
     setState(

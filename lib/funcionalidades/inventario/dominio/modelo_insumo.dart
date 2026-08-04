@@ -63,12 +63,12 @@ class ModeloInsumo {
   }
 
   Map<String, dynamic> aJson() {
-    return {
-      'id': id,
+    final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
       'descripcion': descripcion,
       'stock_actual': stockActual,
+      'stock': stockActual,
       'stock_minimo': stockMinimo,
       'unidad_medida': unidadMedida,
       if (sucursalIdCache != null) 'sucursal_id': sucursalIdCache,
@@ -76,5 +76,11 @@ class ModeloInsumo {
       if (costoUnitarioCache != null) 'costo_unitario': costoUnitarioCache,
       'activo': activo,
     };
+
+    if (id.trim().isNotEmpty) {
+      mapa['id'] = id;
+    }
+
+    return mapa;
   }
 }

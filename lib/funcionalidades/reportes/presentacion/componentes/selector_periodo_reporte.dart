@@ -59,7 +59,7 @@ class SelectorPeriodoReporte extends StatelessWidget {
       case FiltroPeriodo.esteMes:
         return 'Mes';
       case FiltroPeriodo.esteAnio:
-        return 'Ao';
+        return 'Año';
       case FiltroPeriodo.personalizado:
         return 'Personalizado';
     }

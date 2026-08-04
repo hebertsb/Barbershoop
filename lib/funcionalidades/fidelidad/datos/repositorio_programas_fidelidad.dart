@@ -94,7 +94,7 @@ class RepositorioProgramasFidelidadSupabase
       if (e.code == 'P0001') {
         throw ExcepcionPermiso(e.message);
       }
-      throw const ExcepcionDesconocida();
+      throw ExcepcionDesconocida(e.message.isNotEmpty ? e.message : 'Error al guardar programa de fidelidad.');
     }
   }
 

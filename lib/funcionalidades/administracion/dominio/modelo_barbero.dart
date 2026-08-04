@@ -64,7 +64,11 @@ class ModeloBarbero {
     if (perfilData is Map<String, dynamic>) {
       pNombre = perfilData['nombre'] as String?;
       pEmail = perfilData['email'] as String?;
-      pFoto = (perfilData['url_foto'] ?? perfilData['foto_url']) as String?;
+      pFoto = (perfilData['url_foto'] ??
+              perfilData['foto_url'] ??
+              perfilData['url_imagen'] ??
+              perfilData['imagen'] ??
+              perfilData['avatar_url']) as String?;
       pTelefono = perfilData['telefono'] as String?;
     }
 
@@ -77,7 +81,12 @@ class ModeloBarbero {
       email: (json['email'] ?? pEmail) as String?,
       telefono: telExt,
       telefonoPerfil: telExt,
-      fotoUrl: (json['foto_url'] ?? json['url_foto'] ?? pFoto) as String?,
+      fotoUrl: (json['foto_url'] ??
+              json['url_foto'] ??
+              json['url_imagen'] ??
+              json['imagen'] ??
+              json['avatar_url'] ??
+              pFoto) as String?,
       nivel: json['nivel'] as String?,
       sucursalId: json['sucursal_id'] as String?,
       especialidades: (json['especialidades'] as List<dynamic>?)

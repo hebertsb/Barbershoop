@@ -87,8 +87,24 @@ class RepositorioPagosSupabase implements RepositorioPagos {
       return ModeloPago.desdeJson(fila);
     } on SocketException {
       throw const ExcepcionRed();
-    } on PostgrestException catch (e) {
-      throw ExcepcionPermiso(e.message);
+    } catch (e) {
+      try {
+        final uid = _cliente.auth.currentUser?.id;
+        final res = await _cliente.from('pagos').upsert({
+          'cita_id': citaId,
+          'monto': monto,
+          'url_comprobante': urlComprobante,
+          'estado': 'por_verificar',
+          if (uid != null) 'cliente_id': uid,
+        }).select().single();
+        return ModeloPago.desdeJson(res);
+      } on SocketException {
+        throw const ExcepcionRed();
+      } on PostgrestException catch (err) {
+        throw ExcepcionPermiso(err.message);
+      } catch (err) {
+        throw ExcepcionDesconocida(err.toString());
+      }
     }
   }
 

@@ -154,7 +154,8 @@ class _FormularioPromocionState extends ConsumerState<FormularioPromocion> {
       context: context,
       initialDate: _fechaInicio ?? DateTime.now(),
       firstDate: DateTime(2025),
-      lastDate: DateTime(2030),
+      lastDate: DateTime(2030),
+      locale: const Locale('es', 'ES'),
     );
     if (picked != null) {
       setState(() => _fechaInicio = picked);
@@ -169,7 +170,8 @@ class _FormularioPromocionState extends ConsumerState<FormularioPromocion> {
           _fechaInicio ??
           DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime(2025),
-      lastDate: DateTime(2030),
+      lastDate: DateTime(2030),
+      locale: const Locale('es', 'ES'),
     );
     if (picked != null) {
       setState(() => _fechaFin = picked);

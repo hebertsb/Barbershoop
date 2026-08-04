@@ -47,6 +47,7 @@ class PantallaReportesIngresos extends ConsumerWidget {
       initialDateRange: DateTimeRange(start: iniciales.$1, end: iniciales.$2),
       firstDate: DateTime(2025),
       lastDate: DateTime(2030),
+      locale: const Locale('es', 'ES'),
     );
 
     if (picked != null) {
