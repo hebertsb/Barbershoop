@@ -149,7 +149,7 @@ class RepositorioReservasSupabase implements RepositorioReservas {
                     'p_sucursal_id': sucursalId,
                     'p_servicio_id': servicioId,
                     'p_barbero_id': barberoId,
-                    'p_fecha_hora': fechaHora.toIso8601String(),
+                    'p_fecha_hora': fechaHora.toUtc().toIso8601String(),
                     'p_promocion_id': promocionId,
                   },
                 )
@@ -177,7 +177,7 @@ class RepositorioReservasSupabase implements RepositorioReservas {
           'servicio_id': servicioId,
           'cliente_id': uid,
           if (barberoId != null && barberoId.isNotEmpty) 'barbero_id': barberoId,
-          'fecha_hora': fechaHora.toIso8601String(),
+          'fecha_hora': fechaHora.toUtc().toIso8601String(),
           'precio_cobrado': precio,
           'estado': 'pendiente',
           if (promocionId != null && promocionId.isNotEmpty) 'promocion_id': promocionId,
