@@ -38,8 +38,14 @@ class ModeloPago {
     DateTime? fCita;
     final citaMap = json['citas'];
     if (citaMap is Map<String, dynamic>) {
-      cNombre = (citaMap['cliente_nombre'] ?? citaMap['nombre_cliente']) as String?;
-      if (citaMap['fecha'] != null) {
+      final perfilesMap = citaMap['perfiles'];
+      if (perfilesMap is Map<String, dynamic>) {
+        cNombre = perfilesMap['nombre'] as String?;
+      }
+      cNombre ??= (citaMap['cliente_nombre'] ?? citaMap['nombre_cliente']) as String?;
+      if (citaMap['fecha_hora'] != null) {
+        fCita = DateTime.tryParse(citaMap['fecha_hora'] as String);
+      } else if (citaMap['fecha'] != null) {
         fCita = DateTime.tryParse(citaMap['fecha'] as String);
       }
     }

@@ -231,10 +231,26 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
   }
 
   Widget _construirImagenComprobante(String url, ColorScheme colorScheme) {
-    if (url.startsWith('data:image')) {
+    final urlLimpia = url.trim();
+    if (urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')) {
+      return CachedNetworkImage(
+        imageUrl: urlLimpia,
+        placeholder: (context, u) => const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, u, error) => Image.network(
+          urlLimpia,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
+        ),
+      );
+    } else {
       try {
-        final base64Content = url.split(',').last;
-        final bytes = base64Decode(base64Content);
+        final String base64Content = urlLimpia.contains(',')
+            ? urlLimpia.split(',').last
+            : urlLimpia;
+        final bytes = base64Decode(base64Content.replaceAll(RegExp(r'\s+'), ''));
         return Image.memory(
           bytes,
           fit: BoxFit.cover,
@@ -244,14 +260,6 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
         return _errorImagenWidget(colorScheme);
       }
     }
-    return CachedNetworkImage(
-      imageUrl: url,
-      placeholder: (context, url) => const Padding(
-        padding: EdgeInsets.all(24),
-        child: Center(child: CircularProgressIndicator()),
-      ),
-      errorWidget: (context, url, error) => _errorImagenWidget(colorScheme),
-    );
   }
 
   Widget _errorImagenWidget(ColorScheme colorScheme) {
