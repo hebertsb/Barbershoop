@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -193,32 +194,7 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: pago.urlComprobante!,
-                  placeholder: (context, url) => const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  errorWidget: (context, url, error) => Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.broken_image_outlined,
-                          color: colorScheme.error,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'No se pudo cargar el comprobante',
-                          style: TipografiaApp.bodyMd.copyWith(
-                            color: colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                child: _construirImagenComprobante(pago.urlComprobante!, colorScheme),
               ),
             ],
             const SizedBox(height: 12),
@@ -250,6 +226,52 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _construirImagenComprobante(String url, ColorScheme colorScheme) {
+    if (url.startsWith('data:image')) {
+      try {
+        final base64Content = url.split(',').last;
+        final bytes = base64Decode(base64Content);
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
+        );
+      } catch (_) {
+        return _errorImagenWidget(colorScheme);
+      }
+    }
+    return CachedNetworkImage(
+      imageUrl: url,
+      placeholder: (context, url) => const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      errorWidget: (context, url, error) => _errorImagenWidget(colorScheme),
+    );
+  }
+
+  Widget _errorImagenWidget(ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.broken_image_outlined,
+            color: colorScheme.error,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No se pudo cargar el comprobante',
+            style: TipografiaApp.bodyMd.copyWith(
+              color: colorScheme.error,
+            ),
+          ),
+        ],
       ),
     );
   }

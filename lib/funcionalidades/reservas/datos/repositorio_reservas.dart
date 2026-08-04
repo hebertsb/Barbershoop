@@ -52,6 +52,10 @@ class RepositorioReservasSupabase implements RepositorioReservas {
     String? promocionId,
   }) async {
     try {
+      try {
+        await _cliente.rpc('cancelar_citas_pago_vencido');
+      } catch (_) {}
+
       final filas =
           await _cliente.rpc(
                 'obtener_horarios_disponibles',
@@ -87,6 +91,10 @@ class RepositorioReservasSupabase implements RepositorioReservas {
     String? promocionId,
   }) async {
     try {
+      try {
+        await _cliente.rpc('cancelar_citas_pago_vencido');
+      } catch (_) {}
+
       final filas =
           await _cliente.rpc(
                 'obtener_grilla_horarios',
