@@ -37,8 +37,20 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
   @override
   void initState() {
     super.initState();
+    // Refresca el estado del pago cada 5s para detectar cuando el admin
+    // confirma el pago. Se cancela solo cuando el estado ya es terminal
+    // (porVerificar o confirmado) para no seguir parpadeando innecesariamente.
     _timerRefresco = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted) return;
+      final estadoActual =
+          ref.read(controladorPagoDeCitaProvider(widget.citaId)).valueOrNull;
+      final esTerminal = estadoActual != null &&
+          (estadoActual.estado == EstadoPago.porVerificar ||
+           estadoActual.estado == EstadoPago.confirmado);
+      if (esTerminal) {
+        _timerRefresco?.cancel();
+        return;
+      }
       ref.invalidate(controladorPagoDeCitaProvider(widget.citaId));
     });
   }
@@ -194,12 +206,49 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Comprobante subido, esperando verificacin del local.',
-            style: TipografiaApp.bodyMd.copyWith(
-              color: colorScheme.onSurfaceVariant,
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colorScheme.primary.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Comprobante subido. Esperando verificación del local.',
+                    style: TipografiaApp.bodyMd.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          if (pago.urlComprobante != null) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                height: 160,
+                child: Image.network(
+                  pago.urlComprobante!,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           const _BotonIrAMisCitas(),
         ],
