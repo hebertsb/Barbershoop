@@ -75,61 +75,80 @@ class RepositorioPagosSupabase implements RepositorioPagos {
   }) async {
     try {
       try {
-        final fila =
-            await _cliente.rpc(
-                  'subir_comprobante_pago',
-                  params: {
-                    'p_cita_id': citaId,
-                    'p_monto': monto,
-                    'p_url_comprobante': urlComprobante,
-                  },
-                )
-                as Map<String, dynamic>;
-        return ModeloPago.desdeJson(fila);
-      } on PostgrestException catch (_) {
-        final cita = await _cliente
-            .from('citas')
-            .select('barberia_id')
-            .eq('id', citaId)
-            .maybeSingle();
+        final resRpc = await _cliente.rpc(
+          'subir_comprobante_pago',
+          params: {
+            'p_cita_id': citaId,
+            'p_monto': monto,
+            'p_url_comprobante': urlComprobante,
+          },
+        );
 
-        final barberiaId = cita?['barberia_id'] as String?;
-        if (barberiaId == null) {
-          throw const ExcepcionPermiso('No se pudo encontrar la cita.');
+        String? pagoId;
+        if (resRpc is String) {
+          pagoId = resRpc;
+        } else if (resRpc is Map<String, dynamic>) {
+          pagoId = resRpc['id'] as String?;
         }
 
-        final pagoExistente = await _cliente
+        if (pagoId != null && pagoId.isNotEmpty) {
+          final res = await _cliente
+              .from('pagos')
+              .select('*, citas:cita_id(fecha_hora, perfiles:cliente_id(nombre, telefono))')
+              .eq('id', pagoId)
+              .maybeSingle();
+          if (res != null) {
+            return ModeloPago.desdeJson(res);
+          }
+        }
+      } catch (_) {
+        // Ignorar error de cast/RPC y continuar con fallback directo
+      }
+
+      final cita = await _cliente
+          .from('citas')
+          .select('barberia_id')
+          .eq('id', citaId)
+          .maybeSingle();
+
+      final barberiaId = cita?['barberia_id'] as String?;
+      if (barberiaId == null) {
+        throw const ExcepcionPermiso('No se pudo encontrar la cita.');
+      }
+
+      final pagoExistente = await _cliente
+          .from('pagos')
+          .select('id')
+          .eq('cita_id', citaId)
+          .maybeSingle();
+
+      if (pagoExistente != null) {
+        final res = await _cliente
             .from('pagos')
-            .select('id')
-            .eq('cita_id', citaId)
-            .maybeSingle();
-
-        if (pagoExistente != null) {
-          final res = await _cliente
-              .from('pagos')
-              .update({
-                'monto': monto,
-                'url_comprobante': urlComprobante,
-                'estado': 'por_verificar',
-              })
-              .eq('id', pagoExistente['id'])
-              .select()
-              .single();
-          return ModeloPago.desdeJson(res);
-        } else {
-          final res = await _cliente
-              .from('pagos')
-              .insert({
-                'barberia_id': barberiaId,
-                'cita_id': citaId,
-                'monto': monto,
-                'url_comprobante': urlComprobante,
-                'estado': 'por_verificar',
-              })
-              .select()
-              .single();
-          return ModeloPago.desdeJson(res);
-        }
+            .update({
+              'monto': monto,
+              'url_comprobante': urlComprobante,
+              'estado': 'por_verificar',
+              'metodo': 'qr_manual',
+            })
+            .eq('id', pagoExistente['id'])
+            .select('*, citas:cita_id(fecha_hora, perfiles:cliente_id(nombre, telefono))')
+            .single();
+        return ModeloPago.desdeJson(res);
+      } else {
+        final res = await _cliente
+            .from('pagos')
+            .insert({
+              'barberia_id': barberiaId,
+              'cita_id': citaId,
+              'monto': monto,
+              'url_comprobante': urlComprobante,
+              'metodo': 'qr_manual',
+              'estado': 'por_verificar',
+            })
+            .select('*, citas:cita_id(fecha_hora, perfiles:cliente_id(nombre, telefono))')
+            .single();
+        return ModeloPago.desdeJson(res);
       }
     } on SocketException {
       throw const ExcepcionRed();

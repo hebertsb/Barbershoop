@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../nucleo/componentes/visor_imagen_pantalla_completa.dart';
+import '../../../../nucleo/configuracion/constantes.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../../../nucleo/utilidades/formato_moneda.dart';
@@ -290,6 +292,10 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
 
   Widget _construirImagenComprobante(String url, ColorScheme colorScheme) {
     final urlLimpia = url.trim();
+    if (urlLimpia.isEmpty) {
+      return _errorImagenWidget(colorScheme);
+    }
+
     if (urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')) {
       return CachedNetworkImage(
         imageUrl: urlLimpia,
@@ -303,20 +309,58 @@ class _TarjetaPagoPorVerificar extends StatelessWidget {
           errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
         ),
       );
-    } else {
+    }
+
+    if (urlLimpia.startsWith('data:image/')) {
       try {
-        final String base64Content = urlLimpia.contains(',')
-            ? urlLimpia.split(',').last
-            : urlLimpia;
-        final bytes = base64Decode(base64Content.replaceAll(RegExp(r'\s+'), ''));
-        return Image.memory(
-          bytes,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
-        );
+        final commaIndex = urlLimpia.indexOf(',');
+        if (commaIndex != -1) {
+          final base64Content = urlLimpia.substring(commaIndex + 1);
+          final bytes = base64Decode(base64Content.replaceAll(RegExp(r'\s+'), ''));
+          return Image.memory(
+            bytes,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
+          );
+        }
       } catch (_) {
         return _errorImagenWidget(colorScheme);
       }
+    }
+
+    try {
+      final bytes = base64Decode(urlLimpia.replaceAll(RegExp(r'\s+'), ''));
+      if (bytes.length > 4) {
+        return Image.memory(
+          bytes,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => _fallbackPublicUrl(urlLimpia, colorScheme),
+        );
+      }
+    } catch (_) {}
+
+    return _fallbackPublicUrl(urlLimpia, colorScheme);
+  }
+
+  Widget _fallbackPublicUrl(String path, ColorScheme colorScheme) {
+    try {
+      final publicUrl = Supabase.instance.client.storage
+          .from(Constantes.bucketImagenesApp)
+          .getPublicUrl(path);
+      return CachedNetworkImage(
+        imageUrl: publicUrl,
+        fit: BoxFit.contain,
+        placeholder: (context, u) => const Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        errorWidget: (context, u, error) => Image.network(
+          publicUrl,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => _errorImagenWidget(colorScheme),
+        ),
+      );
+    } catch (_) {
+      return _errorImagenWidget(colorScheme);
     }
   }
 
