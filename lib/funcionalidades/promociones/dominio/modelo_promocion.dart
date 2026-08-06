@@ -91,14 +91,10 @@ class ModeloPromocion {
       'descripcion': descripcion,
       'tipo_descuento': tipoDescuento == TipoDescuento.porcentaje ? 'porcentaje' : 'monto_fijo',
       'descuento': valorDescuento,
-      'valor_descuento': valorDescuento,
-      'sucursal_id': sucursalId,
-      'servicio_id': servicioId,
+      if (servicioId != null && servicioId!.isNotEmpty) 'servicio_id': servicioId,
       'fecha_inicio': fechaInicio?.toIso8601String().substring(0, 10),
       'fecha_fin': fechaFin?.toIso8601String().substring(0, 10),
-      'foto_url': fotoUrl,
       'imagen': fotoUrl,
-      'activa': activa,
       'activo': activa,
     };
 

@@ -67,16 +67,17 @@ class ModeloProgramaFidelidad {
   }
 
   Map<String, dynamic> aJson() {
+    final sIds = serviciosIdsCache.isNotEmpty
+        ? serviciosIdsCache
+        : (servicioId != null ? [servicioId!] : <String>[]);
     final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
-      'nombre': nombre,
-      'sellos_requeridos': sellosRequeridos,
-      'recompensa': recompensa,
+      'titulo': nombre,
+      'meta_citas': sellosRequeridos,
+      'servicios_ids': sIds,
       'activo': activo,
       if (fechaInicio != null) 'fecha_inicio': fechaInicio!.toIso8601String().substring(0, 10),
       if (fechaFin != null) 'fecha_fin': fechaFin!.toIso8601String().substring(0, 10),
-      if (descripcion != null) 'descripcion': descripcion,
-      if (servicioId != null) 'servicio_id': servicioId,
     };
 
     if (id.trim().isNotEmpty) {

@@ -82,12 +82,31 @@ class RepositorioProgramasFidelidadSupabase
       if (mapa['id'] == '') {
         mapa.remove('id');
       }
-      final fila = await _cliente
-          .from('programas_fidelidad')
-          .upsert(mapa)
-          .select()
-          .single();
-      return ModeloProgramaFidelidad.desdeJson(fila);
+      try {
+        final fila = await _cliente
+            .from('programas_fidelidad')
+            .upsert(mapa)
+            .select()
+            .single();
+        return ModeloProgramaFidelidad.desdeJson(fila);
+      } on PostgrestException catch (e) {
+        final msg = e.message.toLowerCase();
+        if (msg.contains('column') || msg.contains('find')) {
+          if (msg.contains('nombre')) mapa.remove('nombre');
+          if (msg.contains('sellos_requeridos')) mapa.remove('sellos_requeridos');
+          if (msg.contains('recompensa')) mapa.remove('recompensa');
+          if (msg.contains('descripcion')) mapa.remove('descripcion');
+          if (msg.contains('servicio_id')) mapa.remove('servicio_id');
+
+          final fila = await _cliente
+              .from('programas_fidelidad')
+              .upsert(mapa)
+              .select()
+              .single();
+          return ModeloProgramaFidelidad.desdeJson(fila);
+        }
+        rethrow;
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {

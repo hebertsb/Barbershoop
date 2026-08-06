@@ -108,12 +108,16 @@ class RepositorioPromocionesSupabase implements RepositorioPromociones {
             .single();
         return ModeloPromocion.desdeJson(fila);
       } on PostgrestException catch (e) {
-        if (e.message.contains("column") && e.message.contains("not find")) {
-          if (e.message.contains("activo")) mapa.remove('activo');
-          if (e.message.contains("activa")) mapa.remove('activa');
-          if (e.message.contains("foto_url")) mapa.remove('foto_url');
-          if (e.message.contains("imagen")) mapa.remove('imagen');
-          if (e.message.contains("descuento")) mapa.remove('descuento');
+        final msg = e.message.toLowerCase();
+        if (msg.contains("column") || msg.contains("find")) {
+          if (msg.contains("activo")) mapa.remove('activo');
+          if (msg.contains("activa")) mapa.remove('activa');
+          if (msg.contains("foto_url")) mapa.remove('foto_url');
+          if (msg.contains("imagen")) mapa.remove('imagen');
+          if (msg.contains("descuento")) mapa.remove('descuento');
+          if (msg.contains("valor_descuento")) mapa.remove('valor_descuento');
+          if (msg.contains("sucursal_id")) mapa.remove('sucursal_id');
+
           final fila = await _cliente
               .from('promociones')
               .upsert(mapa)
