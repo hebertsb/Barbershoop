@@ -66,15 +66,14 @@ class ModeloInsumo {
     final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
-      'descripcion': descripcion,
-      'stock_actual': stockActual,
-      'stock': stockActual,
-      'stock_minimo': stockMinimo,
-      'unidad_medida': unidadMedida,
-      if (sucursalIdCache != null) 'sucursal_id': sucursalIdCache,
-      if (categoriaCache != null) 'categoria': categoriaCache,
-      if (costoUnitarioCache != null) 'costo_unitario': costoUnitarioCache,
-      'activo': activo,
+      'stock': stockActual.toInt(),
+      'stock_minimo': stockMinimo.toInt(),
+      if (sucursalIdCache != null && sucursalIdCache!.isNotEmpty)
+        'sucursal_id': sucursalIdCache,
+      if (categoriaCache != null && categoriaCache!.isNotEmpty)
+        'categoria': categoriaCache,
+      if (costoUnitarioCache != null)
+        'costo_unitario': costoUnitarioCache,
     };
 
     if (id.trim().isNotEmpty) {

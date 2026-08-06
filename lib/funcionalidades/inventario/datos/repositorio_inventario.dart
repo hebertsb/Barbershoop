@@ -103,17 +103,48 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
     try {
       final barberiaId = await _obtenerBarberiaId();
       final mapa = insumo.aJson();
-      mapa['barberia_id'] = barberiaId; // Garantizar multi-tenant
-      if (mapa['id'] == '') {
-        mapa.remove('id'); // Dejar que la DB genere el uuid al crear
+      mapa['barberia_id'] = barberiaId;
+
+      if (mapa['sucursal_id'] == null || (mapa['sucursal_id'] as String).isEmpty) {
+        final sucursal = await _cliente
+            .from('sucursales')
+            .select('id')
+            .eq('barberia_id', barberiaId)
+            .limit(1)
+            .maybeSingle();
+        if (sucursal != null) {
+          mapa['sucursal_id'] = sucursal['id'];
+        }
       }
 
-      final fila = await _cliente
-          .from('insumos')
-          .upsert(mapa)
-          .select()
-          .single();
-      return ModeloInsumo.desdeJson(fila);
+      if (mapa['id'] == '' || mapa['id'] == null) {
+        mapa.remove('id');
+      }
+
+      try {
+        final fila = await _cliente
+            .from('insumos')
+            .upsert(mapa)
+            .select()
+            .single();
+        return ModeloInsumo.desdeJson(fila);
+      } on PostgrestException catch (e) {
+        final msg = e.message.toLowerCase();
+        if (msg.contains('column') || msg.contains('find')) {
+          if (msg.contains('stock_actual')) mapa.remove('stock_actual');
+          if (msg.contains('descripcion')) mapa.remove('descripcion');
+          if (msg.contains('unidad_medida')) mapa.remove('unidad_medida');
+          if (msg.contains('activo')) mapa.remove('activo');
+
+          final fila = await _cliente
+              .from('insumos')
+              .upsert(mapa)
+              .select()
+              .single();
+          return ModeloInsumo.desdeJson(fila);
+        }
+        rethrow;
+      }
     } on SocketException {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
