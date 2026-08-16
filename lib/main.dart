@@ -12,16 +12,23 @@ import 'nucleo/configuracion/navegador_raiz.dart';
 import 'nucleo/configuracion/tema_app.dart';
 import 'nucleo/enrutador/enrutador_app.dart';
 
+import 'nucleo/servicios/servicio_notificaciones.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   await ClienteSupabase.inicializar();
   try {
+    await ServicioNotificaciones().inicializar();
+  } catch (e) {
+    debugPrint('Error al inicializar ServicioNotificaciones: $e');
+  }
+  try {
     await GoogleSignIn.instance
         .initialize(serverClientId: Constantes.googleWebClientId)
         .timeout(const Duration(seconds: 10));
   } catch (e) {
-    debugPrint('Google Sign In fallo/timeout: ');
+    debugPrint('Google Sign In fallo/timeout: $e');
   }
   runApp(const ProviderScope(child: BarberApp()));
 }

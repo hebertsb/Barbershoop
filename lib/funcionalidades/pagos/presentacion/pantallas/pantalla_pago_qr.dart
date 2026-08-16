@@ -16,7 +16,7 @@ import '../../dominio/enum_estado_pago.dart';
 import '../../dominio/modelo_pago.dart';
 import '../controladores/controlador_pagos.dart';
 
-class PantallaPagoQr extends ConsumerStatefulWidget {
+class PantallaPagoQr extends ConsumerWidget {
   const PantallaPagoQr({
     super.key,
     required this.citaId,
@@ -29,46 +29,8 @@ class PantallaPagoQr extends ConsumerStatefulWidget {
   final String? urlQrBanco;
 
   @override
-  ConsumerState<PantallaPagoQr> createState() => _PantallaPagoQrState();
-}
-
-class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
-  Timer? _timerRefresco;
-
-  @override
-  void initState() {
-    super.initState();
-    _iniciarTimerSilencioso();
-  }
-
-  void _iniciarTimerSilencioso() {
-    _timerRefresco?.cancel();
-    _timerRefresco = Timer.periodic(const Duration(seconds: 4), (_) async {
-      if (!mounted) return;
-      final pago =
-          ref.read(controladorPagoDeCitaProvider(widget.citaId)).valueOrNull;
-
-      // Solo hacer polling si el comprobante ya se subió y está 'por_verificar'
-      if (pago != null && pago.estado == EstadoPago.porVerificar) {
-        await ref
-            .read(controladorPagoDeCitaProvider(widget.citaId).notifier)
-            .refrescarSilencioso();
-      } else if (pago != null && pago.estado == EstadoPago.confirmado) {
-        // En cuanto pasa a confirmado, detener el timer de polling
-        _timerRefresco?.cancel();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timerRefresco?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final pagoState = ref.watch(controladorPagoDeCitaProvider(widget.citaId));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pagoState = ref.watch(controladorPagoDeCitaProvider(citaId));
     final pago = pagoState.valueOrNull;
     final colorScheme = Theme.of(context).colorScheme;
     final esCargaInicial = pagoState.isLoading && !pagoState.hasValue;
@@ -86,7 +48,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(controladorPagoDeCitaProvider(widget.citaId));
+          ref.invalidate(controladorPagoDeCitaProvider(citaId));
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -95,17 +57,17 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Monto a pagar: ${formatoMoneda(widget.monto)}',
+                'Monto a pagar: ${formatoMoneda(monto)}',
                 style: TipografiaApp.headlineSm.copyWith(
                   color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
-              if (widget.urlQrBanco != null) ...[
+              if (urlQrBanco != null) ...[
                 Center(
                   child: GestureDetector(
                     onTap: () =>
-                        mostrarImagenPantallaCompleta(context, widget.urlQrBanco!),
+                        mostrarImagenPantallaCompleta(context, urlQrBanco!),
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -124,7 +86,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
                         width: 220,
                         height: 220,
                         child: CachedNetworkImage(
-                          imageUrl: widget.urlQrBanco!,
+                          imageUrl: urlQrBanco!,
                           fit: BoxFit.contain,
                           placeholder: (context, url) => const Padding(
                             padding: EdgeInsets.all(24),
@@ -163,7 +125,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Center(child: _BotonDescargarQr(urlQrBanco: widget.urlQrBanco!)),
+                Center(child: _BotonDescargarQr(urlQrBanco: urlQrBanco!)),
               ] else
                 Text(
                   'La barbería todavía no cargó su QR de pago.',
@@ -214,7 +176,7 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
         return Image.memory(
           bytes,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const Center(
+          errorBuilder: (context, error, stackTrace) => const Center(
             child: Icon(Icons.broken_image_outlined, size: 40),
           ),
         );
@@ -491,11 +453,28 @@ class _PantallaPagoQrState extends ConsumerState<PantallaPagoQr> {
             ancho: 220,
             altura: 220,
             fit: BoxFit.contain,
-            alSubir: (url) {
-              ref
-                  .read(controladorPagoDeCitaProvider(widget.citaId).notifier)
-                  .subirComprobante(monto: widget.monto, urlComprobante: url)
-                  .catchError((_) {});
+            alSubir: (url) async {
+              try {
+                await ref
+                    .read(controladorPagoDeCitaProvider(citaId).notifier)
+                    .subirComprobante(monto: monto, urlComprobante: url);
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('¡Comprobante enviado! Revisa el estado en Mis Citas.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                context.go('/mis-citas');
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error al subir el comprobante: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
           ),
         ),
@@ -557,26 +536,6 @@ class _BotonDescargarQrState extends State<_BotonDescargarQr> {
             )
           : const Icon(Icons.download_outlined),
       label: Text(_descargando ? 'Descargando...' : 'Descargar QR'),
-    );
-  }
-}
-
-/// Salida explcita hacia `/mis-citas` para los estados de pago en los que
-/// ya no queda nada por hacer en esta pantalla (comprobante subido o pago
-/// confirmado). Complementa la flecha de "volver" del AppBar y el gesto de
-/// back del sistema (disponibles porque esta pantalla se abre con
-/// `context.push`), para que el cliente siempre tenga una salida obvia sin
-/// depender de que sepa usar el back.
-class _BotonIrAMisCitas extends StatelessWidget {
-  const _BotonIrAMisCitas();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: TextButton(
-        onPressed: () => context.go('/mis-citas'),
-        child: const Text('Ir a Mis citas'),
-      ),
     );
   }
 }
