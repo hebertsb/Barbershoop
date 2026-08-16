@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../nucleo/configuracion/colores_app.dart';
+import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../../administracion/presentacion/controladores/controlador_barberos.dart';
 import '../../dominio/modelo_insumo.dart';
 
@@ -46,13 +48,6 @@ class _FormularioAsignarInsumoState
     }
   }
 
-  /// Reacciona de forma proactiva al foco de los campos de texto: apenas
-  /// alguno toma foco (teclado abrindose) bloquea el dropdown YA, antes de
-  /// que el usuario llegue a tocarlo. As el hit-test de un toque posterior
-  /// sobre el dropdown ve `absorbing == true` y su men nunca se abre con el
-  /// layout todava en posicin "con teclado abierto". Al perder el foco del
-  /// todo, espera a que termine la animacin de cierre del teclado (~300ms)
-  /// antes de reactivarlo.
   void _alCambiarFoco() {
     final tieneFoco = _focusScopeNode?.hasFocus ?? false;
     if (tieneFoco && !_bloqueandoDropdown) {
@@ -72,11 +67,6 @@ class _FormularioAsignarInsumoState
     super.dispose();
   }
 
-  /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
-  /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
-  /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
-  /// al crecer el viewport). Detectamos la transicin y devolvemos el scroll
-  /// a 0 en el siguiente frame.
   void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
     final tecladoSeAcabaDeCerrar =
         _insetInferiorAnterior > 0 && insetInferiorActual == 0;
@@ -95,7 +85,7 @@ class _FormularioAsignarInsumoState
   Future<void> _asignar() async {
     if (!_formularioKey.currentState!.validate()) return;
     if (_barberoId == null) {
-      setState(() => _errorMensaje = 'Eleg un barbero.');
+      setState(() => _errorMensaje = 'Elige un barbero.');
       return;
     }
     setState(() {
@@ -117,18 +107,23 @@ class _FormularioAsignarInsumoState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final barberos = (ref.watch(controladorBarberosProvider).value ?? [])
         .where((b) => b.activo)
         .toList();
     final insetInferior = MediaQuery.of(context).viewInsets.bottom;
     _reajustarScrollSiSeCerroElTeclado(insetInferior);
 
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: EdgeInsets.only(
-        bottom: insetInferior,
-        left: 16,
-        right: 16,
-        top: 16,
+        bottom: insetInferior + 16,
+        left: 20,
+        right: 20,
+        top: 12,
       ),
       child: Form(
         key: _formularioKey,
@@ -138,16 +133,41 @@ class _FormularioAsignarInsumoState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Asignar "${widget.insumo.nombre}"',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
               Text(
-                'Stock disponible: ${widget.insumo.stock}',
-                style: Theme.of(context).textTheme.bodySmall,
+                'Asignar "${widget.insumo.nombre}"',
+                style: TipografiaApp.headlineSm.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Stock en almacén: ${widget.insumo.stockFormateado}',
+                    style: TipografiaApp.bodySm.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Listener(
@@ -160,9 +180,12 @@ class _FormularioAsignarInsumoState
                   absorbing: _bloqueandoDropdown,
                   child: DropdownButtonFormField<String>(
                     initialValue: _barberoId,
-                    decoration: const InputDecoration(
-                      labelText: 'Barbero *',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: 'Seleccionar Barbero *',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     items: barberos
                         .map(
@@ -176,12 +199,15 @@ class _FormularioAsignarInsumoState
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               TextFormField(
                 controller: _cantidadCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Cantidad *',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'Cantidad a Asignar *',
+                  prefixIcon: const Icon(Icons.numbers_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (v) {
@@ -190,26 +216,44 @@ class _FormularioAsignarInsumoState
                     return 'Debe ser > 0';
                   }
                   if (parsed > widget.insumo.stock) {
-                    return 'No hay suficiente stock';
+                    return 'No hay suficiente stock en almacén';
                   }
                   return null;
                 },
               ),
               if (_errorMensaje != null) ...[
-                const SizedBox(height: 16),
-                Text(_errorMensaje!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 14),
+                Text(
+                  _errorMensaje!,
+                  style: const TextStyle(color: Colors.red),
+                ),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _cargando ? null : _asignar,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: ColoresApp.primario,
+                  foregroundColor: colorScheme.onPrimaryContainer,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: _cargando
-                    ? const CircularProgressIndicator()
-                    : const Text('Asignar'),
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        'ASIGNAR INSUMO A BARBERO',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
               ),
-              const SizedBox(height: 16),
             ],
           ),
         ),

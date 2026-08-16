@@ -111,11 +111,11 @@ class _PantallaInicioBarberoState extends ConsumerState<PantallaInicioBarbero> {
               ),
               const SizedBox(height: 4),
               Text(
-                citasHoy == null
-                    ? 'Revis tu agenda del da'
+                citasHoy == null || citasHoy == 0
+                    ? 'No tienes citas programadas para hoy'
                     : citasHoy == 1
-                    ? 'Hoy tens 1 cita'
-                    : 'Hoy tens $citasHoy citas',
+                    ? 'Hoy tienes 1 cita programada'
+                    : 'Hoy tienes $citasHoy citas programadas',
                 style: TipografiaApp.bodySm.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -145,13 +145,13 @@ class _PantallaInicioBarberoState extends ConsumerState<PantallaInicioBarbero> {
                     ),
                   ),
                   title: Text(
-                    'Agenda del da',
+                    'Agenda del Día',
                     style: TipografiaApp.bodyMd.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  subtitle: const Text('Tus citas y check-ins de hoy'),
+                  subtitle: const Text('Tus citas y asistencias de hoy'),
                   trailing: Icon(
                     Icons.chevron_right,
                     color: colorScheme.outline,

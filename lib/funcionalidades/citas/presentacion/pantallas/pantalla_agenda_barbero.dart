@@ -73,7 +73,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
       return const Scaffold(
-        body: Center(child: Text('No tens una sucursal asignada.')),
+        body: Center(child: Text('No tienes una sucursal asignada.')),
       );
     }
     _sucursalIdVisible = sucursalId;
@@ -99,7 +99,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Agenda del Da')),
+      appBar: AppBar(title: const Text('Agenda del Día')),
       body: citasState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
@@ -132,7 +132,7 @@ class _PantallaAgendaBarberoState extends ConsumerState<PantallaAgendaBarbero> {
                   if (items.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 48),
-                      child: Center(child: Text('No tens citas para hoy.')),
+                      child: Center(child: Text('No tienes citas para hoy.')),
                     )
                   else
                     for (final item in items)

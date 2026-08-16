@@ -195,7 +195,7 @@ class RepositorioInventarioSupabase implements RepositorioInventario {
       final filas = await _cliente
           .from('insumos_barbero')
           .select(
-            'barbero_id, insumo_id, cantidad_asignada, insumos:insumo_id(nombre)',
+            'id, barbero_id, insumo_id, cantidad_asignada, insumos:insumo_id(nombre, unidad_medida)',
           )
           .eq('barbero_id', barberoId)
           .order('cantidad_asignada', ascending: false);
