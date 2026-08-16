@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../../../nucleo/configuracion/colores_app.dart';
+import '../../../../nucleo/configuracion/tipografia_app.dart';
 import '../../dominio/modelo_insumo.dart';
+
+const List<String> _unidadesComunes = [
+  'unidad',
+  'ml',
+  'litros',
+  'gramos',
+  'kg',
+  'frasco',
+  'caja',
+  'tubo',
+  'paquete',
+];
 
 class FormularioInsumo extends StatefulWidget {
   const FormularioInsumo({
@@ -23,10 +37,12 @@ class FormularioInsumo extends StatefulWidget {
 class _FormularioInsumoState extends State<FormularioInsumo> {
   final _formularioKey = GlobalKey<FormState>();
   late final TextEditingController _nombreCtrl;
+  late final TextEditingController _descripcionCtrl;
   late final TextEditingController _categoriaCtrl;
   late final TextEditingController _stockCtrl;
   late final TextEditingController _stockMinimoCtrl;
   late final TextEditingController _costoCtrl;
+  late String _unidadMedida;
   final _scrollCtrl = ScrollController();
   bool _cargando = false;
   String? _errorMensaje;
@@ -36,6 +52,7 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
   void initState() {
     super.initState();
     _nombreCtrl = TextEditingController(text: widget.insumo?.nombre ?? '');
+    _descripcionCtrl = TextEditingController(text: widget.insumo?.descripcion ?? '');
     _categoriaCtrl = TextEditingController(
       text: widget.insumo?.categoria ?? '',
     );
@@ -48,11 +65,13 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
     _costoCtrl = TextEditingController(
       text: widget.insumo?.costoUnitario?.toString() ?? '',
     );
+    _unidadMedida = widget.insumo?.unidadMedida ?? 'unidad';
   }
 
   @override
   void dispose() {
     _nombreCtrl.dispose();
+    _descripcionCtrl.dispose();
     _categoriaCtrl.dispose();
     _stockCtrl.dispose();
     _stockMinimoCtrl.dispose();
@@ -61,11 +80,6 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
     super.dispose();
   }
 
-  /// Cuando el teclado se cierra (el inset inferior pasa de >0 a 0), el
-  /// `SingleChildScrollView` puede quedar con el scroll desplazado hacia
-  /// arriba (bug conocido de Flutter: el ScrollPosition no se reajusta solo
-  /// al crecer el viewport). Detectamos la transicin y devolvemos el scroll
-  /// a 0 en el siguiente frame.
   void _reajustarScrollSiSeCerroElTeclado(double insetInferiorActual) {
     final tecladoSeAcabaDeCerrar =
         _insetInferiorAnterior > 0 && insetInferiorActual == 0;
@@ -94,11 +108,15 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
         barberiaId: widget.barberiaId,
         sucursalId: widget.sucursalId,
         nombre: _nombreCtrl.text.trim(),
+        descripcion: _descripcionCtrl.text.trim().isEmpty
+            ? null
+            : _descripcionCtrl.text.trim(),
         categoria: _categoriaCtrl.text.trim().isEmpty
             ? null
             : _categoriaCtrl.text.trim(),
-        stock: int.parse(_stockCtrl.text.trim()),
-        stockMinimo: int.parse(_stockMinimoCtrl.text.trim()),
+        stock: double.parse(_stockCtrl.text.trim()),
+        stockMinimo: double.parse(_stockMinimoCtrl.text.trim()),
+        unidadMedida: _unidadMedida,
         costoUnitario: _costoCtrl.text.trim().isEmpty
             ? null
             : double.parse(_costoCtrl.text.trim()),
@@ -114,124 +132,235 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final insetInferior = MediaQuery.of(context).viewInsets.bottom;
     _reajustarScrollSiSeCerroElTeclado(insetInferior);
-    return Padding(
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: EdgeInsets.only(
-        bottom: insetInferior,
-        left: 16,
-        right: 16,
-        top: 16,
+        bottom: insetInferior + 16,
+        left: 20,
+        right: 20,
+        top: 12,
       ),
       child: Form(
         key: _formularioKey,
-        child: SingleChildScrollView(
-          controller: _scrollCtrl,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                widget.insumo == null ? 'Nuevo Insumo' : 'Editar Insumo',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _nombreCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'El nombre es requerido'
-                    : null,
+            ),
+            Text(
+              widget.insumo == null ? 'Nuevo Insumo' : 'Editar Insumo',
+              style: TipografiaApp.headlineSm.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _categoriaCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Categora',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _stockCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Stock *',
-                        border: OutlineInputBorder(),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollCtrl,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: _nombreCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Nombre del Insumo *',
+                        prefixIcon: const Icon(Icons.inventory_2_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      keyboardType: TextInputType.number,
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? 'El nombre es requerido'
+                          : null,
+                    ),
+                    const SizedBox(height: 14),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _categoriaCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Categoría',
+                              prefixIcon: const Icon(Icons.category_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            initialValue: _unidadesComunes.contains(_unidadMedida)
+                                ? _unidadMedida
+                                : 'unidad',
+                            decoration: InputDecoration(
+                              labelText: 'Unidad de Medida',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            items: _unidadesComunes
+                                .map(
+                                  (u) => DropdownMenuItem(
+                                    value: u,
+                                    child: Text(u),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() => _unidadMedida = val);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _stockCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Stock Actual *',
+                              prefixIcon: const Icon(Icons.numbers_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (v) {
+                              final parsed = double.tryParse(v ?? '');
+                              if (parsed == null || parsed < 0) {
+                                return 'Debe ser >= 0';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _stockMinimoCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Stock Mínimo *',
+                              prefixIcon: const Icon(Icons.warning_amber_rounded),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (v) {
+                              final parsed = double.tryParse(v ?? '');
+                              if (parsed == null || parsed < 0) {
+                                return 'Debe ser >= 0';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    TextFormField(
+                      controller: _costoCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Costo Unitario (Bs.)',
+                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixText: 'Bs. ',
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       validator: (v) {
-                        final parsed = int.tryParse(v ?? '');
-                        if (parsed == null || parsed < 0) {
-                          return 'Debe ser >= 0';
-                        }
+                        if (v == null || v.trim().isEmpty) return null;
+                        final parsed = double.tryParse(v);
+                        if (parsed == null || parsed < 0) return 'Debe ser >= 0';
                         return null;
                       },
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _stockMinimoCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Stock mnimo *',
-                        border: OutlineInputBorder(),
+                    const SizedBox(height: 14),
+
+                    TextFormField(
+                      controller: _descripcionCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Descripción / Notas',
+                        alignLabelWithHint: true,
+                        prefixIcon: const Icon(Icons.notes_rounded),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (v) {
-                        final parsed = int.tryParse(v ?? '');
-                        if (parsed == null || parsed < 0) {
-                          return 'Debe ser >= 0';
-                        }
-                        return null;
-                      },
+                      maxLines: 2,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _costoCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Costo unitario (Bs.)',
-                  border: OutlineInputBorder(),
-                  prefixText: 'Bs. ',
+
+                    if (_errorMensaje != null) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        _errorMensaje!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                  ],
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return null;
-                  final parsed = double.tryParse(v);
-                  if (parsed == null || parsed < 0) return 'Debe ser >= 0';
-                  return null;
-                },
               ),
-              if (_errorMensaje != null) ...[
-                const SizedBox(height: 16),
-                Text(_errorMensaje!, style: const TextStyle(color: Colors.red)),
-              ],
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _cargando ? null : _guardar,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            ElevatedButton(
+              onPressed: _cargando ? null : _guardar,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.primario,
+                foregroundColor: colorScheme.onPrimaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: _cargando
-                    ? const CircularProgressIndicator()
-                    : const Text('Guardar'),
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
+              child: _cargando
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text(
+                      'GUARDAR INSUMO',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+            ),
+          ],
         ),
       ),
     );

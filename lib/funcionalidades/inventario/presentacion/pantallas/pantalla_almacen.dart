@@ -22,6 +22,7 @@ class PantallaAlmacen extends ConsumerStatefulWidget {
 class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
   String? _sucursalSeleccionadaId;
   String? _sucursalIdVisible;
+  String _busqueda = '';
   Timer? _timerRefresco;
 
   @override
@@ -82,7 +83,7 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Almacn'),
+        title: const Text('Almacén e Inventario'),
         actions: [
           if (sucursalesActivas.length > 1)
             Padding(
@@ -141,28 +142,64 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
         child: insumosState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text(error.toString())),
-          data: (insumos) {
-            final bajoMinimo = insumos.where((i) => i.bajoMinimo).toList();
+          data: (insumosOriginales) {
+            final insumos = insumosOriginales.where((i) {
+              if (_busqueda.trim().isEmpty) return true;
+              final q = _busqueda.trim().toLowerCase();
+              return i.nombre.toLowerCase().contains(q) ||
+                  (i.categoria != null && i.categoria!.toLowerCase().contains(q));
+            }).toList();
+
+            final bajoMinimo = insumosOriginales.where((i) => i.bajoMinimo).toList();
+
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                AlertaStockMinimo(insumos: bajoMinimo),
-                if (insumos.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
-                    child: Center(child: Text('No hay insumos registrados.')),
+                // Barra de búsqueda
+                TextField(
+                  onChanged: (val) => setState(() => _busqueda = val),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar insumo por nombre o categoría...',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainer,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
+                ),
+                const SizedBox(height: 14),
+
+                AlertaStockMinimo(insumos: bajoMinimo),
+
+                if (insumos.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: Text(
+                        _busqueda.trim().isEmpty
+                            ? 'No hay insumos registrados en esta sucursal.'
+                            : 'No se encontraron insumos para "$_busqueda".',
+                        style: TipografiaApp.bodyMd.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+
                 for (final insumo in insumos)
                   Dismissible(
                     key: Key('insumo-${insumo.id}'),
                     direction: DismissDirection.endToStart,
                     background: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
+                      margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       alignment: Alignment.centerRight,
                       decoration: BoxDecoration(
                         color: colorScheme.error,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
                         Icons.delete_outline,
@@ -193,50 +230,40 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
                     },
                     child: TarjetaInsumo(
                       insumo: insumo,
-                      onTap: () {
+                      onTap: () => _abrirFormularioInsumo(
+                        context,
+                        perfil?.barberiaId ?? '',
+                        sucursalId,
+                        insumo: insumo,
+                      ),
+                      onEditar: () => _abrirFormularioInsumo(
+                        context,
+                        perfil?.barberiaId ?? '',
+                        sucursalId,
+                        insumo: insumo,
+                      ),
+                      onAsignar: () {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
-                          builder: (context) => FormularioInsumo(
+                          builder: (context) => FormularioAsignarInsumo(
                             insumo: insumo,
-                            barberiaId: perfil?.barberiaId ?? '',
-                            sucursalId: sucursalId,
-                            alGuardar: (nuevo) => ref
-                                .read(
-                                  controladorAlmacenProvider(
-                                    sucursalId,
-                                  ).notifier,
-                                )
-                                .guardarInsumo(nuevo),
+                            alAsignar:
+                                ({required barberoId, required cantidad}) =>
+                                    ref
+                                        .read(
+                                          controladorAlmacenProvider(
+                                            sucursalId,
+                                          ).notifier,
+                                        )
+                                        .asignarABarbero(
+                                          insumoId: insumo.id,
+                                          barberoId: barberoId,
+                                          cantidad: cantidad,
+                                        ),
                           ),
                         );
                       },
-                      trailing: IconButton(
-                        icon: const Icon(Icons.person_add_alt_1_outlined),
-                        tooltip: 'Asignar a un barbero',
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) => FormularioAsignarInsumo(
-                              insumo: insumo,
-                              alAsignar:
-                                  ({required barberoId, required cantidad}) =>
-                                      ref
-                                          .read(
-                                            controladorAlmacenProvider(
-                                              sucursalId,
-                                            ).notifier,
-                                          )
-                                          .asignarABarbero(
-                                            insumoId: insumo.id,
-                                            barberoId: barberoId,
-                                            cantidad: cantidad,
-                                          ),
-                            ),
-                          );
-                        },
-                      ),
                     ),
                   ),
               ],
@@ -244,21 +271,35 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => FormularioInsumo(
-              barberiaId: perfil?.barberiaId ?? '',
-              sucursalId: sucursalId,
-              alGuardar: (nuevo) => ref
-                  .read(controladorAlmacenProvider(sucursalId).notifier)
-                  .guardarInsumo(nuevo),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _abrirFormularioInsumo(
+          context,
+          perfil?.barberiaId ?? '',
+          sucursalId,
+        ),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Nuevo Insumo'),
+      ),
+    );
+  }
+
+  void _abrirFormularioInsumo(
+    BuildContext context,
+    String barberiaId,
+    String sucursalId, {
+    dynamic insumo,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FormularioInsumo(
+        insumo: insumo,
+        barberiaId: barberiaId,
+        sucursalId: sucursalId,
+        alGuardar: (nuevo) => ref
+            .read(controladorAlmacenProvider(sucursalId).notifier)
+            .guardarInsumo(nuevo),
       ),
     );
   }
@@ -270,11 +311,11 @@ class _PantallaAlmacenState extends ConsumerState<PantallaAlmacen> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar insumo?'),
+        title: const Text('¿Eliminar insumo?'),
         content: Text(
-          'Se va a eliminar "$nombreInsumo" y tambin sus asignaciones a '
-          'barberos y su historial de reportes (daado/agotado/perdido). '
-          'Esta accin no se puede deshacer.',
+          'Se va a eliminar "$nombreInsumo" y también sus asignaciones a '
+          'barberos y su historial de reportes (dañado/agotado/perdido). '
+          'Esta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(

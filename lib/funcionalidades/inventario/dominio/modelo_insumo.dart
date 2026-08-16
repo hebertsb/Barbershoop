@@ -33,7 +33,7 @@ class ModeloInsumo {
   /// Alias de [stockActual].
   double get stock => stockActual;
 
-  /// Categória del insumo.
+  /// Categoría del insumo.
   String? get categoria => categoriaCache;
 
   /// Costo unitario del insumo.
@@ -44,6 +44,22 @@ class ModeloInsumo {
 
   /// Indica si el stock cayó por debajo o igual al stock mínimo.
   bool get bajoMinimo => stockActual <= stockMinimo;
+
+  /// Devuelve el stock formateado con su unidad de medida.
+  String get stockFormateado {
+    final cantStr = stockActual % 1 == 0
+        ? stockActual.toInt().toString()
+        : stockActual.toStringAsFixed(1);
+    return '$cantStr $unidadMedida';
+  }
+
+  /// Devuelve el stock mínimo formateado con su unidad de medida.
+  String get stockMinimoFormateado {
+    final cantStr = stockMinimo % 1 == 0
+        ? stockMinimo.toInt().toString()
+        : stockMinimo.toStringAsFixed(1);
+    return '$cantStr $unidadMedida';
+  }
 
   factory ModeloInsumo.desdeJson(Map<String, dynamic> json) {
     final st = json['stock_actual'] ?? json['stock'];
@@ -66,14 +82,19 @@ class ModeloInsumo {
     final mapa = <String, dynamic>{
       'barberia_id': barberiaId,
       'nombre': nombre,
+      if (descripcion != null && descripcion!.isNotEmpty)
+        'descripcion': descripcion,
       'stock': stockActual.toInt(),
+      'stock_actual': stockActual.toInt(),
       'stock_minimo': stockMinimo.toInt(),
+      'unidad_medida': unidadMedida,
       if (sucursalIdCache != null && sucursalIdCache!.isNotEmpty)
         'sucursal_id': sucursalIdCache,
       if (categoriaCache != null && categoriaCache!.isNotEmpty)
         'categoria': categoriaCache,
       if (costoUnitarioCache != null)
         'costo_unitario': costoUnitarioCache,
+      'activo': activo,
     };
 
     if (id.trim().isNotEmpty) {

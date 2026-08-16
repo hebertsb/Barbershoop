@@ -70,7 +70,7 @@ class _PantallaReportarInsumoState
   Future<void> _enviar() async {
     if (!_formularioKey.currentState!.validate()) return;
     if (_insumoIdSeleccionado == null) {
-      setState(() => _errorMensaje = 'Eleg un insumo.');
+      setState(() => _errorMensaje = 'Elige un insumo.');
       return;
     }
     setState(() {
@@ -129,7 +129,7 @@ class _PantallaReportarInsumoState
                           (i) => DropdownMenuItem(
                             value: i.insumoId,
                             child: Text(
-                              '${i.nombreInsumo} (tens ${i.cantidadAsignada})',
+                              '${i.nombreInsumo} (tienes ${i.cantidadAsignada})',
                             ),
                           ),
                         )
@@ -183,7 +183,7 @@ class _PantallaReportarInsumoState
                   if (parsed == null || parsed <= 0) return 'Debe ser > 0';
                   if (_insumoIdSeleccionado != null &&
                       parsed > _cantidadDisponible) {
-                    return 'No tens esa cantidad asignada';
+                    return 'No tienes esa cantidad asignada';
                   }
                   return null;
                 },
