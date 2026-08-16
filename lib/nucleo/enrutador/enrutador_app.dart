@@ -488,7 +488,14 @@ class _EsqueletoAdministracion extends ConsumerWidget {
       );
       return Scaffold(
         body: Stack(
-          children: [navigationShell, const PildoraFidelidadFlotante()],
+          children: [
+            navigationShell,
+            const Positioned(
+              right: 14,
+              bottom: 90,
+              child: PildoraFidelidadFlotante(),
+            ),
+          ],
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: indiceVisible,
