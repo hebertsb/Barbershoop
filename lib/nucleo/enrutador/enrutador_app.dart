@@ -24,7 +24,6 @@ import '../../funcionalidades/citas/presentacion/componentes/esqueleto_barbero.d
 import '../../funcionalidades/citas/presentacion/pantallas/pantalla_agenda.dart';
 import '../../funcionalidades/citas/presentacion/pantallas/pantalla_agenda_barbero.dart';
 import '../../funcionalidades/citas/presentacion/pantallas/pantalla_mis_citas.dart';
-import '../../funcionalidades/fidelidad/presentacion/componentes/pildora_fidelidad_flotante.dart';
 import '../../funcionalidades/fidelidad/presentacion/pantallas/pantalla_gestion_programas_fidelidad.dart';
 import '../../funcionalidades/inventario/presentacion/pantallas/pantalla_almacen.dart';
 import '../../funcionalidades/inventario/presentacion/pantallas/pantalla_bandeja_reportes.dart';
@@ -487,16 +486,7 @@ class _EsqueletoAdministracion extends ConsumerWidget {
         navigationShell.currentIndex,
       );
       return Scaffold(
-        body: Stack(
-          children: [
-            navigationShell,
-            const Positioned(
-              right: 14,
-              bottom: 90,
-              child: PildoraFidelidadFlotante(),
-            ),
-          ],
-        ),
+        body: navigationShell,
         bottomNavigationBar: NavigationBar(
           selectedIndex: indiceVisible,
           onDestinationSelected: (indice) =>

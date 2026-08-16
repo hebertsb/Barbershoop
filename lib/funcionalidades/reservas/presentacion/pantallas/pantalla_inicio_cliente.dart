@@ -14,6 +14,7 @@ import '../../../ajustes/presentacion/controladores/controlador_instrucciones_ci
 import '../../../ajustes/presentacion/controladores/controlador_minutos_cancelacion.dart';
 import '../../../autenticacion/presentacion/controladores/controlador_autenticacion.dart';
 import '../../../citas/presentacion/controladores/controlador_mis_citas.dart';
+import '../../../fidelidad/presentacion/componentes/pildora_fidelidad_flotante.dart';
 import '../../../promociones/presentacion/componentes/tarjeta_promocion_cliente.dart';
 import '../../../promociones/presentacion/controladores/controlador_promociones_cliente.dart';
 import '../componentes/tarjeta_proxima_cita.dart';
@@ -93,7 +94,9 @@ class _PantallaInicioClienteState extends ConsumerState<PantallaInicioCliente> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const _EncabezadoInicio(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                const PildoraFidelidadFlotante(),
+                const SizedBox(height: 16),
                 const _SeccionProximaCita(),
                 const SizedBox(height: 32),
                 _SeccionServiciosPopulares(onIniciarReserva: _iniciarReserva),
