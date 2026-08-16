@@ -32,10 +32,6 @@ class _PildoraFidelidadFlotanteState
     _rebote = Tween<double>(begin: 0, end: -14).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-    // Sin esto el progreso se carga una sola vez al montar el shell del
-    // cliente y nunca se entera si el admin cambia la meta de citas, el
-    // rango de fechas o desactiva el programa -- mismo patron que el
-    // refresco de promociones en pantalla_inicio_cliente.dart.
     _timerRefresco = Timer.periodic(const Duration(seconds: 60), (_) {
       if (!mounted) return;
       ref.invalidate(controladorProgresoFidelidadProvider);
@@ -59,63 +55,66 @@ class _PildoraFidelidadFlotanteState
 
     final avisar = elegido.estaPorCumplirMeta || elegido.puedeReclamar;
 
-    return Positioned(
-      right: 14,
-      bottom: 90,
-      child: GestureDetector(
-        onTap: () => showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => const DetalleFidelidadModal(),
-        ),
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.translate(
-              offset: Offset(0, avisar ? _rebote.value : 0),
-              child: child,
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1C),
-              borderRadius: BorderRadius.circular(99),
-              border: Border.all(
-                color: const Color(0xFFF2CA50),
-                width: avisar ? 2 : 1.5,
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 14, bottom: 90),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => const DetalleFidelidadModal(),
+          ),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(0, avisar ? _rebote.value : 0),
+                child: child,
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1C1C1C),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(
+                  color: const Color(0xFFF2CA50),
+                  width: avisar ? 2 : 1.5,
+                ),
+                boxShadow: avisar
+                    ? [
+                        BoxShadow(
+                          color: const Color(
+                            0xFFF2CA50,
+                          ).withValues(alpha: 0.6),
+                          blurRadius: 16,
+                          spreadRadius: 3,
+                        ),
+                      ]
+                    : null,
               ),
-              boxShadow: avisar
-                  ? [
-                      BoxShadow(
-                        color: const Color(
-                          0xFFF2CA50,
-                        ).withValues(alpha: 0.6),
-                        blurRadius: 16,
-                        spreadRadius: 3,
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.loyalty,
-                  size: 16,
-                  color: Color(0xFFF2CA50),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '${elegido.progresoActual}/${elegido.metaCitas}',
-                  style: const TextStyle(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.loyalty,
+                    size: 16,
                     color: Color(0xFFF2CA50),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 6),
+                  Text(
+                    '${elegido.progresoActual}/${elegido.metaCitas}',
+                    style: const TextStyle(
+                      color: Color(0xFFF2CA50),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
