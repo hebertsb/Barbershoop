@@ -53,6 +53,17 @@ class _PantallaConfirmacionReservaState
       if (!mounted) return;
       ref.read(controladorReservaProvider.notifier).reiniciar();
 
+      if (resultado.esReprogramacion) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Cita reprogramada exitosamente!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/mis-citas');
+        return;
+      }
+
       final config = await ref.read(controladorAjustesPagosProvider.future);
       if (!mounted) return;
 

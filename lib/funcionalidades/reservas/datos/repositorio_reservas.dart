@@ -37,6 +37,11 @@ abstract class RepositorioReservas {
   });
 
   Future<void> cancelarCita(String citaId);
+
+  Future<ModeloCita> reprogramarCita({
+    required String citaId,
+    required DateTime nuevaFechaHora,
+  });
 }
 
 class RepositorioReservasSupabase implements RepositorioReservas {
@@ -227,6 +232,36 @@ class RepositorioReservasSupabase implements RepositorioReservas {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
       throw ExcepcionPermiso(e.message);
+    }
+  }
+
+  @override
+  Future<ModeloCita> reprogramarCita({
+    required String citaId,
+    required DateTime nuevaFechaHora,
+  }) async {
+    try {
+      final uid = _cliente.auth.currentUser?.id;
+      if (uid == null) {
+        throw const ExcepcionPermiso('Sesión no iniciada.');
+      }
+
+      final fila = await _cliente
+          .from('citas')
+          .update({
+            'fecha_hora': nuevaFechaHora.toUtc().toIso8601String(),
+          })
+          .eq('id', citaId)
+          .select()
+          .single();
+
+      return ModeloCita.desdeJson(fila);
+    } on SocketException {
+      throw const ExcepcionRed();
+    } on PostgrestException catch (e) {
+      throw ExcepcionPermiso(e.message);
+    } catch (e) {
+      throw ExcepcionDesconocida(e.toString());
     }
   }
 }

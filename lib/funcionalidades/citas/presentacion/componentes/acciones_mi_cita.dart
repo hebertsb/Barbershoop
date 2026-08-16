@@ -99,6 +99,7 @@ class AccionesMiCita extends ConsumerWidget {
           sucursalId: cita.sucursalId ?? '',
           servicioId: cita.servicioId,
           citaIdAReemplazar: cita.id,
+          fechaHoraOriginal: cita.fechaHora,
         );
     context.push('/reservar/barbero');
   }

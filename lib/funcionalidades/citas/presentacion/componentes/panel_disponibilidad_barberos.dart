@@ -18,6 +18,7 @@ String _formatoHuecos(List<HuecoLibre> huecos) {
 
 /// Texto legible del estado de disponibilidad de un barbero.
 String textoDisponibilidadBarbero(EstadoDisponibilidadBarbero estado) {
+  if (estado.fueraDeHorario) return 'Fuera de horario';
   if (!estado.ocupado) return 'Libre';
   if (estado.libreDesde != null) {
     return 'Libre a las ${formatoHora(estado.libreDesde!.toLocal())}';
@@ -30,6 +31,7 @@ Color colorDisponibilidadBarbero(
   EstadoDisponibilidadBarbero estado,
   dynamic colores,
 ) {
+  if (estado.fueraDeHorario) return Colors.grey;
   if (!estado.ocupado) return Colors.green;
   return Colors.orange;
 }

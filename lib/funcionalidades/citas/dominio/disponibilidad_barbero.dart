@@ -21,12 +21,14 @@ class EstadoDisponibilidadBarbero {
   const EstadoDisponibilidadBarbero({
     required this.barbero,
     required this.ocupado,
+    this.fueraDeHorario = false,
     this.libreDesde,
     this.huecosLibres = const [],
   });
 
   final ModeloBarbero barbero;
   final bool ocupado;
+  final bool fueraDeHorario;
 
   /// Hora estimada en que termina su cita/turno actual -- `null` si est
   /// ocupado pero no se pudo calcular una estimacin.
@@ -72,8 +74,18 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
       (h) => h.barberoId == barbero.id && h.diaSemana == ahora.weekday % 7,
     );
     if (horarioHoy.isEmpty) {
-      return EstadoDisponibilidadBarbero(barbero: barbero, ocupado: true);
+      return EstadoDisponibilidadBarbero(
+        barbero: barbero,
+        ocupado: true,
+        fueraDeHorario: true,
+      );
     }
+
+    // Comprobar si la hora actual está fuera del horario de trabajo de hoy
+    final horaInicioJornada = horaDeHoy(horarioHoy.first.horaInicio);
+    final horaFinJornada = horaDeHoy(horarioHoy.last.horaFin);
+    final estaFueraDeHorario =
+        ahora.isBefore(horaInicioJornada) || !ahora.isBefore(horaFinJornada);
 
     // Bloques ocupados de hoy: citas activas + turnos activos del barbero.
     final bloques = <(DateTime, DateTime)>[
@@ -89,13 +101,16 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
             (t.horaLlegada != null || t.creadoEn != null))
           (
             t.horaLlegada ?? t.creadoEn!,
-            (t.horaLlegada ?? t.creadoEn!).add(Duration(minutes: duracionDe(t.servicioId ?? ''))),
+            (t.horaLlegada ?? t.creadoEn!).add(
+              Duration(minutes: duracionDe(t.servicioId ?? '')),
+            ),
           ),
     ]..sort((a, b) => a.$1.compareTo(b.$1));
 
-    final ocupadoAhora = bloques.any(
-      (b) => !ahora.isBefore(b.$1) && ahora.isBefore(b.$2),
-    );
+    final ocupadoAhora = estaFueraDeHorario ||
+        bloques.any(
+          (b) => !ahora.isBefore(b.$1) && ahora.isBefore(b.$2),
+        );
 
     // Huecos libres dentro del horario de trabajo, restando los bloques.
     final huecos = <HuecoLibre>[];
@@ -116,7 +131,7 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
       }
     }
 
-    // Solo huecos que todava no terminaron.
+    // Solo huecos que todavía no terminaron.
     final huecosFuturos = huecos
         .where((h) => h.fin.isAfter(ahora))
         .map(
@@ -128,9 +143,10 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
         .toList();
 
     DateTime? libreDesde;
-    if (ocupadoAhora) {
+    if (ocupadoAhora && !estaFueraDeHorario) {
       final bloqueActual = bloques.firstWhere(
         (b) => !ahora.isBefore(b.$1) && ahora.isBefore(b.$2),
+        orElse: () => (ahora, ahora),
       );
       libreDesde = bloqueActual.$2;
     }
@@ -138,6 +154,7 @@ List<EstadoDisponibilidadBarbero> calcularDisponibilidadBarberos({
     return EstadoDisponibilidadBarbero(
       barbero: barbero,
       ocupado: ocupadoAhora,
+      fueraDeHorario: estaFueraDeHorario,
       libreDesde: libreDesde,
       huecosLibres: huecosFuturos,
     );

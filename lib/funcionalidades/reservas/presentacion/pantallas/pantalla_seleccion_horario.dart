@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
+import '../../../../nucleo/utilidades/formato_fecha.dart';
 import '../../../administracion/presentacion/controladores/controlador_servicios.dart';
 import '../../datos/repositorio_reservas.dart';
 import '../../dominio/calculo_precio_combo.dart';
@@ -54,8 +55,14 @@ class _PantallaSeleccionHorarioState
   @override
   void initState() {
     super.initState();
-    final hoy = DateTime.now();
-    _fechaSeleccionada = DateTime(hoy.year, hoy.month, hoy.day);
+    final estado = ref.read(controladorReservaProvider);
+    if (estado.citaIdAReemplazar != null && estado.fechaHoraOriginal != null) {
+      final orig = estado.fechaHoraOriginal!.toLocal();
+      _fechaSeleccionada = DateTime(orig.year, orig.month, orig.day);
+    } else {
+      final hoy = DateTime.now();
+      _fechaSeleccionada = DateTime(hoy.year, hoy.month, hoy.day);
+    }
     _consultarHorarios();
   }
 
@@ -64,11 +71,6 @@ class _PantallaSeleccionHorarioState
     if (estado.sucursalId == null || estado.servicioId == null) return;
 
     final repo = ref.read(repositorioReservasProvider);
-    // NOTA: al reprogramar NO se excluye la cita actual del cálculo de
-    // disponibilidad. El slot viejo debe seguir apareciendo tachado (ocupado)
-    // hasta que el cliente confirme el nuevo horario — recién ahí la cita
-    // anterior se cancela y el slot queda libre. El cliente debe elegir
-    // un horario DIFERENTE al que ya tiene reservado.
 
     if (!estado.cualquieraSeleccionado && estado.barberoId != null) {
       setState(() {
@@ -96,6 +98,10 @@ class _PantallaSeleccionHorarioState
   }
 
   Future<void> _abrirCalendario() async {
+    final estado = ref.read(controladorReservaProvider);
+    // Si se está reprogramando, solo se puede reprogramar dentro del mismo día
+    if (estado.citaIdAReemplazar != null) return;
+
     final hoy = DateTime.now();
     final elegida = await showDatePicker(
       context: context,
@@ -123,62 +129,90 @@ class _PantallaSeleccionHorarioState
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final estado = ref.watch(controladorReservaProvider);
+    final esReprogramacion = estado.citaIdAReemplazar != null;
+
     final servicios = ref.watch(controladorServiciosProvider).value ?? [];
     final servicioActual = servicios
         .where((s) => s.id == estado.servicioId)
         .toList();
     final promocion = estado.promocion;
     final esCombo = promocion != null && promocion.esCombo;
-    // Para un combo, el bloque real a reservar es la suma de TODOS los
-    // servicios del combo (mismo criterio que reservar_cita, 0040), no solo
-    // la duración de estado.servicioId (el servicio "ancla" del combo) --
-    // evita mostrarle al cliente un mensaje de duración engañoso (0047).
     final duracionMin = esCombo
         ? duracionTotalCombo(promocion.serviciosIds ?? [], servicios)
         : (servicioActual.isEmpty ? null : servicioActual.first.duracionMin);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Selecciona el Horario')),
+      appBar: AppBar(
+        title: Text(
+          esReprogramacion ? 'Reprogramar Horario' : 'Selecciona el Horario',
+        ),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (esReprogramacion && estado.fechaHoraOriginal != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              color: Colors.amber.shade100,
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.amber, size: 22),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Reprogramando cita para el día ${formatoFechaCorta(estado.fechaHoraOriginal!.toLocal())}. '
+                      'Tu hora actual (${formatoHora(estado.fechaHoraOriginal!.toLocal())}) aparece tachada.',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Selecciona un día',
+                  esReprogramacion ? 'Día de la cita' : 'Selecciona un día',
                   style: TipografiaApp.labelSm.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                IconButton(
-                  onPressed: _abrirCalendario,
-                  icon: Icon(
-                    Icons.calendar_month_outlined,
-                    color: colorScheme.primary,
+                if (!esReprogramacion)
+                  IconButton(
+                    onPressed: _abrirCalendario,
+                    icon: Icon(
+                      Icons.calendar_month_outlined,
+                      color: colorScheme.primary,
+                    ),
+                    tooltip: 'Elegir una fecha del calendario',
                   ),
-                  tooltip: 'Elegir una fecha del calendario',
-                ),
               ],
             ),
           ),
-          // Tira Horizontal de 7 Días
+          // Tira Horizontal de Días (bloqueada si es reprogramación)
           SizedBox(
             height: 90,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: 7,
+              itemCount: esReprogramacion ? 1 : 7,
               itemBuilder: (context, index) {
-                final hoy = DateTime.now();
+                final baseDate = esReprogramacion && estado.fechaHoraOriginal != null
+                    ? estado.fechaHoraOriginal!.toLocal()
+                    : DateTime.now();
                 final dia = DateTime(
-                  hoy.year,
-                  hoy.month,
-                  hoy.day,
-                ).add(Duration(days: index));
+                  baseDate.year,
+                  baseDate.month,
+                  baseDate.day,
+                ).add(Duration(days: esReprogramacion ? 0 : index));
                 final seleccionado =
                     dia.year == _fechaSeleccionada.year &&
                     dia.month == _fechaSeleccionada.month &&
@@ -188,10 +222,12 @@ class _PantallaSeleccionHorarioState
                 final nombreMes = _meses[dia.month - 1];
 
                 return GestureDetector(
-                  onTap: () {
-                    setState(() => _fechaSeleccionada = dia);
-                    _consultarHorarios();
-                  },
+                  onTap: esReprogramacion
+                      ? null
+                      : () {
+                          setState(() => _fechaSeleccionada = dia);
+                          _consultarHorarios();
+                        },
                   child: Container(
                     width: 68,
                     margin: const EdgeInsets.symmetric(

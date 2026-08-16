@@ -15,6 +15,7 @@ class EstadoReserva {
     this.cualquieraSeleccionado = false,
     this.fechaHora,
     this.citaIdAReemplazar,
+    this.fechaHoraOriginal,
     this.promocion,
   });
 
@@ -24,6 +25,7 @@ class EstadoReserva {
   final bool cualquieraSeleccionado;
   final DateTime? fechaHora;
   final String? citaIdAReemplazar;
+  final DateTime? fechaHoraOriginal;
   final ModeloPromocion? promocion;
 }
 
@@ -43,6 +45,7 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       cualquieraSeleccionado: state.cualquieraSeleccionado,
       fechaHora: state.fechaHora,
       citaIdAReemplazar: state.citaIdAReemplazar,
+      fechaHoraOriginal: state.fechaHoraOriginal,
       promocion: state.promocion,
     );
   }
@@ -55,6 +58,7 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       cualquieraSeleccionado: state.cualquieraSeleccionado,
       fechaHora: state.fechaHora,
       citaIdAReemplazar: state.citaIdAReemplazar,
+      fechaHoraOriginal: state.fechaHoraOriginal,
       promocion: state.promocion,
     );
   }
@@ -67,6 +71,7 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       cualquieraSeleccionado: false,
       fechaHora: state.fechaHora,
       citaIdAReemplazar: state.citaIdAReemplazar,
+      fechaHoraOriginal: state.fechaHoraOriginal,
       promocion: state.promocion,
     );
   }
@@ -79,6 +84,7 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       cualquieraSeleccionado: true,
       fechaHora: state.fechaHora,
       citaIdAReemplazar: state.citaIdAReemplazar,
+      fechaHoraOriginal: state.fechaHoraOriginal,
       promocion: state.promocion,
     );
   }
@@ -94,6 +100,7 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       cualquieraSeleccionado: state.cualquieraSeleccionado,
       fechaHora: fechaHora,
       citaIdAReemplazar: state.citaIdAReemplazar,
+      fechaHoraOriginal: state.fechaHoraOriginal,
       promocion: state.promocion,
     );
   }
@@ -109,15 +116,17 @@ class ControladorReserva extends Notifier<EstadoReserva> {
     required String sucursalId,
     required String servicioId,
     required String citaIdAReemplazar,
+    required DateTime fechaHoraOriginal,
   }) {
     state = EstadoReserva(
       sucursalId: sucursalId,
       servicioId: servicioId,
       citaIdAReemplazar: citaIdAReemplazar,
+      fechaHoraOriginal: fechaHoraOriginal,
     );
   }
 
-  Future<({ModeloCita cita, bool cancelacionAnteriorFallo})> confirmar() async {
+  Future<({ModeloCita cita, bool esReprogramacion})> confirmar() async {
     final actual = state;
     if (actual.sucursalId == null ||
         actual.servicioId == null ||
@@ -128,6 +137,17 @@ class ControladorReserva extends Notifier<EstadoReserva> {
     }
 
     final repositorio = ref.read(repositorioReservasProvider);
+
+    // Si se está reprogramando una cita existente:
+    if (actual.citaIdAReemplazar != null) {
+      final citaActualizada = await repositorio.reprogramarCita(
+        citaId: actual.citaIdAReemplazar!,
+        nuevaFechaHora: actual.fechaHora!,
+      );
+      return (cita: citaActualizada, esReprogramacion: true);
+    }
+
+    // Si es una reserva nueva regular:
     final cita = await repositorio.reservarCita(
       sucursalId: actual.sucursalId!,
       servicioId: actual.servicioId!,
@@ -136,29 +156,7 @@ class ControladorReserva extends Notifier<EstadoReserva> {
       promocionId: actual.promocion?.id,
     );
 
-    // La cita nueva ya est creada: cancelar la vieja es "mejor esfuerzo".
-    // Si falla (ej. el cliente ya no tiene conexin), NO se debe hacer
-    // fallar esta llamada -- ya reserv con xito y perder eso sera peor
-    // que dejarle una cita vieja pendiente (puede cancelarla a mano desde
-    // "Mis citas", o el propio local la ve duplicada y la resuelve). Se
-    // reporta en el valor de retorno para que la UI pueda avisarle al
-    // cliente (adems de quedar logueado, por si algn da hay reporte de
-    // errores en produccin).
-    var cancelacionAnteriorFallo = false;
-    if (actual.citaIdAReemplazar != null) {
-      try {
-        await repositorio.cancelarCita(actual.citaIdAReemplazar!);
-      } catch (e) {
-        cancelacionAnteriorFallo = true;
-        debugPrint(
-          'No se pudo cancelar la cita reemplazada '
-          '(${actual.citaIdAReemplazar}) tras reprogramar a '
-          '${cita.id}: $e',
-        );
-      }
-    }
-
-    return (cita: cita, cancelacionAnteriorFallo: cancelacionAnteriorFallo);
+    return (cita: cita, esReprogramacion: false);
   }
 }
 
