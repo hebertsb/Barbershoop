@@ -97,7 +97,7 @@ class _PantallaInicioClienteState extends ConsumerState<PantallaInicioCliente> {
                 const SizedBox(height: 16),
                 const PildoraFidelidadFlotante(),
                 const SizedBox(height: 16),
-                const _SeccionProximaCita(),
+                _SeccionProximaCita(onIniciarReserva: _iniciarReserva),
                 const SizedBox(height: 32),
                 _SeccionServiciosPopulares(onIniciarReserva: _iniciarReserva),
                 const SizedBox(height: 32),
@@ -181,17 +181,13 @@ class _EncabezadoInicio extends ConsumerWidget {
   }
 }
 class _SeccionProximaCita extends ConsumerWidget {
-  const _SeccionProximaCita();
+  const _SeccionProximaCita({required this.onIniciarReserva});
+  final Future<void> Function({String? servicioId}) onIniciarReserva;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final citasState = ref.watch(controladorMisCitasProvider);
     final serviciosState = ref.watch(controladorServiciosProvider);
     final barberosState = ref.watch(barberosPublicosProvider);
-    // ref.watch (no .read) es intencional: además de traer el umbral,
-    // mantiene esta sección re-evaluando "cuánto falta" cada vez que el
-    // Timer.periodic de arriba invalida este provider (cada 60s) -- si se
-    // cambia a .read, el botón Reprogramar deja de desaparecer solo con el
-    // paso del tiempo.
     final minutosCancelacion = ref.watch(controladorMinutosCancelacionProvider);
     final colorScheme = Theme.of(context).colorScheme;
     return Column(
@@ -221,8 +217,46 @@ class _SeccionProximaCita extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         citasState.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, s) => const SizedBox.shrink(),
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (e, s) => Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '¿Listo para tu próximo corte?',
+                  style: TipografiaApp.bodyLg.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Reserva una cita con tu barbero preferido.',
+                  style: TipografiaApp.bodySm.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () => onIniciarReserva(),
+                  icon: const Icon(Icons.add_task),
+                  label: const Text('NUEVA RESERVA'),
+                ),
+              ],
+            ),
+          ),
           data: (_) {
             final proximaCita = ref.watch(proximaCitaProvider);
             if (proximaCita == null) {
@@ -234,19 +268,52 @@ class _SeccionProximaCita extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: colorScheme.outlineVariant),
                 ),
-                child: Text(
-                  'No tienes citas próximas activas.',
-                  style: TipografiaApp.bodyMd.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_month, color: colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          'No tienes citas próximas activas',
+                          style: TipografiaApp.bodyLg.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Reserva tu horario ideal en pocos segundos.',
+                      style: TipografiaApp.bodySm.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => onIniciarReserva(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColoresApp.primario,
+                          foregroundColor: colorScheme.onPrimaryContainer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.calendar_today_rounded),
+                        label: const Text(
+                          'AGENDAR UNA CITA',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
-            // `citas.servicio_id` solo guarda el primer servicio de un
-            // combo (diseño intencional) -- si la cita viene de una
-            // promoción combo, `nombresServiciosCombo` trae la lista
-            // completa (ej. "Corte + Barba"); si no, se busca el
-            // servicio individual en el catálogo como antes.
             String nombreServicio;
             if (proximaCita.nombresServiciosCombo.isNotEmpty) {
               nombreServicio = proximaCita.nombresServiciosCombo.join(' + ');
@@ -319,9 +386,6 @@ class _SeccionProximaCita extends ConsumerWidget {
     );
   }
 }
-/// Sección de servicios populares con carrusel horizontal.
-/// Recibe [onIniciarReserva] desde [PantallaInicioCliente] para que la
-/// navegación se haga desde el contexto correcto (navigator raíz).
 class _SeccionServiciosPopulares extends ConsumerWidget {
   const _SeccionServiciosPopulares({required this.onIniciarReserva});
   final Future<void> Function({String? servicioId}) onIniciarReserva;
@@ -332,7 +396,6 @@ class _SeccionServiciosPopulares extends ConsumerWidget {
     final servicios = (serviciosState.value ?? [])
         .where((s) => s.activo)
         .toList();
-    if (servicios.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -344,30 +407,68 @@ class _SeccionServiciosPopulares extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-        // Altura = imagen(130) + padding(22) + nombre(20) + desc(36) + margen(12)
-        SizedBox(
-          height: 240,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(bottom: 4),
-            itemCount: servicios.length,
-            // Usar "_" para no ocultar el context del build()
-            itemBuilder: (_, index) {
-              final servicio = servicios[index];
-              return TarjetaServicioPopular(
-                servicio: servicio,
-                onTap: () => onIniciarReserva(servicioId: servicio.id),
-              );
-            },
+        if (serviciosState.isLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (servicios.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Servicios de la Barbería',
+                  style: TipografiaApp.bodyLg.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Cortes de cabello, barba, perfilado y tratamientos.',
+                  style: TipografiaApp.bodySm.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                OutlinedButton.icon(
+                  onPressed: () => onIniciarReserva(),
+                  icon: const Icon(Icons.content_cut),
+                  label: const Text('VER SERVICIOS Y RESERVAR'),
+                ),
+              ],
+            ),
+          )
+        else
+          SizedBox(
+            height: 240,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(bottom: 4),
+              itemCount: servicios.length,
+              itemBuilder: (_, index) {
+                final servicio = servicios[index];
+                return TarjetaServicioPopular(
+                  servicio: servicio,
+                  onTap: () => onIniciarReserva(servicioId: servicio.id),
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }
 }
-/// Sección de ofertas especiales con carrusel horizontal.
-/// Recibe [onIniciarReserva] desde [PantallaInicioCliente] para que la
-/// navegación se haga desde el contexto correcto (navigator raíz).
 class _SeccionOfertaEspecial extends ConsumerWidget {
   const _SeccionOfertaEspecial({required this.onIniciarReserva});
   final Future<void> Function({String? servicioId}) onIniciarReserva;
@@ -375,26 +476,83 @@ class _SeccionOfertaEspecial extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final promocionesState = ref.watch(controladorPromocionesClienteProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    return promocionesState.when(
-      loading: () => const SizedBox.shrink(),
-      error: (e, s) => const SizedBox.shrink(),
-      data: (promociones) {
-        if (promociones.isEmpty) return const SizedBox.shrink();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Promociones y Ofertas',
-              style: TipografiaApp.headlineSm.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Promociones y Ofertas',
+          style: TipografiaApp.headlineSm.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        promocionesState.when(
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (_, __) => Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Text(
+              'No hay promociones activas en este momento.',
+              style: TipografiaApp.bodySm.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
-            // Cada tarjeta mide su propio alto natural (evita alturas fijas
-            // que se desajustan con combos de servicios, 2 líneas de
-            // descripción o escalas de accesibilidad de texto grandes).
-            SingleChildScrollView(
+          ),
+          data: (promociones) {
+            if (promociones.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.local_offer_outlined,
+                      color: ColoresApp.primario,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Novedades y Descuentos',
+                            style: TipografiaApp.bodyLg.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '¡Atento! Próximamente publicaremos ofertas exclusivas.',
+                            style: TipografiaApp.bodySm.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 4),
               child: IntrinsicHeight(
@@ -407,7 +565,6 @@ class _SeccionOfertaEspecial extends ConsumerWidget {
                           ref
                               .read(controladorReservaProvider.notifier)
                               .iniciarReservaConPromocion(promo);
-                          // Navegar usando el navigator raíz
                           final sucursales = await ref.read(
                             controladorSucursalesProvider.future,
                           );
@@ -433,10 +590,10 @@ class _SeccionOfertaEspecial extends ConsumerWidget {
                   ],
                 ),
               ),
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 }
