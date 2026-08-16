@@ -222,30 +222,14 @@ class _EncabezadoInicioBarbero extends ConsumerWidget {
         ),
         IconButton(
           icon: Icon(Icons.logout, color: colorScheme.primary),
-          tooltip: 'Cerrar sesin',
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: const Text('Cerrar sesin'),
-                content: const Text('Ests seguro de que deseas salir?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Cancelar'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      ref
-                          .read(controladorAutenticacionProvider.notifier)
-                          .cerrarSesion();
-                    },
-                    child: const Text('Salir'),
-                  ),
-                ],
-              ),
-            );
+          tooltip: 'Cerrar sesión',
+          onPressed: () async {
+            await ref
+                .read(controladorAutenticacionProvider.notifier)
+                .cerrarSesion();
+            if (context.mounted) {
+              context.go('/login');
+            }
           },
         ),
       ],

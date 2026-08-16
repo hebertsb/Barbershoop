@@ -50,16 +50,18 @@ class RepositorioCitasSupabase implements RepositorioCitas {
     try {
       final uid = _cliente.auth.currentUser?.id;
       if (uid == null) {
-        throw const ExcepcionPermiso('Sesión no iniciada.');
+        return const [];
       }
 
-      final ahoraUtc = DateTime.now().toUtc().toIso8601String();
-      await _cliente
-          .from('citas')
-          .update({'estado': 'cancelada'})
-          .eq('cliente_id', uid)
-          .eq('estado', 'pendiente')
-          .lt('fecha_hora', ahoraUtc);
+      try {
+        final ahoraUtc = DateTime.now().toUtc().toIso8601String();
+        await _cliente
+            .from('citas')
+            .update({'estado': 'cancelada'})
+            .eq('cliente_id', uid)
+            .eq('estado', 'pendiente')
+            .lt('fecha_hora', ahoraUtc);
+      } catch (_) {}
 
       final filas = await _cliente
           .from('citas')
@@ -71,6 +73,8 @@ class RepositorioCitasSupabase implements RepositorioCitas {
       throw const ExcepcionRed();
     } on PostgrestException catch (e) {
       throw ExcepcionDesconocida(e.message);
+    } catch (_) {
+      return const [];
     }
   }
 

@@ -70,29 +70,13 @@ class PantallaAdministracionDashboard extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar Sesión',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Cerrar sesión'),
-                  content: const Text('¿Estás seguro de que deseas salir?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        ref
-                            .read(controladorAutenticacionProvider.notifier)
-                            .cerrarSesion();
-                      },
-                      child: const Text('Salir'),
-                    ),
-                  ],
-                ),
-              );
+            onPressed: () async {
+              await ref
+                  .read(controladorAutenticacionProvider.notifier)
+                  .cerrarSesion();
+              if (context.mounted) {
+                context.go('/login');
+              }
             },
           ),
         ],
