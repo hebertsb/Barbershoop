@@ -296,7 +296,7 @@ class _PintorGraficoTendencia extends CustomPainter {
       n,
       (i) => Offset(
         n == 1 ? 0 : size.width * i / (n - 1),
-        size.height * puntosNormalizados[i],
+        size.height * (1.0 - puntosNormalizados[i]) * 0.85 + (size.height * 0.08),
       ),
     );
 
