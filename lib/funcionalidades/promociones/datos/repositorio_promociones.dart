@@ -48,26 +48,42 @@ class RepositorioPromocionesSupabase implements RepositorioPromociones {
     return id;
   }
 
+  Future<String?> _obtenerBarberiaIdOpcion() async {
+    final uid = _cliente.auth.currentUser?.id;
+    if (uid == null) return null;
+    try {
+      final fila = await _cliente
+          .from('perfiles')
+          .select('barberia_id')
+          .eq('id', uid)
+          .maybeSingle();
+      return fila?['barberia_id'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Future<List<ModeloPromocion>> obtenerPromocionesActivas() async {
     try {
-      final barberiaId = await _obtenerBarberiaId();
+      final barberiaId = await _obtenerBarberiaIdOpcion();
       final hoy = DateTime.now().toIso8601String().substring(0, 10);
-      final filas = await _cliente
+      var query = _cliente
           .from('promociones')
           .select('*, servicios:servicio_id(nombre)')
-          .eq('barberia_id', barberiaId)
-          .eq('activo', true)
+          .eq('activo', true);
+      if (barberiaId != null) {
+        query = query.eq('barberia_id', barberiaId);
+      }
+      final filas = await query
           .or('fecha_inicio.is.null,fecha_inicio.lte.$hoy')
           .or('fecha_fin.is.null,fecha_fin.gte.$hoy')
           .order('creado_en', ascending: false);
       return (filas as List)
           .map((f) => ModeloPromocion.desdeJson(f as Map<String, dynamic>))
           .toList();
-    } on SocketException {
-      throw const ExcepcionRed();
-    } on PostgrestException {
-      throw const ExcepcionDesconocida();
+    } catch (_) {
+      return [];
     }
   }
 

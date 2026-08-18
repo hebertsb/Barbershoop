@@ -139,6 +139,8 @@ class RepositorioProgramasFidelidadSupabase
   @override
   Future<List<ModeloProgresoFidelidad>> obtenerProgresoCliente() async {
     try {
+      final uid = _cliente.auth.currentUser?.id;
+      if (uid == null) return [];
       final filas =
           await _cliente.rpc('obtener_progreso_fidelidad_cliente') as List;
       return filas
@@ -147,10 +149,8 @@ class RepositorioProgramasFidelidadSupabase
                 ModeloProgresoFidelidad.desdeJson(f as Map<String, dynamic>),
           )
           .toList();
-    } on SocketException {
-      throw const ExcepcionRed();
-    } on PostgrestException catch (e) {
-      throw ExcepcionPermiso(e.message);
+    } catch (_) {
+      return [];
     }
   }
 
