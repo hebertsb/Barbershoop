@@ -141,14 +141,102 @@ class RepositorioProgramasFidelidadSupabase
     try {
       final uid = _cliente.auth.currentUser?.id;
       if (uid == null) return [];
-      final filas =
-          await _cliente.rpc('obtener_progreso_fidelidad_cliente') as List;
-      return filas
-          .map(
-            (f) =>
-                ModeloProgresoFidelidad.desdeJson(f as Map<String, dynamic>),
-          )
-          .toList();
+
+      try {
+        final rpcResult =
+            await _cliente.rpc('obtener_progreso_fidelidad_cliente') as List;
+        if (rpcResult.isNotEmpty) {
+          final res = rpcResult
+              .map(
+                (f) => ModeloProgresoFidelidad.desdeJson(
+                  f as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+          if (res.any((p) => p.progresoActual > 0 || p.metaCitas != 10)) {
+            return res;
+          }
+        }
+      } catch (_) {}
+
+      // Fallback inteligente: Consultar programas activos y citas filtradas por servicio
+      final programasFilas = await _cliente
+          .from('programas_fidelidad')
+          .select()
+          .eq('activo', true);
+
+      final citasFilas = await _cliente
+          .from('citas')
+          .select('id, servicio_id, servicios_ids, fecha_hora, estado')
+          .eq('cliente_id', uid);
+
+      final citasValidas = (citasFilas as List).where((c) {
+        final st = (c['estado'] as String? ?? '').toLowerCase();
+        return !st.contains('canc') && !st.contains('recha');
+      }).toList();
+
+      if ((programasFilas as List).isEmpty) {
+        return [
+          ModeloProgresoFidelidad(
+            id: 'default_5',
+            programaId: 'default_5',
+            clienteId: uid,
+            sellosActuales: citasValidas.length % 5,
+            completado: citasValidas.length >= 5,
+            metaCitasCache: 5,
+            tituloCache: 'Programa 5 Cortes (6to Gratis)',
+          ),
+        ];
+      }
+
+      final resultado = <ModeloProgresoFidelidad>[];
+      for (final p in (programasFilas as List)) {
+        final progMap = p as Map<String, dynamic>;
+        final progId = progMap['id'] as String;
+        final meta =
+            (progMap['meta_citas'] ?? progMap['sellos_requeridos']) as int? ??
+            5;
+        final titulo =
+            (progMap['nombre'] ?? progMap['titulo']) as String? ??
+            'Programa Fidelidad';
+        final sId = progMap['servicio_id'] as String?;
+        final sIdsRaw = progMap['servicios_ids'] as List<dynamic>?;
+        final sIds = sIdsRaw?.map((e) => e.toString()).toSet() ?? {};
+        if (sId != null && sId.isNotEmpty) sIds.add(sId);
+
+        final citasDelPrograma = citasValidas.where((c) {
+          if (sIds.isEmpty) return true;
+          final citaSid = c['servicio_id'] as String?;
+          final citaSidsList =
+              (c['servicios_ids'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              [];
+          if (citaSid != null && sIds.contains(citaSid)) return true;
+          for (final id in citaSidsList) {
+            if (sIds.contains(id)) return true;
+          }
+          return false;
+        }).toList();
+
+        final totalSellos = citasDelPrograma.length;
+        final sellosActuales = totalSellos % meta;
+        final completado = totalSellos >= meta;
+
+        resultado.add(
+          ModeloProgresoFidelidad(
+            id: progId,
+            programaId: progId,
+            clienteId: uid,
+            sellosActuales: sellosActuales,
+            completado: completado,
+            metaCitasCache: meta,
+            tituloCache: titulo,
+          ),
+        );
+      }
+
+      return resultado;
     } catch (_) {
       return [];
     }

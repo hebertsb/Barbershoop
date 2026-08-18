@@ -102,29 +102,57 @@ class DetalleFidelidadModal extends ConsumerWidget {
                                 Row(
                                   children: [
                                     const Icon(
-                                      Icons.loyalty_rounded,
+                                      Icons.workspace_premium_rounded,
                                       color: Color(0xFFF2CA50),
-                                      size: 20,
+                                      size: 22,
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            p.titulo,
+                                            style: TipografiaApp.bodyMd.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.onSurface,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Meta: ${p.metaCitas} citas acumuladas',
+                                            style: TipografiaApp.labelSm.copyWith(
+                                              color: colorScheme.onSurfaceVariant,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF2CA50).withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: const Color(0xFFF2CA50)),
+                                      ),
                                       child: Text(
-                                        p.titulo,
-                                        style: TipografiaApp.bodyMd.copyWith(
+                                        '${p.progresoActual} / ${p.metaCitas}',
+                                        style: const TextStyle(
+                                          color: Color(0xFFF2CA50),
                                           fontWeight: FontWeight.bold,
-                                          color: colorScheme.onSurface,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 12),
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(99),
                                   child: LinearProgressIndicator(
                                     value: (p.progresoActual / p.metaCitas)
                                         .clamp(0.0, 1.0),
-                                    minHeight: 10,
+                                    minHeight: 8,
                                     backgroundColor:
                                         colorScheme.surfaceContainerHighest,
                                     valueColor: const AlwaysStoppedAnimation(
@@ -138,16 +166,18 @@ class DetalleFidelidadModal extends ConsumerWidget {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Progreso:',
+                                      'Sello acumulado por cita válida',
                                       style: TipografiaApp.bodySm.copyWith(
                                         color: colorScheme.onSurfaceVariant,
+                                        fontSize: 11,
                                       ),
                                     ),
                                     Text(
-                                      '${p.progresoActual} / ${p.metaCitas} citas',
+                                      '${p.metaCitas - p.progresoActual} restantes',
                                       style: TipografiaApp.bodySm.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: colorScheme.onSurface,
+                                        color: ColoresApp.primario,
+                                        fontSize: 11,
                                       ),
                                     ),
                                   ],
