@@ -285,7 +285,7 @@ class PantallaAdministracionDashboard extends ConsumerWidget {
                         border: Border.all(
                           color: cantidad > 0
                               ? ColoresApp.estadoCancelada
-                              : colorScheme.outlineVariant,
+                              : ColoresApp.estadoCompletada.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Column(
@@ -294,16 +294,22 @@ class PantallaAdministracionDashboard extends ConsumerWidget {
                           Row(
                             children: [
                               Icon(
-                                Icons.warning_amber_rounded,
+                                cantidad > 0
+                                    ? Icons.warning_amber_rounded
+                                    : Icons.check_circle_outline_rounded,
                                 color: cantidad > 0
                                     ? ColoresApp.estadoCancelada
-                                    : colorScheme.primary,
+                                    : ColoresApp.estadoCompletada,
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Alertas de Stock Bajo',
+                                cantidad > 0
+                                    ? 'Alertas de Stock Bajo'
+                                    : 'Stock en Nivel Óptimo',
                                 style: TipografiaApp.headlineSm.copyWith(
-                                  color: colorScheme.onSurface,
+                                  color: cantidad > 0
+                                      ? colorScheme.onSurface
+                                      : ColoresApp.estadoCompletada,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -327,9 +333,11 @@ class PantallaAdministracionDashboard extends ConsumerWidget {
                                 onPressed: () =>
                                     context.push('/administracion/almacen'),
                                 child: Text(
-                                  'REABASTECER',
+                                  cantidad > 0 ? 'REABASTECER' : 'VER ALMACÉN',
                                   style: TipografiaApp.labelSm.copyWith(
-                                    color: ColoresApp.primario,
+                                    color: cantidad > 0
+                                        ? ColoresApp.primario
+                                        : colorScheme.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

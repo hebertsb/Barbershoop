@@ -56,11 +56,17 @@ class _FormularioInsumoState extends State<FormularioInsumo> {
     _categoriaCtrl = TextEditingController(
       text: widget.insumo?.categoria ?? '',
     );
+    final st = widget.insumo?.stockActual;
+    final stMin = widget.insumo?.stockMinimo;
     _stockCtrl = TextEditingController(
-      text: widget.insumo?.stock.toString() ?? '0',
+      text: st == null
+          ? '0'
+          : (st % 1 == 0 ? st.toInt().toString() : st.toStringAsFixed(1)),
     );
     _stockMinimoCtrl = TextEditingController(
-      text: widget.insumo?.stockMinimo.toString() ?? '5',
+      text: stMin == null
+          ? '5'
+          : (stMin % 1 == 0 ? stMin.toInt().toString() : stMin.toStringAsFixed(1)),
     );
     _costoCtrl = TextEditingController(
       text: widget.insumo?.costoUnitario?.toString() ?? '',

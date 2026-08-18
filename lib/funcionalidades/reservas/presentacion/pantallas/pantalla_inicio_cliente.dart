@@ -14,7 +14,10 @@ import '../../../ajustes/presentacion/controladores/controlador_instrucciones_ci
 import '../../../ajustes/presentacion/controladores/controlador_minutos_cancelacion.dart';
 import '../../../autenticacion/presentacion/controladores/controlador_autenticacion.dart';
 import '../../../citas/presentacion/controladores/controlador_mis_citas.dart';
+import '../../../fidelidad/dominio/elegir_programa_para_pildora.dart';
+import '../../../fidelidad/presentacion/componentes/detalle_fidelidad_modal.dart';
 import '../../../fidelidad/presentacion/componentes/pildora_fidelidad_flotante.dart';
+import '../../../fidelidad/presentacion/controladores/controlador_progreso_fidelidad.dart';
 import '../../../promociones/presentacion/componentes/tarjeta_promocion_cliente.dart';
 import '../../../promociones/presentacion/controladores/controlador_promociones_cliente.dart';
 import '../componentes/tarjeta_proxima_cita.dart';
@@ -94,8 +97,7 @@ class _PantallaInicioClienteState extends ConsumerState<PantallaInicioCliente> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const _EncabezadoInicio(),
-                const SizedBox(height: 16),
-                const PildoraFidelidadFlotante(),
+                const _SeccionFidelidadCliente(),
                 const SizedBox(height: 16),
                 _SeccionProximaCita(onIniciarReserva: _iniciarReserva),
                 const SizedBox(height: 32),
@@ -177,6 +179,128 @@ class _EncabezadoInicio extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+class _SeccionFidelidadCliente extends ConsumerWidget {
+  const _SeccionFidelidadCliente();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final estado = ref.watch(controladorProgresoFidelidadProvider);
+    final programas = estado.value ?? const [];
+    final elegido = elegirProgramaParaPildora(programas);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final progreso = elegido?.progresoActual ?? 0;
+    final meta = elegido?.metaCitas ?? 10;
+    final recompensas = elegido?.titulo ?? 'Corte o servicio gratis';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF2CA50), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF2CA50).withValues(alpha: 0.15),
+            blurRadius: 12,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.stars_rounded, color: Color(0xFFF2CA50), size: 22),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Programa de Fidelización',
+                    style: TipografiaApp.headlineSm.copyWith(
+                      color: const Color(0xFFF2CA50),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2CA50).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFF2CA50), width: 1),
+                ),
+                child: Text(
+                  '$progreso / $meta SELLOS',
+                  style: const TextStyle(
+                    color: Color(0xFFF2CA50),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: (progreso / meta).clamp(0.0, 1.0),
+              minHeight: 8,
+              backgroundColor: Colors.white10,
+              color: const Color(0xFFF2CA50),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  elegido?.puedeReclamar == true
+                      ? '¡Felicidades! Tienes una recompensa disponible.'
+                      : 'Premio: $recompensas',
+                  style: TipografiaApp.bodySm.copyWith(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              TextButton(
+                onPressed: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const DetalleFidelidadModal(),
+                ),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'VER DETALLES',
+                  style: TextStyle(
+                    color: Color(0xFFF2CA50),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
