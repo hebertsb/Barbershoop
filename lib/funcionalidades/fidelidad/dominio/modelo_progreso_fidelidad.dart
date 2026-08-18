@@ -21,10 +21,10 @@ class ModeloProgresoFidelidad {
   int get progresoActual => sellosActuales;
 
   /// Cantidad de citas requeridas (meta) para el programa.
-  int get metaCitas => metaCitasCache ?? 10;
+  int get metaCitas => metaCitasCache ?? 5;
 
   /// Título o nombre del programa de fidelidad.
-  String get titulo => tituloCache ?? 'Programa de Fidelidad';
+  String get titulo => tituloCache ?? 'Programa de Fidelidad (5 Cortes)';
 
   /// Indica si el cliente acumuló suficientes sellos para reclamar la recompensa.
   bool get puedeReclamar => sellosActuales >= metaCitas;
@@ -34,13 +34,13 @@ class ModeloProgresoFidelidad {
 
   factory ModeloProgresoFidelidad.desdeJson(Map<String, dynamic> json) {
     return ModeloProgresoFidelidad(
-      id: json['id'] as String,
-      programaId: json['programa_id'] as String,
-      clienteId: json['cliente_id'] as String,
-      sellosActuales: json['sellos_actuales'] as int? ?? 0,
+      id: json['id'] as String? ?? '',
+      programaId: json['programa_id'] as String? ?? '',
+      clienteId: json['cliente_id'] as String? ?? '',
+      sellosActuales: json['sellos_actuales'] as int? ?? json['sellos'] as int? ?? 0,
       completado: json['completado'] as bool? ?? false,
-      metaCitasCache: json['meta_citas'] as int?,
-      tituloCache: (json['titulo'] ?? json['nombre_programa']) as String?,
+      metaCitasCache: (json['meta_citas'] ?? json['sellos_requeridos'] ?? json['meta']) as int?,
+      tituloCache: (json['titulo'] ?? json['nombre_programa'] ?? json['nombre']) as String?,
     );
   }
 }

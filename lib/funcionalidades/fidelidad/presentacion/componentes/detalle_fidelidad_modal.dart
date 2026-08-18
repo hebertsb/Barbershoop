@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../nucleo/configuracion/colores_app.dart';
 import '../../../../nucleo/configuracion/tipografia_app.dart';
+import '../../datos/repositorio_programas_fidelidad.dart';
 import '../controladores/controlador_progreso_fidelidad.dart';
+import 'dialogo_premio_fidelidad_celebracion.dart';
 
 class DetalleFidelidadModal extends ConsumerWidget {
   const DetalleFidelidadModal({super.key});
@@ -187,26 +189,38 @@ class DetalleFidelidadModal extends ConsumerWidget {
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
-                                      onPressed: () async {
-                                        await ref
-                                            .read(
-                                              controladorProgresoFidelidadProvider
-                                                  .notifier,
-                                            )
-                                            .reclamarPremio(p.programaId);
-                                        if (context.mounted) {
-                                          Navigator.pop(context);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                '¡Premio reclamado! Ya lo tienes disponible para tu próxima reserva.',
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
+                                       onPressed: () async {
+                                         try {
+                                           final promo = await ref
+                                               .read(
+                                                 repositorioProgramasFidelidadProvider,
+                                               )
+                                               .reclamarPremio(p.programaId);
+                                           ref.invalidate(controladorProgresoFidelidadProvider);
+                                           if (context.mounted) {
+                                             Navigator.pop(context);
+                                             showDialog<void>(
+                                               context: context,
+                                               barrierDismissible: false,
+                                               builder: (context) => DialogoPremioFidelidadCelebracion(
+                                                 promocion: promo,
+                                                 nombrePrograma: p.titulo,
+                                               ),
+                                             );
+                                           }
+                                         } catch (_) {
+                                           if (context.mounted) {
+                                             Navigator.pop(context);
+                                             ScaffoldMessenger.of(context).showSnackBar(
+                                               const SnackBar(
+                                                 content: Text(
+                                                   '¡Felicidades por completar tu meta de fidelidad!',
+                                                 ),
+                                               ),
+                                             );
+                                           }
+                                         }
+                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: ColoresApp.primario,
                                         foregroundColor:

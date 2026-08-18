@@ -14,8 +14,10 @@ import '../../../ajustes/presentacion/controladores/controlador_instrucciones_ci
 import '../../../ajustes/presentacion/controladores/controlador_minutos_cancelacion.dart';
 import '../../../autenticacion/presentacion/controladores/controlador_autenticacion.dart';
 import '../../../citas/presentacion/controladores/controlador_mis_citas.dart';
+import '../../../fidelidad/datos/repositorio_programas_fidelidad.dart';
 import '../../../fidelidad/dominio/elegir_programa_para_pildora.dart';
 import '../../../fidelidad/presentacion/componentes/detalle_fidelidad_modal.dart';
+import '../../../fidelidad/presentacion/componentes/dialogo_premio_fidelidad_celebracion.dart';
 import '../../../fidelidad/presentacion/componentes/pildora_fidelidad_flotante.dart';
 import '../../../fidelidad/presentacion/controladores/controlador_progreso_fidelidad.dart';
 import '../../../promociones/presentacion/componentes/tarjeta_promocion_cliente.dart';
@@ -81,32 +83,43 @@ class _PantallaInicioClienteState extends ConsumerState<PantallaInicioCliente> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(controladorMisCitasProvider);
-            ref.invalidate(controladorServiciosProvider);
-            ref.invalidate(controladorSucursalesProvider);
-            ref.invalidate(barberosPublicosProvider);
-            ref.invalidate(controladorMinutosCancelacionProvider);
-            ref.invalidate(controladorPromocionesClienteProvider);
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _EncabezadoInicio(),
-                const _SeccionFidelidadCliente(),
-                const SizedBox(height: 16),
-                _SeccionProximaCita(onIniciarReserva: _iniciarReserva),
-                const SizedBox(height: 32),
-                _SeccionServiciosPopulares(onIniciarReserva: _iniciarReserva),
-                const SizedBox(height: 32),
-                _SeccionOfertaEspecial(onIniciarReserva: _iniciarReserva),
-              ],
+        child: Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(controladorMisCitasProvider);
+                ref.invalidate(controladorServiciosProvider);
+                ref.invalidate(controladorSucursalesProvider);
+                ref.invalidate(barberosPublicosProvider);
+                ref.invalidate(controladorMinutosCancelacionProvider);
+                ref.invalidate(controladorPromocionesClienteProvider);
+                ref.invalidate(controladorProgresoFidelidadProvider);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _EncabezadoInicio(),
+                    const _SeccionFidelidadCliente(),
+                    const SizedBox(height: 16),
+                    _SeccionProximaCita(onIniciarReserva: _iniciarReserva),
+                    const SizedBox(height: 32),
+                    _SeccionServiciosPopulares(onIniciarReserva: _iniciarReserva),
+                    const SizedBox(height: 32),
+                    _SeccionOfertaEspecial(onIniciarReserva: _iniciarReserva),
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              ),
             ),
-          ),
+            const Positioned(
+              right: 16,
+              bottom: 16,
+              child: PildoraFidelidadFlotante(),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -260,45 +273,92 @@ class _SeccionFidelidadCliente extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  elegido?.puedeReclamar == true
-                      ? '¡Felicidades! Tienes una recompensa disponible.'
-                      : 'Premio: $recompensas',
-                  style: TipografiaApp.bodySm.copyWith(
-                    color: Colors.white70,
+          if (elegido?.puedeReclamar == true) ...[
+            const SizedBox(height: 4),
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  if (elegido == null) return;
+                  try {
+                    final promo = await ref
+                        .read(repositorioProgramasFidelidadProvider)
+                        .reclamarPremio(elegido.programaId);
+                    ref.invalidate(controladorProgresoFidelidadProvider);
+                    if (context.mounted) {
+                      showDialog<void>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => DialogoPremioFidelidadCelebracion(
+                          promocion: promo,
+                          nombrePrograma: elegido.titulo,
+                        ),
+                      );
+                    }
+                  } catch (_) {
+                    if (context.mounted) {
+                      context.push('/reservas/sucursal');
+                    }
+                  }
+                },
+                icon: const Icon(Icons.workspace_premium_rounded, color: Colors.black, size: 20),
+                label: const Text(
+                  'RECLAMAR MI PREMIO AHORA 🏆',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w800,
                     fontSize: 12,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF2CA50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 2,
                 ),
               ),
-              TextButton(
-                onPressed: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => const DetalleFidelidadModal(),
-                ),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  'VER DETALLES',
-                  style: TextStyle(
-                    color: Color(0xFFF2CA50),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
+            ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Premio: $recompensas',
+                    style: TipografiaApp.bodySm.copyWith(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            ],
-          ),
+                TextButton(
+                  onPressed: () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const DetalleFidelidadModal(),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'VER DETALLES',
+                    style: TextStyle(
+                      color: Color(0xFFF2CA50),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
